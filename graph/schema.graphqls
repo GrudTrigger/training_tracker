@@ -1,0 +1,21 @@
+scalar Time
+
+type User {
+    id: ID!
+    email: String!
+    login: String!
+    password: String!
+    role: String! #Надо подумать делать обязательным или нет
+    telegram_id: String #При регистрации не нужно, только потом подвязывать
+    created_at: Time
+}
+
+type Query {
+    user(email: String!): User
+    userById(id: ID!): User
+    users: [User!]!
+}
+
+type Mutation {
+    createUser(email: String!, login: String!, password: String!, role: String!): User
+}
