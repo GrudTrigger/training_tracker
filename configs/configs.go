@@ -1,13 +1,15 @@
 package configs
 
 import (
-	"github.com/joho/godotenv"
 	"log"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type Configs struct {
 	Port string
+	Secret string
 	Db
 }
 
@@ -23,6 +25,7 @@ func LoadConfigs() *Configs {
 
 	return &Configs{
 		os.Getenv("PORT"),
+		os.Getenv("SECRET"),
 		Db{Dsn: os.Getenv("DSN")},
 	}
 }

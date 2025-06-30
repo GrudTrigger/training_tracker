@@ -1,6 +1,9 @@
 package main
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
@@ -11,8 +14,6 @@ import (
 	"github.com/GrudTrigger/trainin_tracker/internal/user"
 	"github.com/GrudTrigger/trainin_tracker/pkg/storage"
 	"github.com/vektah/gqlparser/v2/ast"
-	"log"
-	"net/http"
 )
 
 func main() {
@@ -26,6 +27,7 @@ func main() {
 	userService := user.NewUserService(userRepository)
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
+		Configs: cfg, 
 		UserService: userService,
 	}}))
 

@@ -2,12 +2,14 @@ package user
 
 import (
 	"errors"
+
 	"github.com/GrudTrigger/trainin_tracker/graph/model"
 	"github.com/GrudTrigger/trainin_tracker/pkg/utils"
 )
 
 type Service interface {
-	Create(data *CreateRequest) (*model.User, error)
+	Create(data *model.RegisterInput) (*model.User, error)
+	Login(data *model.LoginInput) (*model.User, error)
 }
 
 type UserService struct {
@@ -18,13 +20,13 @@ func NewUserService(userRepo Repository) Service {
 	return &UserService{userRepo}
 }
 
-func (s *UserService) Create(data *CreateRequest) (*model.User, error) {
+func (s *UserService) Create(data *model.RegisterInput) (*model.User, error) {
 	existedUser, err := s.repo.GetByEmail(data.Email)
 	if err != nil {
 		return nil, err
 	}
 
-	if existedUser != "" {
+	if existedUser != nil {
 		return nil, errors.New("пользователь с такой почтой уже зарегистрирован")
 	}
 
@@ -40,4 +42,18 @@ func (s *UserService) Create(data *CreateRequest) (*model.User, error) {
 		return nil, err
 	}
 	return newUser, nil
+}
+
+func(s *UserService) Login(data *model.LoginInput) (*model.User, error) {
+	existedUser, err := s.repo.GetByEmail(data.Email)
+	if err != nil {
+		return nil, err
+	}
+	err = utils.ComparePassword(data.Password, existedUser.Password)
+	if err != nil {
+		return nil, errors.New("неверный пароль")
+	}
+
+	//Сделать генерацию jwt
+	return existedUser, nil
 }

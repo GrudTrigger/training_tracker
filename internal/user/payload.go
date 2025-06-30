@@ -1,8 +1,10 @@
 package user
 
-type CreateRequest struct {
-	Email    string `json:"email"`
-	Login    string `json:"login"`
-	Password string `json:"password"`
-	Role     string `json:"role"`
+
+type FindByEmail struct {
+	ID string
+	Email string
+	Login string
+	Password string
+	Role string
 }
