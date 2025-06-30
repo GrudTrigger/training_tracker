@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS training (
+	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	name VARCHAR NOT NULL
+)

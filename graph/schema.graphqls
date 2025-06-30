@@ -30,6 +30,7 @@ input RegisterInput {
 
 type Query {
 	user(email: String!): User
+	me: User!
 	userById(id: ID!): User
 	users: [User!]!
 }

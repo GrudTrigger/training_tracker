@@ -10,6 +10,7 @@ import (
 type Service interface {
 	Create(data *model.RegisterInput) (*model.User, error)
 	Login(data *model.LoginInput) (*model.User, error)
+	GetByEmail(email string) (*model.User, error)
 }
 
 type UserService struct {
@@ -56,4 +57,12 @@ func(s *UserService) Login(data *model.LoginInput) (*model.User, error) {
 
 	//Сделать генерацию jwt
 	return existedUser, nil
+}
+
+func(s *UserService) GetByEmail(email string) (*model.User, error) {
+	u, err := s.repo.GetByEmail(email)
+	if err != nil {
+		return nil, errors.New("пользователь не найден")
+	}
+	return u, nil
 }

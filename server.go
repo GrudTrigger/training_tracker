@@ -12,6 +12,7 @@ import (
 	"github.com/GrudTrigger/trainin_tracker/configs"
 	"github.com/GrudTrigger/trainin_tracker/graph"
 	"github.com/GrudTrigger/trainin_tracker/internal/user"
+	"github.com/GrudTrigger/trainin_tracker/pkg/middleware"
 	"github.com/GrudTrigger/trainin_tracker/pkg/storage"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -43,7 +44,7 @@ func main() {
 	})
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	http.Handle("/query", middleware.IsAuthed(srv, cfg))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", cfg.Port)
 	log.Fatal(http.ListenAndServe(":"+cfg.Port, nil))

@@ -6,10 +6,12 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/GrudTrigger/trainin_tracker/graph/model"
 	"github.com/GrudTrigger/trainin_tracker/pkg/jwt"
+	"github.com/GrudTrigger/trainin_tracker/pkg/middleware"
 )
 
 // Register is the resolver for the register field.
@@ -20,14 +22,13 @@ func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInp
 	}
 
 	t, err := jwt.NewJwt(r.Configs.Secret).Create(jwt.JWTData{Email: newUser.Email})
-	//Узнать как правильно возвращать такие ошибки в graphql
 	if err != nil {
 		return nil, err
 	}
 
 	payload := model.AuthPayload{
 		Token: t,
-		User: newUser,
+		User:  newUser,
 	}
 
 	return &payload, nil
@@ -40,14 +41,13 @@ func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*
 		return nil, err
 	}
 	t, err := jwt.NewJwt(r.Configs.Secret).Create(jwt.JWTData{Email: loginUser.Email})
-	//Узнать как правильно возвращать такие ошибки в graphql
 	if err != nil {
 		return nil, err
 	}
 
 	payload := model.AuthPayload{
 		Token: t,
-		User: loginUser,
+		User:  loginUser,
 	}
 	return &payload, nil
 }
@@ -55,6 +55,19 @@ func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, email string) (*model.User, error) {
 	panic(fmt.Errorf("not implemented: User - user"))
+}
+
+// Me is the resolver for the me field.
+func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
+	u := middleware.ForContext(ctx)
+	if u == nil {
+		return nil, errors.New("access denied")
+	}
+	searchUser, err := r.UserService.GetByEmail(u.Email)
+	if err != nil {
+		return nil, err
+	}
+	return searchUser, nil
 }
 
 // UserByID is the resolver for the userById field.
@@ -75,25 +88,3 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-/*
-	func (r *mutationResolver) CreateUser(ctx context.Context, email string, login string, password string, role string) (*model.User, error) {
-	data := user.CreateRequest{
-		Email:    email,
-		Login:    login,
-		Password: password,
-		Role:     role,
-	}
-	newUser, err := r.UserService.Create(&data)
-	if err != nil {
-		return nil, err
-	}
-	return newUser, nil
-}
-*/

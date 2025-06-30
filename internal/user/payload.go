@@ -1,6 +1,5 @@
 package user
 
-
 type FindByEmail struct {
 	ID string
 	Email string
