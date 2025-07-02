@@ -1,3 +1,4 @@
 migrate -database "postgres://postgres:12345@localhost:5432/postgres?sslmode=disable" -path migrations up
 
 надо автомазировать
+добавить refresh-token(придется переделать на Cookie)

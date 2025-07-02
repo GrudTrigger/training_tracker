@@ -1,4 +1,12 @@
 CREATE TABLE IF NOT EXISTS training (
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	name VARCHAR NOT NULL
+	user_id UUID,
+	name VARCHAR NOT NULL,
+	duration VARCHAR(5) NOT NULL,
+	date TIMESTAMP WITH TIME ZONE,
+	notes TEXT,
+	type INT NOT NULL,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+	FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 )

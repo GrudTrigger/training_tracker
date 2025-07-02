@@ -1,6 +1,10 @@
 package jwt
 
-import "github.com/golang-jwt/jwt/v5"
+import (
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+)
 
 type JWTData struct {
 	Email string
@@ -17,6 +21,7 @@ func NewJwt(secret string) *JWT {
 func(j *JWT) Create(data JWTData) (string, error) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": data.Email,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
 	s, err := t.SignedString([]byte(j.Secret))
 	if err != nil {

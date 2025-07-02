@@ -37,11 +37,11 @@ func main() {
 	srv.AddTransport(transport.POST{})
 
 	srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
+	srv.Use(middleware.LoggingExtension{})
 	srv.Use(extension.Introspection{})
 	srv.Use(extension.AutomaticPersistedQuery{
 		Cache: lru.New[string](100),
 	})
-	srv.Use(middleware.LoggingExtension{})
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", middleware.Logging(middleware.IsAuthed(srv, cfg)))
