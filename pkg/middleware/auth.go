@@ -40,7 +40,7 @@ func IsAuthed(next http.Handler, cfg *configs.Configs) http.Handler {
 	})
 }
 
-func ForContext(ctx context.Context) *jwt.JWTData {
+func GetUserForContext(ctx context.Context) *jwt.JWTData {
 	raw, _ := ctx.Value(UserContextKey).(*jwt.JWTData)
 	return raw
 }

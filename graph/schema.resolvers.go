@@ -54,12 +54,16 @@ func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, email string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	u, err := r.UserService.GetByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	return u, nil
 }
 
 // Me is the resolver for the me field.
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
-	u := middleware.ForContext(ctx)
+	u := middleware.GetUserForContext(ctx)
 	if u == nil {
 		return nil, errors.New("access denied")
 	}
