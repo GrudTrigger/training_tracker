@@ -21,7 +21,7 @@ func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInp
 		return nil, err
 	}
 
-	t, err := jwt.NewJwt(r.Configs.Secret).Create(jwt.JWTData{Email: newUser.Email})
+	t, err := jwt.NewJwt(r.Configs.Secret).Create(jwt.JWTData{Email: newUser.Email, Id: newUser.ID})
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*
 	if err != nil {
 		return nil, err
 	}
-	t, err := jwt.NewJwt(r.Configs.Secret).Create(jwt.JWTData{Email: loginUser.Email})
+	t, err := jwt.NewJwt(r.Configs.Secret).Create(jwt.JWTData{Email: loginUser.Email, Id: loginUser.ID})
 	if err != nil {
 		return nil, err
 	}
@@ -50,6 +50,19 @@ func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*
 		User:  loginUser,
 	}
 	return &payload, nil
+}
+
+// AddTraining is the resolver for the addTraining field.
+func (r *mutationResolver) AddTraining(ctx context.Context, input model.AddTraining) (*model.Training, error) {
+	u := middleware.GetUserForContext(ctx)
+	if u == nil {
+		return nil, errors.New("access denied")
+	}
+	t, err := r.TrainingService.Create(&input, u.Id)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }
 
 // User is the resolver for the user field.
@@ -82,6 +95,16 @@ func (r *queryResolver) UserByID(ctx context.Context, id string) (*model.User, e
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	panic(fmt.Errorf("not implemented: Users - users"))
+}
+
+// Trainings is the resolver for the trainings field.
+func (r *queryResolver) Trainings(ctx context.Context) ([]*model.Training, error) {
+	panic(fmt.Errorf("not implemented: Trainings - trainings"))
+}
+
+// Training is the resolver for the training field.
+func (r *queryResolver) Training(ctx context.Context, id string) (*model.Training, error) {
+	panic(fmt.Errorf("not implemented: Training - training"))
 }
 
 // Mutation returns MutationResolver implementation.

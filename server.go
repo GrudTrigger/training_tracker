@@ -11,6 +11,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/GrudTrigger/trainin_tracker/configs"
 	"github.com/GrudTrigger/trainin_tracker/graph"
+	"github.com/GrudTrigger/trainin_tracker/internal/training"
 	"github.com/GrudTrigger/trainin_tracker/internal/user"
 	"github.com/GrudTrigger/trainin_tracker/pkg/middleware"
 	"github.com/GrudTrigger/trainin_tracker/pkg/storage"
@@ -25,11 +26,15 @@ func main() {
 	defer dbPostgres.Close()
 
 	userRepository := user.NewRepository(dbPostgres)
+	trainingRepository := training.NewTrainingRepository(dbPostgres)
+
 	userService := user.NewUserService(userRepository)
+	trainingService := training.NewTrainingService(trainingRepository)
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
 		Configs: cfg, 
 		UserService: userService,
+		TrainingService: trainingService,
 	}}))
 
 	srv.AddTransport(transport.Options{})

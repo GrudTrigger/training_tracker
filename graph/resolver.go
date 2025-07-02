@@ -2,6 +2,7 @@ package graph
 
 import (
 	"github.com/GrudTrigger/trainin_tracker/configs"
+	"github.com/GrudTrigger/trainin_tracker/internal/training"
 	"github.com/GrudTrigger/trainin_tracker/internal/user"
 )
 
@@ -12,4 +13,5 @@ import (
 type Resolver struct {
 	Configs *configs.Configs
 	UserService user.Service
+	TrainingService training.Service
 }
