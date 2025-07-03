@@ -7,7 +7,7 @@ import (
 
 type Repository interface{
 	Create(input InputWithUser) (*model.Training, error)
-	GetAll()([]*model.Training, error)
+	GetAll(input *model.SearchTrainings)([]*model.Training, error)
 }
 
 type TrainingRepository struct {
@@ -31,6 +31,18 @@ func(r *TrainingRepository) Create(input InputWithUser) (*model.Training, error)
 	return &training, nil
 }
 
-func (r *TrainingRepository) GetAll() ([]*model.Training, error) {
-	return nil, nil
+func (r *TrainingRepository) GetAll(input *model.SearchTrainings) ([]model.Training, error) {
+	var trainings []model.Training
+
+	query := `SELECT * FROM training
+									WHERE name = $1, type = $2
+									LIMIT $3 OFFSET $4`
+	rows, err := r.Query(query, input.Name, input.Type, input.Limit, input.Offset)
+	if err != nil {
+		return nil, err
+	}
+
+	// for _, t := range rows.
+
+	return trainings, nil
 }

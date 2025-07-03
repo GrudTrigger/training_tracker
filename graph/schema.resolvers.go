@@ -98,7 +98,7 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 }
 
 // Trainings is the resolver for the trainings field.
-func (r *queryResolver) Trainings(ctx context.Context) ([]*model.Training, error) {
+func (r *queryResolver) Trainings(ctx context.Context, input model.SearchTrainings) ([]*model.Training, error) {
 	panic(fmt.Errorf("not implemented: Trainings - trainings"))
 }
 

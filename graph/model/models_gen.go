@@ -37,6 +37,13 @@ type RegisterInput struct {
 	Role     string `json:"role"`
 }
 
+type SearchTrainings struct {
+	Name   *string `json:"name,omitempty"`
+	Type   *int32  `json:"type,omitempty"`
+	Limit  int32   `json:"limit"`
+	Offset int32   `json:"offset"`
+}
+
 type Training struct {
 	ID        string     `json:"id"`
 	UserID    string     `json:"user_id"`

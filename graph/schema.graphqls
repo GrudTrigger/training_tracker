@@ -48,12 +48,19 @@ input AddTraining {
 	type: Int!
 }
 
+input SearchTrainings {
+	name: String
+	type: Int
+	limit: Int!
+	offset: Int!
+}
+
 type Query {
 	user(email: String!): User
 	me: User!
 	userById(id: ID!): User
 	users: [User!]!
-	trainings: [Training!]!
+	trainings(input: SearchTrainings!): [Training!]!
 	training(id: ID!): Training
 }
 

@@ -62,7 +62,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Me        func(childComplexity int) int
 		Training  func(childComplexity int, id string) int
-		Trainings func(childComplexity int) int
+		Trainings func(childComplexity int, input model.SearchTrainings) int
 		User      func(childComplexity int, email string) int
 		UserByID  func(childComplexity int, id string) int
 		Users     func(childComplexity int) int
@@ -100,7 +100,7 @@ type QueryResolver interface {
 	Me(ctx context.Context) (*model.User, error)
 	UserByID(ctx context.Context, id string) (*model.User, error)
 	Users(ctx context.Context) ([]*model.User, error)
-	Trainings(ctx context.Context) ([]*model.Training, error)
+	Trainings(ctx context.Context, input model.SearchTrainings) ([]*model.Training, error)
 	Training(ctx context.Context, id string) (*model.Training, error)
 }
 
@@ -197,7 +197,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		return e.complexity.Query.Trainings(childComplexity), true
+		args, err := ec.field_Query_trainings_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Trainings(childComplexity, args["input"].(model.SearchTrainings)), true
 
 	case "Query.user":
 		if e.complexity.Query.User == nil {
@@ -346,6 +351,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputAddTraining,
 		ec.unmarshalInputLoginInput,
 		ec.unmarshalInputRegisterInput,
+		ec.unmarshalInputSearchTrainings,
 	)
 	first := true
 
@@ -574,6 +580,29 @@ func (ec *executionContext) field_Query_training_argsID(
 	}
 
 	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_trainings_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Query_trainings_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_trainings_argsInput(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (model.SearchTrainings, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNSearchTrainings2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐSearchTrainings(ctx, tmp)
+	}
+
+	var zeroVal model.SearchTrainings
 	return zeroVal, nil
 }
 
@@ -1292,7 +1321,7 @@ func (ec *executionContext) _Query_trainings(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Trainings(rctx)
+		return ec.resolvers.Query().Trainings(rctx, fc.Args["input"].(model.SearchTrainings))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1309,7 +1338,7 @@ func (ec *executionContext) _Query_trainings(ctx context.Context, field graphql.
 	return ec.marshalNTraining2ᚕᚖgithubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐTrainingᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_trainings(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_trainings(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1336,6 +1365,17 @@ func (ec *executionContext) fieldContext_Query_trainings(_ context.Context, fiel
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Training", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_trainings_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -4280,6 +4320,54 @@ func (ec *executionContext) unmarshalInputRegisterInput(ctx context.Context, obj
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputSearchTrainings(ctx context.Context, obj any) (model.SearchTrainings, error) {
+	var it model.SearchTrainings
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "type", "limit", "offset"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "type":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Type = data
+		case "limit":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+			data, err := ec.unmarshalNInt2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Limit = data
+		case "offset":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+			data, err := ec.unmarshalNInt2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Offset = data
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -5130,6 +5218,11 @@ func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋGrudTrigger�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNSearchTrainings2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐSearchTrainings(ctx context.Context, v any) (model.SearchTrainings, error) {
+	res, err := ec.unmarshalInputSearchTrainings(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -5542,6 +5635,24 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	_ = sel
 	_ = ctx
 	res := graphql.MarshalBoolean(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint32(ctx context.Context, v any) (*int32, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt32(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint32(ctx context.Context, sel ast.SelectionSet, v *int32) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalInt32(*v)
 	return res
 }
 
