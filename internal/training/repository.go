@@ -7,6 +7,7 @@ import (
 
 type Repository interface{
 	Create(input InputWithUser) (*model.Training, error)
+	GetAll()([]*model.Training, error)
 }
 
 type TrainingRepository struct {
@@ -30,3 +31,6 @@ func(r *TrainingRepository) Create(input InputWithUser) (*model.Training, error)
 	return &training, nil
 }
 
+func (r *TrainingRepository) GetAll() ([]*model.Training, error) {
+	return nil, nil
+}
