@@ -1,6 +1,9 @@
 package main
 
 import (
+	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/go-chi/chi/v5"
+	"github.com/rs/cors"
 	"log"
 	"net/http"
 
@@ -8,7 +11,6 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/GrudTrigger/trainin_tracker/configs"
 	"github.com/GrudTrigger/trainin_tracker/graph"
 	"github.com/GrudTrigger/trainin_tracker/internal/training"
@@ -32,10 +34,20 @@ func main() {
 	trainingService := training.NewTrainingService(trainingRepository)
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
-		Configs: cfg, 
-		UserService: userService,
+		Configs:         cfg,
+		UserService:     userService,
 		TrainingService: trainingService,
 	}}))
+
+	router := chi.NewRouter()
+
+	router.Use(cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:8080"},
+		AllowCredentials: true,
+		Debug:            true,
+	}).Handler)
+	router.Use(middleware.Logging)
+	router.Handle("/query", middleware.IsAuthed(srv, cfg))
 
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
@@ -48,9 +60,12 @@ func main() {
 		Cache: lru.New[string](100),
 	})
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", middleware.Logging(middleware.IsAuthed(srv, cfg)))
+	//http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	//http.Handle("/query", middleware.Logging(middleware.IsAuthed(srv, cfg)))
+
+	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	router.Handle("/query", srv)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", cfg.Port)
-	log.Fatal(http.ListenAndServe(":"+cfg.Port, nil))
+	log.Fatal(http.ListenAndServe(":"+cfg.Port, router))
 }
