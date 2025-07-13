@@ -4,3 +4,6 @@ migrate create -ext sql -dir migrations -seq create_table
 
 надо автомазировать
 добавить refresh-token(придется переделать на Cookie)
+
+
+https://training-tracker-fv65.onrender.com

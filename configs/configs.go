@@ -8,7 +8,7 @@ import (
 )
 
 type Configs struct {
-	Port string
+	Port   string
 	Secret string
 	Db
 }
@@ -20,7 +20,7 @@ type Db struct {
 func LoadConfigs() *Configs {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Ошибка при загрузку .env файла")
+		log.Fatal("Ошибка при загрузки .env файла")
 	}
 
 	return &Configs{

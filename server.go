@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/cors"
@@ -21,7 +23,9 @@ import (
 )
 
 func main() {
-
+	env := flag.String("env", "dev", "Application environment: dev or prod")
+	flag.Parse()
+	fmt.Println(*env)
 	cfg := configs.LoadConfigs()
 
 	dbPostgres := storage.NewDbPostgres(cfg.Dsn)
