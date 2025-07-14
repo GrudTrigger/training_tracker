@@ -17,7 +17,6 @@ const UserContextKey contextKey = "user"
 func IsAuthed(next http.Handler, cfg *configs.Configs) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authedHeader := r.Header.Get("Authorization")
-
 		if authedHeader == "" {
 			next.ServeHTTP(w, r)
 			return

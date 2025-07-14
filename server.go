@@ -3,11 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/cors"
-	"log"
-	"net/http"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -48,7 +49,6 @@ func main() {
 	router.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:8080"},
 		AllowCredentials: true,
-		Debug:            true,
 	}).Handler)
 	router.Use(middleware.Logging)
 	router.Handle("/query", middleware.IsAuthed(srv, cfg))
@@ -64,11 +64,7 @@ func main() {
 		Cache: lru.New[string](100),
 	})
 
-	//http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	//http.Handle("/query", middleware.Logging(middleware.IsAuthed(srv, cfg)))
-
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	router.Handle("/query", srv)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", cfg.Port)
 	log.Fatal(http.ListenAndServe(":"+cfg.Port, router))

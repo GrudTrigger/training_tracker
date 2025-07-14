@@ -58,7 +58,7 @@ func (r *mutationResolver) AddTraining(ctx context.Context, input model.AddTrain
 	if u == nil {
 		return nil, errors.New("access denied")
 	}
-	t, err := r.TrainingService.Create(&input, u.Id)
+	t, err := r.TrainingService.Create(input, u.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -99,12 +99,20 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 
 // Trainings is the resolver for the trainings field.
 func (r *queryResolver) Trainings(ctx context.Context, input model.SearchTrainings) ([]*model.Training, error) {
-	panic(fmt.Errorf("not implemented: Trainings - trainings"))
+	t, err := r.TrainingService.FindAll(input)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }
 
 // Training is the resolver for the training field.
 func (r *queryResolver) Training(ctx context.Context, id string) (*model.Training, error) {
-	panic(fmt.Errorf("not implemented: Training - training"))
+	t, err := r.TrainingService.FindById(id)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }
 
 // Mutation returns MutationResolver implementation.
