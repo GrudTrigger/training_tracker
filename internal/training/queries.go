@@ -10,13 +10,13 @@ import (
 func QueryGetAll(input model.SearchTrainings) (string, []interface{}) {
 	var (
 		queryBuilder strings.Builder
-		args []interface{}
-		conditions []string
+		args         []interface{}
+		conditions   []string
 	)
 	queryBuilder.WriteString("SELECT * FROM training")
 
 	if input.Name != nil {
-		args = append(args, "%" + *input.Name + "%")
+		args = append(args, "%"+*input.Name+"%")
 		conditions = append(conditions, fmt.Sprintf("name ILIKE $%d", len(args)))
 	}
 
@@ -30,7 +30,6 @@ func QueryGetAll(input model.SearchTrainings) (string, []interface{}) {
 		queryBuilder.WriteString(strings.Join(conditions, " AND "))
 	}
 	args = append(args, input.Limit, input.Offset)
-	queryBuilder.WriteString(fmt.Sprintf(" LIMIT $%d OFFSET $%d", len(args) - 1, len(args)))
-	fmt.Println(queryBuilder.String())
+	queryBuilder.WriteString(fmt.Sprintf(" LIMIT $%d OFFSET $%d", len(args)-1, len(args)))
 	return queryBuilder.String(), args
 }
