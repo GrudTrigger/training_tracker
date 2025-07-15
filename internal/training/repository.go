@@ -59,7 +59,7 @@ func (r *TrainingRepository) GetAll(input model.SearchTrainings) ([]*model.Train
 
 func (r *TrainingRepository) GetById(id string) (*model.Training, error) {
 	var training model.Training
-	query := `SELECT * from training WHERE id = $1`
+	query := `SELECT training.*, users.login from training JOIN users ON training.user_id = users.id WHERE training.id = $1`
 	row := r.QueryRow(query, id)
 	if row.Err() == sql.ErrNoRows {
 		return nil, errors.New("тренировка не найдена")
