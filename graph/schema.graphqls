@@ -19,6 +19,7 @@ type Training {
 	date: Date! #2025-07-02
 	notes: String!
 	type: Int!
+	user_data: User
 	created_at: Time
 }
 

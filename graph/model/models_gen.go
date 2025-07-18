@@ -52,6 +52,7 @@ type Training struct {
 	Date      string     `json:"date"`
 	Notes     string     `json:"notes"`
 	Type      int32      `json:"type"`
+	UserData  *User      `json:"user_data,omitempty"`
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 }
 

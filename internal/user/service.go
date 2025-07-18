@@ -7,21 +7,21 @@ import (
 	"github.com/GrudTrigger/trainin_tracker/pkg/utils"
 )
 
-type Service interface {
+type IService interface {
 	Create(data *model.RegisterInput) (*model.User, error)
 	Login(data *model.LoginInput) (*model.User, error)
 	GetByEmail(email string) (*model.User, error)
 }
 
-type UserService struct {
+type Service struct {
 	repo Repository
 }
 
-func NewUserService(userRepo Repository) Service {
-	return &UserService{userRepo}
+func NewUserService(userRepo Repository) IService {
+	return &Service{userRepo}
 }
 
-func (s *UserService) Create(data *model.RegisterInput) (*model.User, error) {
+func (s *Service) Create(data *model.RegisterInput) (*model.User, error) {
 	existedUser, err := s.repo.GetByEmail(data.Email)
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func (s *UserService) Create(data *model.RegisterInput) (*model.User, error) {
 	return newUser, nil
 }
 
-func(s *UserService) Login(data *model.LoginInput) (*model.User, error) {
+func (s *Service) Login(data *model.LoginInput) (*model.User, error) {
 	existedUser, err := s.repo.GetByEmail(data.Email)
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func(s *UserService) Login(data *model.LoginInput) (*model.User, error) {
 	return existedUser, nil
 }
 
-func(s *UserService) GetByEmail(email string) (*model.User, error) {
+func (s *Service) GetByEmail(email string) (*model.User, error) {
 	u, err := s.repo.GetByEmail(email)
 	if err != nil {
 		return nil, errors.New("пользователь не найден")

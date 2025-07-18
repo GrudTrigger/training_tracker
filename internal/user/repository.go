@@ -8,21 +8,21 @@ import (
 	"github.com/GrudTrigger/trainin_tracker/pkg/storage"
 )
 
-type Repository interface {
+type IRepository interface {
 	Create(data *model.RegisterInput) (*model.User, error)
 	GetByEmail(email string) (*model.User, error)
 	GetAll()
 }
 
-type UserRepository struct {
+type Repository struct {
 	*storage.DbPostgres
 }
 
-func NewRepository(db *storage.DbPostgres) Repository {
-	return &UserRepository{db}
+func NewRepository(db *storage.DbPostgres) IRepository {
+	return &Repository{db}
 }
 
-func (r *UserRepository) Create(data *model.RegisterInput) (*model.User, error) {
+func (r *Repository) Create(data *model.RegisterInput) (*model.User, error) {
 	var userModel model.User
 	query := `INSERT INTO users (email, login, password, role) 
 			  VALUES ($1, $2, $3, $4) 
@@ -35,7 +35,7 @@ func (r *UserRepository) Create(data *model.RegisterInput) (*model.User, error) 
 	return &userModel, nil
 }
 
-func (r *UserRepository) GetByEmail(email string) (*model.User, error) {
+func (r *Repository) GetByEmail(email string) (*model.User, error) {
 	var existedUser model.User
 
 	query := "SELECT id, email, login, password, role FROM users WHERE email = $1"
@@ -50,4 +50,4 @@ func (r *UserRepository) GetByEmail(email string) (*model.User, error) {
 	return &existedUser, nil
 }
 
-func (r *UserRepository) GetAll() {}
+func (r *Repository) GetAll() {}

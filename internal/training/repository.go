@@ -8,21 +8,21 @@ import (
 	"github.com/GrudTrigger/trainin_tracker/pkg/storage"
 )
 
-type Repository interface {
+type IRepository interface {
 	Create(input InputWithUser) (*model.Training, error)
 	GetAll(input model.SearchTrainings) ([]*model.Training, error)
 	GetById(id string) (*model.Training, error)
 }
 
-type TrainingRepository struct {
+type Repository struct {
 	*storage.DbPostgres
 }
 
-func NewTrainingRepository(db *storage.DbPostgres) Repository {
-	return &TrainingRepository{db}
+func NewTrainingRepository(db *storage.DbPostgres) IRepository {
+	return &Repository{db}
 }
 
-func (r *TrainingRepository) Create(input InputWithUser) (*model.Training, error) {
+func (r *Repository) Create(input InputWithUser) (*model.Training, error) {
 	var training model.Training
 	query := `INSERT INTO training(name, user_id, duration, date, notes, type) 
 									VALUES($1, $2, $3, $4, $5, $6)
@@ -35,7 +35,7 @@ func (r *TrainingRepository) Create(input InputWithUser) (*model.Training, error
 	return &training, nil
 }
 
-func (r *TrainingRepository) GetAll(input model.SearchTrainings) ([]*model.Training, error) {
+func (r *Repository) GetAll(input model.SearchTrainings) ([]*model.Training, error) {
 	var trainings []*model.Training
 
 	query, args := QueryGetAll(input)
@@ -57,7 +57,7 @@ func (r *TrainingRepository) GetAll(input model.SearchTrainings) ([]*model.Train
 	return trainings, nil
 }
 
-func (r *TrainingRepository) GetById(id string) (*model.Training, error) {
+func (r *Repository) GetById(id string) (*model.Training, error) {
 	var training model.Training
 	query := `SELECT training.*, users.login from training JOIN users ON training.user_id = users.id WHERE training.id = $1`
 	row := r.QueryRow(query, id)

@@ -76,6 +76,7 @@ type ComplexityRoot struct {
 		Name      func(childComplexity int) int
 		Notes     func(childComplexity int) int
 		Type      func(childComplexity int) int
+		UserData  func(childComplexity int) int
 		UserID    func(childComplexity int) int
 	}
 
@@ -283,6 +284,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Training.Type(childComplexity), true
+
+	case "Training.user_data":
+		if e.complexity.Training.UserData == nil {
+			break
+		}
+
+		return e.complexity.Training.UserData(childComplexity), true
 
 	case "Training.user_id":
 		if e.complexity.Training.UserID == nil {
@@ -1031,6 +1039,8 @@ func (ec *executionContext) fieldContext_Mutation_addTraining(ctx context.Contex
 				return ec.fieldContext_Training_notes(ctx, field)
 			case "type":
 				return ec.fieldContext_Training_type(ctx, field)
+			case "user_data":
+				return ec.fieldContext_Training_user_data(ctx, field)
 			case "created_at":
 				return ec.fieldContext_Training_created_at(ctx, field)
 			}
@@ -1360,6 +1370,8 @@ func (ec *executionContext) fieldContext_Query_trainings(ctx context.Context, fi
 				return ec.fieldContext_Training_notes(ctx, field)
 			case "type":
 				return ec.fieldContext_Training_type(ctx, field)
+			case "user_data":
+				return ec.fieldContext_Training_user_data(ctx, field)
 			case "created_at":
 				return ec.fieldContext_Training_created_at(ctx, field)
 			}
@@ -1430,6 +1442,8 @@ func (ec *executionContext) fieldContext_Query_training(ctx context.Context, fie
 				return ec.fieldContext_Training_notes(ctx, field)
 			case "type":
 				return ec.fieldContext_Training_type(ctx, field)
+			case "user_data":
+				return ec.fieldContext_Training_user_data(ctx, field)
 			case "created_at":
 				return ec.fieldContext_Training_created_at(ctx, field)
 			}
@@ -1884,6 +1898,63 @@ func (ec *executionContext) fieldContext_Training_type(_ context.Context, field 
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Training_user_data(ctx context.Context, field graphql.CollectedField, obj *model.Training) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Training_user_data(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserData, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Training_user_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Training",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "login":
+				return ec.fieldContext_User_login(ctx, field)
+			case "password":
+				return ec.fieldContext_User_password(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "telegram_id":
+				return ec.fieldContext_User_telegram_id(ctx, field)
+			case "created_at":
+				return ec.fieldContext_User_created_at(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	return fc, nil
@@ -4702,6 +4773,8 @@ func (ec *executionContext) _Training(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "user_data":
+			out.Values[i] = ec._Training_user_data(ctx, field, obj)
 		case "created_at":
 			out.Values[i] = ec._Training_created_at(ctx, field, obj)
 		default:
