@@ -6,18 +6,19 @@ type IService interface {
 	Create(input model.AddTraining, userId string) (*model.Training, error)
 	FindAll(input model.SearchTrainings) ([]*model.Training, error)
 	FindById(id string) (*model.Training, error)
+	GetMy(userId string) ([]*model.Training, error)
 }
 
 type Service struct {
-	repo Repository
+	repo IRepository
 }
 
-func NewTrainingService(trainingRepository Repository) IService {
+func NewTrainingService(trainingRepository IRepository) IService {
 	return &Service{repo: trainingRepository}
 }
 
 func (s *Service) Create(input model.AddTraining, userId string) (*model.Training, error) {
-	// нужно будет добавить валидацию на type
+	//TODO нужно будет добавить валидацию на type
 	inputWithUser := InputWithUser{input, userId}
 	t, err := s.repo.Create(inputWithUser)
 	if err != nil {
@@ -40,4 +41,12 @@ func (s *Service) FindById(id string) (*model.Training, error) {
 		return nil, err
 	}
 	return t, nil
+}
+
+func (s *Service) GetMy(userId string) ([]*model.Training, error) {
+	t, err := s.repo.GetMyTrainings(userId)
+	if err != nil {
+		return nil, err
+	}
+	return t, err
 }

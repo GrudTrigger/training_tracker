@@ -60,12 +60,13 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Me        func(childComplexity int) int
-		Training  func(childComplexity int, id string) int
-		Trainings func(childComplexity int, input model.SearchTrainings) int
-		User      func(childComplexity int, email string) int
-		UserByID  func(childComplexity int, id string) int
-		Users     func(childComplexity int) int
+		Me         func(childComplexity int) int
+		MyTraining func(childComplexity int) int
+		Training   func(childComplexity int, id string) int
+		Trainings  func(childComplexity int, input model.SearchTrainings) int
+		User       func(childComplexity int, email string) int
+		UserByID   func(childComplexity int, id string) int
+		Users      func(childComplexity int) int
 	}
 
 	Training struct {
@@ -103,6 +104,7 @@ type QueryResolver interface {
 	Users(ctx context.Context) ([]*model.User, error)
 	Trainings(ctx context.Context, input model.SearchTrainings) ([]*model.Training, error)
 	Training(ctx context.Context, id string) (*model.Training, error)
+	MyTraining(ctx context.Context) ([]*model.Training, error)
 }
 
 type executableSchema struct {
@@ -180,6 +182,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Me(childComplexity), true
+
+	case "Query.my_training":
+		if e.complexity.Query.MyTraining == nil {
+			break
+		}
+
+		return e.complexity.Query.MyTraining(childComplexity), true
 
 	case "Query.training":
 		if e.complexity.Query.Training == nil {
@@ -1460,6 +1469,70 @@ func (ec *executionContext) fieldContext_Query_training(ctx context.Context, fie
 	if fc.Args, err = ec.field_Query_training_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_my_training(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_my_training(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().MyTraining(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Training)
+	fc.Result = res
+	return ec.marshalNTraining2ᚕᚖgithubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐTrainingᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_my_training(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Training_id(ctx, field)
+			case "user_id":
+				return ec.fieldContext_Training_user_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Training_name(ctx, field)
+			case "duration":
+				return ec.fieldContext_Training_duration(ctx, field)
+			case "date":
+				return ec.fieldContext_Training_date(ctx, field)
+			case "notes":
+				return ec.fieldContext_Training_notes(ctx, field)
+			case "type":
+				return ec.fieldContext_Training_type(ctx, field)
+			case "user_data":
+				return ec.fieldContext_Training_user_data(ctx, field)
+			case "created_at":
+				return ec.fieldContext_Training_created_at(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Training", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -4687,6 +4760,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_training(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "my_training":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_my_training(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 

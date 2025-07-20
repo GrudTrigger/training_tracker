@@ -3,7 +3,6 @@ package training
 import (
 	"database/sql"
 	"errors"
-
 	"github.com/GrudTrigger/trainin_tracker/graph/model"
 	"github.com/GrudTrigger/trainin_tracker/pkg/storage"
 )
@@ -12,6 +11,7 @@ type IRepository interface {
 	Create(input InputWithUser) (*model.Training, error)
 	GetAll(input model.SearchTrainings) ([]*model.Training, error)
 	GetById(id string) (*model.Training, error)
+	GetMyTrainings(userId string) ([]*model.Training, error)
 }
 
 type Repository struct {
@@ -45,7 +45,7 @@ func (r *Repository) GetAll(input model.SearchTrainings) ([]*model.Training, err
 	}
 	for rows.Next() {
 		var training model.Training
-		err := rows.Scan(&training.ID, &training.UserID, &training.Name, &training.Duration, &training.Date, &training.Notes, &training.Type, &training.CreatedAt)
+		err = rows.Scan(&training.ID, &training.UserID, &training.Name, &training.Duration, &training.Date, &training.Notes, &training.Type, &training.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -59,15 +59,55 @@ func (r *Repository) GetAll(input model.SearchTrainings) ([]*model.Training, err
 
 func (r *Repository) GetById(id string) (*model.Training, error) {
 	var training model.Training
-	query := `SELECT training.*, users.login from training JOIN users ON training.user_id = users.id WHERE training.id = $1`
+	training.UserData = &model.User{}
+
+	query := `SELECT training.*, users.id, users.email, users.login, users.password, users.role, users.created_at from training JOIN users ON training.user_id = users.id WHERE training.id = $1`
 	row := r.QueryRow(query, id)
 	if row.Err() == sql.ErrNoRows {
 		return nil, errors.New("тренировка не найдена")
 	}
 
-	err := row.Scan(&training.ID, &training.UserID, &training.Name, &training.Duration, &training.Date, &training.Notes, &training.Type, &training.CreatedAt)
+	err := row.Scan(
+		&training.ID,
+		&training.UserID,
+		&training.Name,
+		&training.Duration,
+		&training.Date,
+		&training.Notes,
+		&training.Type,
+		&training.CreatedAt,
+		&training.UserData.ID,
+		&training.UserData.Email,
+		&training.UserData.Login,
+		&training.UserData.Password,
+		&training.UserData.Role,
+		&training.UserData.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
 	return &training, nil
+}
+
+func (r *Repository) GetMyTrainings(userId string) ([]*model.Training, error) {
+
+	var trainings []*model.Training
+
+	query := "SELECT * FROM training WHERE user_id = $1"
+
+	rows, err := r.Query(query, userId)
+
+	if !errors.Is(err, sql.ErrNoRows) {
+		return nil, errors.New("тренировки не найдены")
+	}
+
+	for rows.Next() {
+		var training model.Training
+		err = rows.Scan(&training.ID, &training.UserID, &training.Name, &training.Duration, &training.Date, &training.Notes, &training.Type, &training.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		trainings = append(trainings, &training)
+	}
+
+	return trainings, nil
 }

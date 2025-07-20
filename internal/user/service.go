@@ -14,10 +14,10 @@ type IService interface {
 }
 
 type Service struct {
-	repo Repository
+	repo IRepository
 }
 
-func NewUserService(userRepo Repository) IService {
+func NewUserService(userRepo IRepository) IService {
 	return &Service{userRepo}
 }
 

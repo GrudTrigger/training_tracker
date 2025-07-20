@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"log"
 	"net/http"
 
@@ -28,7 +29,7 @@ func main() {
 	flag.Parse()
 	fmt.Println(*env)
 	cfg := configs.LoadConfigs()
-
+	v := validator.New(validator.WithRequiredStructEnabled())
 	dbPostgres := storage.NewDbPostgres(cfg.Dsn)
 	defer dbPostgres.Close()
 
@@ -42,6 +43,7 @@ func main() {
 		Configs:         cfg,
 		UserService:     userService,
 		TrainingService: trainingService,
+		Validator:       v,
 	}}))
 
 	router := chi.NewRouter()

@@ -63,6 +63,7 @@ type Query {
 	users: [User!]!
 	trainings(input: SearchTrainings!): [Training!]!
 	training(id: ID!): Training
+	my_training: [Training!]!
 }
 
 type Mutation {

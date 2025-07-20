@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/GrudTrigger/trainin_tracker/pkg/validInput"
 
 	"github.com/GrudTrigger/trainin_tracker/graph/model"
 	"github.com/GrudTrigger/trainin_tracker/pkg/jwt"
@@ -16,6 +17,17 @@ import (
 
 // Register is the resolver for the register field.
 func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInput) (*model.AuthPayload, error) {
+	dto := validInput.Register{
+		Login:    input.Login,
+		Email:    input.Email,
+		Password: input.Password,
+		Role:     input.Role,
+	}
+	err := r.Validator.Struct(dto)
+	if err != nil {
+		return nil, err
+	}
+
 	newUser, err := r.UserService.Create(&input)
 	if err != nil {
 		return nil, err
@@ -36,6 +48,16 @@ func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInp
 
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*model.AuthPayload, error) {
+	dto := validInput.Login{
+		Email:    input.Email,
+		Password: input.Password,
+	}
+
+	err := r.Validator.Struct(dto)
+	if err != nil {
+		return nil, err
+	}
+
 	loginUser, err := r.UserService.Login(&input)
 	if err != nil {
 		return nil, err
@@ -113,6 +135,19 @@ func (r *queryResolver) Training(ctx context.Context, id string) (*model.Trainin
 		return nil, err
 	}
 	return t, nil
+}
+
+// MyTraining is the resolver for the my_training field.
+func (r *queryResolver) MyTraining(ctx context.Context) ([]*model.Training, error) {
+	u := middleware.GetUserForContext(ctx)
+	if u == nil {
+		return nil, errors.New("access denied")
+	}
+	t, err := r.TrainingService.GetMy(u.Id)
+	if err != nil {
+		return nil, err
+	}
+	return t, err
 }
 
 // Mutation returns MutationResolver implementation.

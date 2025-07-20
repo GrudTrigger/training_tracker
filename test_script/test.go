@@ -2,26 +2,34 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
+	"sync"
 	"time"
 )
 
-func randomWait(ch chan int) {
-	workSeconds := rand.Intn(5 + 1)
-	time.Sleep(time.Duration(workSeconds) * time.Second)
-	ch <- workSeconds
+func testCounterWithWg() {
+	now := time.Now()
+	var counter int
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+
+	fmt.Println("start counter", counter)
+
+	wg.Add(1000)
+
+	for i := 0; i < 1000; i++ {
+		go func() {
+			defer wg.Done()
+			time.Sleep(time.Nanosecond)
+			mu.Lock()
+			counter++
+			mu.Unlock()
+		}()
+	}
+	wg.Wait()
+	fmt.Println("finish counter:", counter)
+	fmt.Println(time.Since(now).Seconds())
 }
 
 func main() {
-	mainSeconds := time.Now()
-	totalWordSeconds := 0
-	ch := make(chan int)
-	for range 100 {
-		go randomWait(ch)
-	}
-	for range 100 {
-		totalWordSeconds += <-ch
-	}
-	fmt.Println("main:", time.Since(mainSeconds))
-	fmt.Println("total:", totalWordSeconds)
+	testCounterWithWg()
 }
