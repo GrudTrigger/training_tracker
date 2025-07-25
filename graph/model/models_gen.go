@@ -19,6 +19,23 @@ type AuthPayload struct {
 	User  *User  `json:"user"`
 }
 
+type CreateExercise struct {
+	Title         string `json:"title"`
+	MuscleGroup   int32  `json:"muscle_group"`
+	ApproachCount int32  `json:"approach_count"`
+	Weight        int32  `json:"weight"`
+	TrainingID    string `json:"training_id"`
+}
+
+type Exercise struct {
+	ID            string     `json:"id"`
+	Title         string     `json:"title"`
+	MuscleGroup   int32      `json:"muscle_group"`
+	ApproachCount int32      `json:"approach_count"`
+	Weight        int32      `json:"weight"`
+	CreatedAt     *time.Time `json:"created_at,omitempty"`
+}
+
 type LoginInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -37,6 +54,15 @@ type RegisterInput struct {
 	Role     string `json:"role"`
 }
 
+type SearchExercise struct {
+	Title         *string `json:"title,omitempty"`
+	MuscleGroup   *int32  `json:"muscle_group,omitempty"`
+	ApproachCount *int32  `json:"approach_count,omitempty"`
+	Weight        *int32  `json:"weight,omitempty"`
+	Limit         int32   `json:"limit"`
+	Offset        int32   `json:"offset"`
+}
+
 type SearchTrainings struct {
 	Name   *string `json:"name,omitempty"`
 	Type   *int32  `json:"type,omitempty"`
@@ -53,6 +79,7 @@ type Training struct {
 	Notes     string     `json:"notes"`
 	Type      int32      `json:"type"`
 	UserData  *User      `json:"user_data,omitempty"`
+	Exercise  *Exercise  `json:"exercise,omitempty"`
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 }
 

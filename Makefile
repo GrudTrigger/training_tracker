@@ -7,7 +7,7 @@ MIGRATE_CREATE=$(MIGRATE_BIN) create -ext sql -dir $(MIGRATIONS_DIR) -seq
 .PHONY: migrate
 
 migrate:
-	@if [ -z "$(name)" ]; then \
+	@if [ "$(name)" = "" ]; then \
 		echo "❌ Укажи имя миграции: make migrate name=create_table"; \
 		exit 1; \
 	fi; \

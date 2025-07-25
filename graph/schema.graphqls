@@ -11,6 +11,7 @@ type User {
 	created_at: Time
 }
 
+#Тренировки
 type Training {
 	id: ID!
 	user_id: String!
@@ -18,8 +19,19 @@ type Training {
 	duration: String!
 	date: Date! #2025-07-02
 	notes: String!
-	type: Int!
+	type: Int! #0 - силовая, 1 - кардио
 	user_data: User
+	exercise: Exercise
+	created_at: Time
+}
+
+#Упражнения
+type Exercise {
+	id: ID!
+	title: String! #жим лежа,подтягивания
+	muscle_group: Int! #0 - грудь, 1 - спина и тд
+	approach_count: Int! #количество подходов
+	weight: Int! #вес в кг
 	created_at: Time
 }
 
@@ -56,6 +68,25 @@ input SearchTrainings {
 	offset: Int!
 }
 
+#EXERCISE
+input CreateExercise {
+	title: String!
+	muscle_group: Int!
+	approach_count: Int!
+	weight: Int!
+	training_id: ID!
+}
+
+input SearchExercise {
+	title: String
+	muscle_group: Int
+	approach_count: Int
+	weight: Int
+	limit: Int!
+	offset: Int!
+}
+
+
 type Query {
 	user(email: String!): User
 	me: User!
@@ -64,10 +95,12 @@ type Query {
 	trainings(input: SearchTrainings!): [Training!]!
 	training(id: ID!): Training
 	my_training: [Training!]!
+	exercise(input: SearchExercise!): [Exercise!]!
 }
 
 type Mutation {
 	register(input: RegisterInput!): AuthPayload!
 	login(input: LoginInput!): AuthPayload!
 	addTraining(input: AddTraining!): Training!
+	createExercise(input: CreateExercise!): Exercise!
 }

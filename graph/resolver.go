@@ -2,6 +2,7 @@ package graph
 
 import (
 	"github.com/GrudTrigger/trainin_tracker/configs"
+	"github.com/GrudTrigger/trainin_tracker/internal/exercise"
 	"github.com/GrudTrigger/trainin_tracker/internal/training"
 	"github.com/GrudTrigger/trainin_tracker/internal/user"
 	"github.com/go-playground/validator/v10"
@@ -15,5 +16,6 @@ type Resolver struct {
 	Configs         *configs.Configs
 	UserService     user.IService
 	TrainingService training.IService
+	ExerciseService exercise.IService
 	Validator       *validator.Validate
 }

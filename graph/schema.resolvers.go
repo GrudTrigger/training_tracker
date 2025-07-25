@@ -8,11 +8,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/GrudTrigger/trainin_tracker/pkg/validInput"
 
 	"github.com/GrudTrigger/trainin_tracker/graph/model"
 	"github.com/GrudTrigger/trainin_tracker/pkg/jwt"
 	"github.com/GrudTrigger/trainin_tracker/pkg/middleware"
+	"github.com/GrudTrigger/trainin_tracker/pkg/validInput"
 )
 
 // Register is the resolver for the register field.
@@ -87,6 +87,19 @@ func (r *mutationResolver) AddTraining(ctx context.Context, input model.AddTrain
 	return t, nil
 }
 
+// CreateExercise is the resolver for the createExercise field.
+func (r *mutationResolver) CreateExercise(ctx context.Context, input model.CreateExercise) (*model.Exercise, error) {
+	u := middleware.GetUserForContext(ctx)
+	if u == nil {
+		return nil, errors.New("access denied")
+	}
+	newEx, err := r.ExerciseService.Create(&input)
+	if err != nil {
+		return nil, err
+	}
+	return newEx, nil
+}
+
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, email string) (*model.User, error) {
 	u, err := r.UserService.GetByEmail(email)
@@ -148,6 +161,11 @@ func (r *queryResolver) MyTraining(ctx context.Context) ([]*model.Training, erro
 		return nil, err
 	}
 	return t, err
+}
+
+// Exercise is the resolver for the exercise field.
+func (r *queryResolver) Exercise(ctx context.Context, input model.SearchExercise) ([]*model.Exercise, error) {
+	panic(fmt.Errorf("not implemented: Exercise - exercise"))
 }
 
 // Mutation returns MutationResolver implementation.

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/GrudTrigger/trainin_tracker/internal/exercise"
 	"github.com/go-playground/validator/v10"
 	"log"
 	"net/http"
@@ -35,14 +36,17 @@ func main() {
 
 	userRepository := user.NewRepository(dbPostgres)
 	trainingRepository := training.NewTrainingRepository(dbPostgres)
+	exerciseRepository := exercise.NewRepository(dbPostgres)
 
 	userService := user.NewUserService(userRepository)
 	trainingService := training.NewTrainingService(trainingRepository)
+	exerciseService := exercise.NewService(exerciseRepository)
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
 		Configs:         cfg,
 		UserService:     userService,
 		TrainingService: trainingService,
+		ExerciseService: exerciseService,
 		Validator:       v,
 	}}))
 
