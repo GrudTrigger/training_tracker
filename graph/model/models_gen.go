@@ -29,6 +29,7 @@ type CreateExercise struct {
 
 type Exercise struct {
 	ID            string     `json:"id"`
+	TrainingID    string     `json:"training_id"`
 	Title         string     `json:"title"`
 	MuscleGroup   int32      `json:"muscle_group"`
 	ApproachCount int32      `json:"approach_count"`

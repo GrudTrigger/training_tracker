@@ -165,7 +165,15 @@ func (r *queryResolver) MyTraining(ctx context.Context) ([]*model.Training, erro
 
 // Exercise is the resolver for the exercise field.
 func (r *queryResolver) Exercise(ctx context.Context, input model.SearchExercise) ([]*model.Exercise, error) {
-	panic(fmt.Errorf("not implemented: Exercise - exercise"))
+	u := middleware.GetUserForContext(ctx)
+	if u == nil {
+		return nil, errors.New("access denied")
+	}
+	exs, err := r.ExerciseService.GetAll(&input)
+	if err != nil {
+		return nil, err
+	}
+	return exs, nil
 }
 
 // Mutation returns MutationResolver implementation.

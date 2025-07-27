@@ -1,12 +1,15 @@
 package exercise
 
 import (
+	"database/sql"
+	"errors"
 	"github.com/GrudTrigger/trainin_tracker/graph/model"
 	"github.com/GrudTrigger/trainin_tracker/pkg/storage"
 )
 
 type IRepository interface {
 	Create(input *model.CreateExercise) (*model.Exercise, error)
+	GetAll(input *model.SearchExercise) ([]*model.Exercise, error)
 }
 
 type Repository struct {
@@ -28,4 +31,25 @@ func (r *Repository) Create(input *model.CreateExercise) (*model.Exercise, error
 		return nil, err
 	}
 	return &e, nil
+}
+
+func (r *Repository) GetAll(input *model.SearchExercise) ([]*model.Exercise, error) {
+	var exercise []*model.Exercise
+	query, args := QueryGetAll(input)
+	rows, err := r.Query(query, args...)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, errors.New("подход не найден")
+	}
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var ex model.Exercise
+		err = rows.Scan(&ex.ID, &ex.TrainingID, &ex.Title, &ex.MuscleGroup, &ex.ApproachCount, &ex.Weight, &ex.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		exercise = append(exercise, &ex)
+	}
+	return exercise, nil
 }

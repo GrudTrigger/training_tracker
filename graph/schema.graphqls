@@ -28,6 +28,7 @@ type Training {
 #Упражнения
 type Exercise {
 	id: ID!
+	training_id: ID!
 	title: String! #жим лежа,подтягивания
 	muscle_group: Int! #0 - грудь, 1 - спина и тд
 	approach_count: Int! #количество подходов

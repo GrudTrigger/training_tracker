@@ -61,9 +61,9 @@ func (r *Repository) GetById(id string) (*model.Training, error) {
 	var training model.Training
 	training.UserData = &model.User{}
 
-	query := `SELECT training.*, users.id, users.email, users.login, users.password, users.role, users.created_at from training JOIN users ON training.user_id = users.id WHERE training.id = $1`
+	query := `SELECT training.*, users.id, users.email, users.login, users.password, users.role, users.created_at, exercise.* from training JOIN users ON training.user_id = users.id JOIN exercise ON training.id = exercise.training_id WHERE training.id = $1`
 	row := r.QueryRow(query, id)
-	if row.Err() == sql.ErrNoRows {
+	if errors.Is(row.Err(), sql.ErrNoRows) {
 		return nil, errors.New("тренировка не найдена")
 	}
 

@@ -4,6 +4,7 @@ import "github.com/GrudTrigger/trainin_tracker/graph/model"
 
 type IService interface {
 	Create(input *model.CreateExercise) (*model.Exercise, error)
+	GetAll(input *model.SearchExercise) ([]*model.Exercise, error)
 }
 
 type Service struct {
@@ -20,4 +21,12 @@ func (s *Service) Create(input *model.CreateExercise) (*model.Exercise, error) {
 		return nil, err
 	}
 	return ex, nil
+}
+
+func (s *Service) GetAll(input *model.SearchExercise) ([]*model.Exercise, error) {
+	exs, err := s.repo.GetAll(input)
+	if err != nil {
+		return nil, err
+	}
+	return exs, nil
 }
