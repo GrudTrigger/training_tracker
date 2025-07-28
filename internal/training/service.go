@@ -7,6 +7,7 @@ type IService interface {
 	FindAll(input model.SearchTrainings) ([]*model.Training, error)
 	FindById(id string) (*model.Training, error)
 	GetMy(userId string) ([]*model.Training, error)
+	DeleteById(id string) (string, error)
 }
 
 type Service struct {
@@ -18,7 +19,6 @@ func NewTrainingService(trainingRepository IRepository) IService {
 }
 
 func (s *Service) Create(input model.AddTraining, userId string) (*model.Training, error) {
-	//TODO нужно будет добавить валидацию на type
 	inputWithUser := InputWithUser{input, userId}
 	t, err := s.repo.Create(inputWithUser)
 	if err != nil {
@@ -49,4 +49,12 @@ func (s *Service) GetMy(userId string) ([]*model.Training, error) {
 		return nil, err
 	}
 	return t, err
+}
+
+func (s *Service) DeleteById(id string) (string, error) {
+	res, err := s.repo.DeleteById(id)
+	if err != nil {
+		return "", err
+	}
+	return res, nil
 }

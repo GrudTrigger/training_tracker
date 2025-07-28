@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/GrudTrigger/trainin_tracker/internal/exercise"
-	"github.com/go-playground/validator/v10"
 	"log"
 	"net/http"
+
+	"github.com/GrudTrigger/trainin_tracker/internal/exercise"
+	"github.com/go-playground/validator/v10"
 
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"

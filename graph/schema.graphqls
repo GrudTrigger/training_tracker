@@ -87,7 +87,6 @@ input SearchExercise {
 	offset: Int!
 }
 
-
 type Query {
 	user(email: String!): User
 	me: User!
@@ -96,12 +95,15 @@ type Query {
 	trainings(input: SearchTrainings!): [Training!]!
 	training(id: ID!): Training
 	my_training: [Training!]!
-	exercise(input: SearchExercise!): [Exercise!]!
+	exercises(input: SearchExercise!): [Exercise!]!
+	exercies(id: ID!): Exercise!
 }
 
 type Mutation {
 	register(input: RegisterInput!): AuthPayload!
 	login(input: LoginInput!): AuthPayload!
 	addTraining(input: AddTraining!): Training!
+	deleteTraining(id: ID!): String!
 	createExercise(input: CreateExercise!): Exercise!
+	deleteExercise(id: ID!): String!
 }
