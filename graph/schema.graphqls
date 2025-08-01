@@ -15,11 +15,10 @@ type User {
 type Training {
 	id: ID!
 	user_id: String!
-	name: String!
-	duration: String!
+	title: String!
+	duration: String! #01:30
 	date: Date! #2025-07-02
 	notes: String!
-	type: Int! #0 - силовая, 1 - кардио
 	user_data: User
 	exercise: Exercise
 	created_at: Time
