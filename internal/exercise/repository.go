@@ -3,13 +3,17 @@ package exercise
 import (
 	"database/sql"
 	"errors"
+
 	"github.com/GrudTrigger/trainin_tracker/graph/model"
+	"github.com/GrudTrigger/trainin_tracker/pkg/res"
 	"github.com/GrudTrigger/trainin_tracker/pkg/storage"
 )
 
 type IRepository interface {
 	Create(input *model.CreateExercise) (*model.Exercise, error)
 	GetAll(input *model.SearchExercise) ([]*model.Exercise, error)
+	GetById(id string) (*model.Exercise, error)
+	DeleteById(id string) (string, error)
 }
 
 type Repository struct {
@@ -52,4 +56,23 @@ func (r *Repository) GetAll(input *model.SearchExercise) ([]*model.Exercise, err
 		exercise = append(exercise, &ex)
 	}
 	return exercise, nil
+}
+
+func (r *Repository) GetById(id string) (*model.Exercise, error) {
+	var e model.Exercise
+	query := "SELECT * from exercise WHERE id = $1"
+	err := r.QueryRow(query, id).Scan(&e.ID, &e.TrainingID, &e.Title, &e.MuscleGroup, &e.ApproachCount, &e.Weight, &e.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &e, nil
+}
+ 
+func(r *Repository) DeleteById(id string) (string,error) {
+	query := "DELETE from exercise WHERE id = $1"
+	_, err := r.Exec(query, id)
+	if err != nil {
+		return "", res.ErrAccessDenied
+	}
+	return res.SuccessResponse, nil
 }

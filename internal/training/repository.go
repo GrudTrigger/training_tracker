@@ -3,8 +3,11 @@ package training
 import (
 	"database/sql"
 	"errors"
+
 	"github.com/GrudTrigger/trainin_tracker/graph/model"
+	"github.com/GrudTrigger/trainin_tracker/pkg/res"
 	"github.com/GrudTrigger/trainin_tracker/pkg/storage"
+	"github.com/GrudTrigger/trainin_tracker/pkg/utils"
 )
 
 type IRepository interface {
@@ -12,6 +15,7 @@ type IRepository interface {
 	GetAll(input model.SearchTrainings) ([]*model.Training, error)
 	GetById(id string) (*model.Training, error)
 	GetMyTrainings(userId string) ([]*model.Training, error)
+	DeleteById(id string) (string, error)
 }
 
 type Repository struct {
@@ -44,12 +48,12 @@ func (r *Repository) GetAll(input model.SearchTrainings) ([]*model.Training, err
 		return nil, err
 	}
 	for rows.Next() {
-		var training model.Training
+		training := utils.NewTraining()
 		err = rows.Scan(&training.ID, &training.UserID, &training.Name, &training.Duration, &training.Date, &training.Notes, &training.Type, &training.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
-		trainings = append(trainings, &training)
+		trainings = append(trainings, training)
 	}
 	if rows.Err() != nil {
 		return nil, err
@@ -58,8 +62,7 @@ func (r *Repository) GetAll(input model.SearchTrainings) ([]*model.Training, err
 }
 
 func (r *Repository) GetById(id string) (*model.Training, error) {
-	var training model.Training
-	training.UserData = &model.User{}
+	training := utils.NewTraining()
 
 	query := `SELECT training.*, users.id, users.email, users.login, users.password, users.role, users.created_at, exercise.* from training JOIN users ON training.user_id = users.id JOIN exercise ON training.id = exercise.training_id WHERE training.id = $1`
 	row := r.QueryRow(query, id)
@@ -81,11 +84,19 @@ func (r *Repository) GetById(id string) (*model.Training, error) {
 		&training.UserData.Login,
 		&training.UserData.Password,
 		&training.UserData.Role,
-		&training.UserData.CreatedAt)
+		&training.UserData.CreatedAt,
+		&training.Exercise.ID,
+		&training.Exercise.TrainingID,
+		&training.Exercise.Title,
+		&training.Exercise.MuscleGroup,
+		&training.Exercise.ApproachCount,
+		&training.Exercise.Weight,
+		&training.Exercise.CreatedAt,
+	)
 	if err != nil {
 		return nil, err
 	}
-	return &training, nil
+	return training, nil
 }
 
 func (r *Repository) GetMyTrainings(userId string) ([]*model.Training, error) {
@@ -110,4 +121,14 @@ func (r *Repository) GetMyTrainings(userId string) ([]*model.Training, error) {
 	}
 
 	return trainings, nil
+}
+
+
+func (r *Repository) DeleteById(id string) (string, error) {
+	query := "DELETE FROM training WHERE id = $1"
+	_, err := r.Exec(query, id)
+	if err != nil {
+		return "", err
+	}
+	return res.SuccessResponse, nil
 }
