@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/GrudTrigger/trainin_tracker/internal/exlist"
 	"log"
 	"net/http"
 
@@ -38,17 +39,20 @@ func main() {
 	userRepository := user.NewRepository(dbPostgres)
 	trainingRepository := training.NewTrainingRepository(dbPostgres)
 	exerciseRepository := exercise.NewRepository(dbPostgres)
+	exerciseListRepository := exlist.NewRepository(dbPostgres)
 
 	userService := user.NewUserService(userRepository)
 	trainingService := training.NewTrainingService(trainingRepository)
 	exerciseService := exercise.NewService(exerciseRepository)
+	exerciseListService := exlist.NewService(exerciseListRepository)
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
-		Configs:         cfg,
-		UserService:     userService,
-		TrainingService: trainingService,
-		ExerciseService: exerciseService,
-		Validator:       v,
+		Configs:             cfg,
+		UserService:         userService,
+		TrainingService:     trainingService,
+		ExerciseService:     exerciseService,
+		ExerciseListService: exerciseListService,
+		Validator:           v,
 	}}))
 
 	router := chi.NewRouter()

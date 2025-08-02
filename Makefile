@@ -1,18 +1,18 @@
 include .env
 
-MIGRATIONS_DIR=migrations
-MIGRATE_BIN=migrate
-MIGRATE_CREATE=$(MIGRATE_BIN) create -ext sql -dir $(MIGRATIONS_DIR) -seq
+MIGRATIONS_DIR = migrations
+MIGRATE_BIN = $(HOME)/go/bin/migrate
+MIGRATE_CREATE = $(MIGRATE_BIN) create -ext sql -dir $(MIGRATIONS_DIR) -seq
 
 .PHONY: migrate
 
 migrate:
-	@if [ "$(name)" = "" ]; then \
-		echo "❌ Укажи имя миграции: make migrate name=create_table"; \
+	@if [ -z "$(NAME)" ]; then \
+		echo "❌ Укажи имя миграции: make migrate NAME=add_users_table"; \
 		exit 1; \
 	fi; \
-	echo "🚀 Создание миграции: $(name)"; \
-	$(MIGRATE_CREATE) $(name)
+	echo "🚀 Создание миграции: $(NAME)"; \
+	$(MIGRATE_CREATE) $(NAME)
 
 migration_up: 
 	migrate -path migrations -database $(DATABASE_URL) -verbose up

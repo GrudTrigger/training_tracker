@@ -16,23 +16,35 @@ type Training {
 	id: ID!
 	user_id: String!
 	title: String!
-	duration: String! #01:30
-	date: Date! #2025-07-02
-	notes: String!
-	user_data: User
-	exercise: Exercise
+	duration: String! # 01:30
+	date: Date!
+	notes: String
+	exercises: [Exercise!]!
+	user: User
 	created_at: Time
 }
 
-#Упражнения
+#Таблица всех упражнений
+type ExerciseList {
+	id: ID!
+	title: String!
+	category_muscle: Int!
+	created_at: Time
+}
+#Таблица упражнение для тренировки и подходов
 type Exercise {
 	id: ID!
 	training_id: ID!
-	title: String! #жим лежа,подтягивания
-	muscle_group: Int! #0 - грудь, 1 - спина и тд
-	approach_count: Int! #количество подходов
-	weight: Int! #вес в кг
-	created_at: Time
+	exercise_list: ExerciseList!
+	approaches: [Approach!]!
+}
+
+#Таблица подходов
+type Approach {
+	id: ID!
+	exercise_id: ID!
+	repetition: Int!
+	weight: Int!
 }
 
 type AuthPayload {
@@ -52,9 +64,20 @@ input RegisterInput {
 	password: String!
 	role: String!
 }
+
+input CreateExerciseForList {
+	title: String!
+	category_muscle: Int!
+}
+
+input GetExerciseList {
+	limit: Int!
+	Offset: Int!
+}
+
 #Сделать notes необязательным
-input AddTraining {
-	name: String!
+input CreateTraining {
+	title: String!
 	duration: String!
 	date: Date! #2025-07-02T08:30:00Z
 	notes: String!
@@ -91,18 +114,17 @@ type Query {
 	me: User!
 	userById(id: ID!): User
 	users: [User!]!
+	exerciseList(input: GetExerciseList!): [ExerciseList!]!
 	trainings(input: SearchTrainings!): [Training!]!
 	training(id: ID!): Training
 	my_training: [Training!]!
-	exercises(input: SearchExercise!): [Exercise!]!
-	exercies(id: ID!): Exercise!
+
 }
 
 type Mutation {
 	register(input: RegisterInput!): AuthPayload!
 	login(input: LoginInput!): AuthPayload!
-	addTraining(input: AddTraining!): Training!
-	deleteTraining(id: ID!): String!
-	createExercise(input: CreateExercise!): Exercise!
-	deleteExercise(id: ID!): String!
+	createExerciseForList(input: CreateExerciseForList!): ExerciseList
+	deleteExerciseForList(id: ID!): String!
+	addTraining(input: CreateTraining!): Training!
 }

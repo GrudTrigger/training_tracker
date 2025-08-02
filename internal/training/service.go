@@ -3,7 +3,7 @@ package training
 import "github.com/GrudTrigger/trainin_tracker/graph/model"
 
 type IService interface {
-	Create(input model.AddTraining, userId string) (*model.Training, error)
+	Create(input model.CreateTraining, userId string) (*model.Training, error)
 	FindAll(input model.SearchTrainings) ([]*model.Training, error)
 	FindById(id string) (*model.Training, error)
 	GetMy(userId string) ([]*model.Training, error)
@@ -18,7 +18,7 @@ func NewTrainingService(trainingRepository IRepository) IService {
 	return &Service{repo: trainingRepository}
 }
 
-func (s *Service) Create(input model.AddTraining, userId string) (*model.Training, error) {
+func (s *Service) Create(input model.CreateTraining, userId string) (*model.Training, error) {
 	inputWithUser := InputWithUser{input, userId}
 	t, err := s.repo.Create(inputWithUser)
 	if err != nil {
