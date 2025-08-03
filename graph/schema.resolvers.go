@@ -87,6 +87,19 @@ func (r *mutationResolver) CreateExerciseForList(ctx context.Context, input mode
 	return ex, nil
 }
 
+// UpdateExerciseForList is the resolver for the updateExerciseForList field.
+func (r *mutationResolver) UpdateExerciseForList(ctx context.Context, input model.UpdateExerciseForList) (*model.ExerciseList, error) {
+	u := middleware.GetUserForContext(ctx)
+	if u == nil {
+		return nil, res.ErrAccessDenied
+	}
+	ex, err := r.ExerciseListService.Update(&input)
+	if err != nil {
+		return nil, err
+	}
+	return ex, nil
+}
+
 // DeleteExerciseForList is the resolver for the deleteExerciseForList field.
 func (r *mutationResolver) DeleteExerciseForList(ctx context.Context, id string) (string, error) {
 	u := middleware.GetUserForContext(ctx)
@@ -156,6 +169,19 @@ func (r *queryResolver) ExerciseList(ctx context.Context, input model.GetExercis
 		return nil, err
 	}
 	return exList, nil
+}
+
+// ExerciseListStatistics is the resolver for the exerciseListStatistics field.
+func (r *queryResolver) ExerciseListStatistics(ctx context.Context) (*model.ExerciseListStatistic, error) {
+	u := middleware.GetUserForContext(ctx)
+	if u == nil {
+		return nil, res.ErrAccessDenied
+	}
+	result, err := r.ExerciseListService.Statistics()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Trainings is the resolver for the trainings field.

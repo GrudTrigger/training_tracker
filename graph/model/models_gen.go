@@ -53,14 +53,27 @@ type ExerciseList struct {
 	CreatedAt      *time.Time `json:"created_at,omitempty"`
 }
 
+type ExerciseListStatistic struct {
+	AllExercise       int32               `json:"all_exercise"`
+	AllCategory       int32               `json:"all_category"`
+	StatisticCategory []*MuscleGroupCount `json:"statistic_category"`
+}
+
 type GetExerciseList struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"Offset"`
+	Title          *string `json:"title,omitempty"`
+	CategoryMuscle *int32  `json:"category_muscle,omitempty"`
+	Limit          int32   `json:"limit"`
+	Offset         int32   `json:"Offset"`
 }
 
 type LoginInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type MuscleGroupCount struct {
+	CategoryMuscle int32 `json:"category_muscle"`
+	Count          int32 `json:"count"`
 }
 
 type Mutation struct {
@@ -102,6 +115,12 @@ type Training struct {
 	Exercises []*Exercise `json:"exercises"`
 	User      *User       `json:"user,omitempty"`
 	CreatedAt *time.Time  `json:"created_at,omitempty"`
+}
+
+type UpdateExerciseForList struct {
+	ID             string `json:"id"`
+	Title          string `json:"title"`
+	CategoryMuscle int32  `json:"category_muscle"`
 }
 
 type User struct {

@@ -52,6 +52,18 @@ type AuthPayload {
 	user: User!
 }
 
+type ExerciseListStatistic {
+	all_exercise: Int!
+	all_category: Int!
+	statistic_category: [MuscleGroupCount!]!
+}
+
+type MuscleGroupCount  {
+	category_muscle: Int!
+	count: Int!
+}
+
+
 #Inputs
 input LoginInput {
 	email: String!
@@ -70,10 +82,20 @@ input CreateExerciseForList {
 	category_muscle: Int!
 }
 
+input UpdateExerciseForList {
+	id: ID!
+	title: String!
+	category_muscle: Int!
+}
+
 input GetExerciseList {
+	title: String
+	category_muscle: Int
 	limit: Int!
 	Offset: Int!
 }
+
+
 
 #Сделать notes необязательным
 input CreateTraining {
@@ -115,6 +137,7 @@ type Query {
 	userById(id: ID!): User
 	users: [User!]!
 	exerciseList(input: GetExerciseList!): [ExerciseList!]!
+	exerciseListStatistics: ExerciseListStatistic!
 	trainings(input: SearchTrainings!): [Training!]!
 	training(id: ID!): Training
 	my_training: [Training!]!
@@ -125,6 +148,7 @@ type Mutation {
 	register(input: RegisterInput!): AuthPayload!
 	login(input: LoginInput!): AuthPayload!
 	createExerciseForList(input: CreateExerciseForList!): ExerciseList
+	updateExerciseForList(input: UpdateExerciseForList!): ExerciseList
 	deleteExerciseForList(id: ID!): String!
 	addTraining(input: CreateTraining!): Training!
 }
