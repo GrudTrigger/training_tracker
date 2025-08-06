@@ -6,12 +6,11 @@ import (
 	"time"
 )
 
-type AddTraining struct {
-	Name     string `json:"name"`
-	Duration string `json:"duration"`
-	Date     string `json:"date"`
-	Notes    string `json:"notes"`
-	Type     int32  `json:"type"`
+type Approach struct {
+	ID         string `json:"id"`
+	ExerciseID string `json:"exercise_id"`
+	Repetition int32  `json:"repetition"`
+	Weight     int32  `json:"weight"`
 }
 
 type AuthPayload struct {
@@ -27,19 +26,54 @@ type CreateExercise struct {
 	TrainingID    string `json:"training_id"`
 }
 
+type CreateExerciseForList struct {
+	Title          string `json:"title"`
+	CategoryMuscle int32  `json:"category_muscle"`
+}
+
+type CreateTraining struct {
+	Title    string `json:"title"`
+	Duration string `json:"duration"`
+	Date     string `json:"date"`
+	Notes    string `json:"notes"`
+	Type     int32  `json:"type"`
+}
+
 type Exercise struct {
-	ID            string     `json:"id"`
-	TrainingID    string     `json:"training_id"`
-	Title         string     `json:"title"`
-	MuscleGroup   int32      `json:"muscle_group"`
-	ApproachCount int32      `json:"approach_count"`
-	Weight        int32      `json:"weight"`
-	CreatedAt     *time.Time `json:"created_at,omitempty"`
+	ID           string        `json:"id"`
+	TrainingID   string        `json:"training_id"`
+	ExerciseList *ExerciseList `json:"exercise_list"`
+	Approaches   []*Approach   `json:"approaches"`
+}
+
+type ExerciseList struct {
+	ID             string     `json:"id"`
+	Title          string     `json:"title"`
+	CategoryMuscle int32      `json:"category_muscle"`
+	CreatedAt      *time.Time `json:"created_at,omitempty"`
+}
+
+type ExerciseListStatistic struct {
+	AllExercise       int32               `json:"all_exercise"`
+	AllCategory       int32               `json:"all_category"`
+	StatisticCategory []*MuscleGroupCount `json:"statistic_category"`
+}
+
+type GetExerciseList struct {
+	Title          *string `json:"title,omitempty"`
+	CategoryMuscle *int32  `json:"category_muscle,omitempty"`
+	Limit          int32   `json:"limit"`
+	Offset         int32   `json:"Offset"`
 }
 
 type LoginInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type MuscleGroupCount struct {
+	CategoryMuscle int32 `json:"category_muscle"`
+	Count          int32 `json:"count"`
 }
 
 type Mutation struct {
@@ -72,16 +106,21 @@ type SearchTrainings struct {
 }
 
 type Training struct {
-	ID        string     `json:"id"`
-	UserID    string     `json:"user_id"`
-	Name      string     `json:"name"`
-	Duration  string     `json:"duration"`
-	Date      string     `json:"date"`
-	Notes     string     `json:"notes"`
-	Type      int32      `json:"type"`
-	UserData  *User      `json:"user_data,omitempty"`
-	Exercise  *Exercise  `json:"exercise,omitempty"`
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	ID        string      `json:"id"`
+	UserID    string      `json:"user_id"`
+	Title     string      `json:"title"`
+	Duration  string      `json:"duration"`
+	Date      string      `json:"date"`
+	Notes     *string     `json:"notes,omitempty"`
+	Exercises []*Exercise `json:"exercises"`
+	User      *User       `json:"user,omitempty"`
+	CreatedAt *time.Time  `json:"created_at,omitempty"`
+}
+
+type UpdateExerciseForList struct {
+	ID             string `json:"id"`
+	Title          string `json:"title"`
+	CategoryMuscle int32  `json:"category_muscle"`
 }
 
 type User struct {

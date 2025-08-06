@@ -28,11 +28,11 @@ func NewTrainingRepository(db *storage.DbPostgres) IRepository {
 
 func (r *Repository) Create(input InputWithUser) (*model.Training, error) {
 	var training model.Training
-	query := `INSERT INTO training(name, user_id, duration, date, notes, type) 
-									VALUES($1, $2, $3, $4, $5, $6)
-									RETURNING id, user_id, name, duration, date, notes, type, created_at`
-	err := r.QueryRow(query, input.Name, input.UserId, input.Duration, input.Date, input.Notes, input.Type).
-		Scan(&training.ID, &training.UserID, &training.Name, &training.Duration, &training.Date, &training.Notes, &training.Type, &training.CreatedAt)
+	query := `INSERT INTO training(user_id, duration, date, notes) 
+									VALUES($1, $2, $3, $4, $5)
+									RETURNING id, user_id, duration, date, notes, created_at`
+	err := r.QueryRow(query, input.Title, input.UserId, input.Duration, input.Date, input.Notes, input.Type).
+		Scan(&training.ID, &training.UserID, &training.Title, &training.Duration, &training.Date, &training.Notes, &training.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (r *Repository) GetAll(input model.SearchTrainings) ([]*model.Training, err
 	}
 	for rows.Next() {
 		training := utils.NewTraining()
-		err = rows.Scan(&training.ID, &training.UserID, &training.Name, &training.Duration, &training.Date, &training.Notes, &training.Type, &training.CreatedAt)
+		err = rows.Scan(&training.ID, &training.UserID, &training.Title, &training.Duration, &training.Date, &training.Notes, &training.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -73,25 +73,11 @@ func (r *Repository) GetById(id string) (*model.Training, error) {
 	err := row.Scan(
 		&training.ID,
 		&training.UserID,
-		&training.Name,
+		&training.Title,
 		&training.Duration,
 		&training.Date,
 		&training.Notes,
-		&training.Type,
 		&training.CreatedAt,
-		&training.UserData.ID,
-		&training.UserData.Email,
-		&training.UserData.Login,
-		&training.UserData.Password,
-		&training.UserData.Role,
-		&training.UserData.CreatedAt,
-		&training.Exercise.ID,
-		&training.Exercise.TrainingID,
-		&training.Exercise.Title,
-		&training.Exercise.MuscleGroup,
-		&training.Exercise.ApproachCount,
-		&training.Exercise.Weight,
-		&training.Exercise.CreatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -113,7 +99,7 @@ func (r *Repository) GetMyTrainings(userId string) ([]*model.Training, error) {
 
 	for rows.Next() {
 		var training model.Training
-		err = rows.Scan(&training.ID, &training.UserID, &training.Name, &training.Duration, &training.Date, &training.Notes, &training.Type, &training.CreatedAt)
+		err = rows.Scan(&training.ID, &training.UserID, &training.Title, &training.Duration, &training.Date, &training.Notes, &training.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -122,7 +108,6 @@ func (r *Repository) GetMyTrainings(userId string) ([]*model.Training, error) {
 
 	return trainings, nil
 }
-
 
 func (r *Repository) DeleteById(id string) (string, error) {
 	query := "DELETE FROM training WHERE id = $1"
