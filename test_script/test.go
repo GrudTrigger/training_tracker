@@ -1,58 +1,63 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"runtime"
-	"sync"
 	"time"
 )
 
-func worker(ctx context.Context, task <-chan int, resultCh chan<- int, id int) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case v, ok := <-task:
-			if !ok {
-				return
-			}
-			resultCh <- v * v
-		}
-	}
+func square(ch chan int) {
+	v := <- ch
+	time.Sleep(1 * time.Second)
+	ch <- v * v
+}
+
+func cube(ch chan int) {
+	v := <- ch
+	time.Sleep(1 * time.Second)
+	ch <- v * v * v
+}
+
+func double(ch chan int) {
+	v := <- ch
+	ch <- v * 2
 }
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*20)
-	defer cancel()
+	sqr_ch := make(chan int)
+	cybe_ch := make(chan int)
+	double_ch := make(chan int)
 
-	wg := &sync.WaitGroup{}
+	go square(sqr_ch)
+	go cube(cybe_ch)
+	go double(double_ch)
 
-	task, resultCh := make(chan int, 5), make(chan int, 5)
-
-	for i := 0; i <= runtime.NumCPU(); i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			worker(ctx, task, resultCh, i)
-		}()
-	}
-
-	go func() {
-		for i := 0; i < 1000; i++ {
-			task <- i
+	sqr_ch <- 3
+	cybe_ch <- 5
+	double_ch <- 10
+	count := 0
+	for {
+		select {
+		case v := <- sqr_ch:
+			count++
+			fmt.Printf("Square = %d\n", v)
+			if(count == 3) {
+				return
+			}
+		case v := <- cybe_ch:
+			count++
+			fmt.Printf("Cube = %d\n", v)
+			if(count == 3) {
+				return
+			}
+		case v := <- double_ch:
+			count++
+			fmt.Printf("Double = %d\n", v)
+			if(count == 3) {
+				return
+			}
+		case <- time.After(2 * time.Second):
+			fmt.Println("time After")
+			return
 		}
-		close(task)
-	}()
-
-	go func() {
-		wg.Wait() // --- блокируется горутина ---
-		close(resultCh)
-	}()
-
-	for res := range resultCh {
-		fmt.Println(res)
 	}
 }
-
-// 22 урок

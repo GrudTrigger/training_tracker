@@ -1,9 +1,11 @@
 package exlist
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/GrudTrigger/trainin_tracker/graph/model"
 	"github.com/GrudTrigger/trainin_tracker/pkg/res"
 	"github.com/GrudTrigger/trainin_tracker/pkg/storage"
@@ -94,7 +96,7 @@ func (r *Repository) Statistics() (*model.ExerciseListStatistic, error) {
 	chForCat := make(chan int32)
 	chForStat := make(chan []*model.MuscleGroupCount)
 	chForErr := make(chan error, 3)
-
+	ctx, cancel := context.WithCancel(context.Background())
 	// AllExercise
 	go func() {
 		var countAllExercise int32
@@ -102,7 +104,7 @@ func (r *Repository) Statistics() (*model.ExerciseListStatistic, error) {
 		err := r.QueryRow(query).Scan(&countAllExercise)
 		if err != nil {
 			chForErr <- fmt.Errorf("all exercise: %w", err)
-			return
+			cancel()
 		}
 		chForAll <- countAllExercise
 	}()
@@ -114,7 +116,7 @@ func (r *Repository) Statistics() (*model.ExerciseListStatistic, error) {
 		err := r.QueryRow(query).Scan(&countCategory)
 		if err != nil {
 			chForErr <- fmt.Errorf("all category: %w", err)
-			return
+			cancel()
 		}
 		chForCat <- countCategory
 	}()
@@ -128,6 +130,7 @@ func (r *Repository) Statistics() (*model.ExerciseListStatistic, error) {
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				chForErr <- fmt.Errorf("statistic category query: %w", err)
+				cancel()
 			}
 		}
 		for rows.Next() {
@@ -135,6 +138,7 @@ func (r *Repository) Statistics() (*model.ExerciseListStatistic, error) {
 			err := rows.Scan(&countCat.CategoryMuscle, &countCat.Count)
 			if err != nil {
 				chForErr <- fmt.Errorf("statistic category scan: %w", err)
+				cancel()
 			}
 			mgc = append(mgc, &countCat)
 		}
@@ -144,10 +148,32 @@ func (r *Repository) Statistics() (*model.ExerciseListStatistic, error) {
 	if len(chForErr) > 0 {
 		return nil, <-chForErr
 	}
-
-	result.AllExercise = <-chForAll
-	result.AllCategory = <-chForCat
-	result.StatisticCategory = <-chForStat
-
-	return &result, nil
+	count := 0
+	for {
+		select {
+		case v := <-chForAll:
+			count++
+			result.AllExercise = v
+			if count == 2 {
+				return &result, nil
+			}
+		case v := <- chForCat:
+			count++
+			result.AllCategory = v
+			if count == 2 {
+				return &result, nil
+			}
+		case v := <- chForStat:
+			count++
+			result.StatisticCategory = v
+			if count == 2 {
+				return &result, nil
+			}
+		case <- ctx.Done():
+			return nil, <-chForErr
+		}
+	}
+	// result.AllExercise = <-chForAll
+	// result.AllCategory = <-chForCat
+	// result.StatisticCategory = <-chForStat
 }
