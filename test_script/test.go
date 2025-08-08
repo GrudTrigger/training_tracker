@@ -5,59 +5,41 @@ import (
 	"time"
 )
 
-func square(ch chan int) {
-	v := <- ch
-	time.Sleep(1 * time.Second)
-	ch <- v * v
+func makeRequest(num int) <-chan string {
+	responseChan := make(chan string)
+
+	go func() {
+		time.Sleep(time.Second)
+		responseChan <- fmt.Sprintf("response number %d", num)
+	}()
+	return responseChan
 }
 
-func cube(ch chan int) {
-	v := <- ch
-	time.Sleep(1 * time.Second)
-	ch <- v * v * v
-}
+//func chanAsPromise() {
+//	firstResponseChan := makeRequest(1)
+//	secondResponseChan := makeRequest(2)
+//	fmt.Println("Non blocking")
+//	fmt.Println(<-firstResponseChan, <-secondResponseChan)
+//}
 
-func double(ch chan int) {
-	v := <- ch
-	ch <- v * 2
-}
+//func chanAsMutex() {
+//	var counter int
+//	mutexChan := make(chan struct{}, 1)
+//	wg := sync.WaitGroup{}
+//
+//	for i := 0; i < 1000; i++ {
+//		wg.Add(1)
+//		go func() {
+//			defer wg.Done()
+//			mutexChan <- struct{}{}
+//			counter++
+//			<-mutexChan
+//		}()
+//	}
+//	wg.Wait()
+//	fmt.Println(counter)
+//}
 
 func main() {
-	sqr_ch := make(chan int)
-	cybe_ch := make(chan int)
-	double_ch := make(chan int)
-
-	go square(sqr_ch)
-	go cube(cybe_ch)
-	go double(double_ch)
-
-	sqr_ch <- 3
-	cybe_ch <- 5
-	double_ch <- 10
-	count := 0
-	for {
-		select {
-		case v := <- sqr_ch:
-			count++
-			fmt.Printf("Square = %d\n", v)
-			if(count == 3) {
-				return
-			}
-		case v := <- cybe_ch:
-			count++
-			fmt.Printf("Cube = %d\n", v)
-			if(count == 3) {
-				return
-			}
-		case v := <- double_ch:
-			count++
-			fmt.Printf("Double = %d\n", v)
-			if(count == 3) {
-				return
-			}
-		case <- time.After(2 * time.Second):
-			fmt.Println("time After")
-			return
-		}
-	}
+	//chanAsMutex()
 }

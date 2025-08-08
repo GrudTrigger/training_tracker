@@ -1,10 +1,8 @@
 package exlist
 
 import (
-	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 
 	"github.com/GrudTrigger/trainin_tracker/graph/model"
 	"github.com/GrudTrigger/trainin_tracker/pkg/res"
@@ -90,90 +88,62 @@ func (r *Repository) DeleteById(id string) (string, error) {
 }
 
 func (r *Repository) Statistics() (*model.ExerciseListStatistic, error) {
-	var result model.ExerciseListStatistic
-	//TODO: попробывать сделать под один буфферизированный канал, с label:string, value: {}interface, чтобы не плодить каналы под каждую горутину, а читать из одного канала все данные и объеденить
-	chForAll := make(chan int32)
-	chForCat := make(chan int32)
-	chForStat := make(chan []*model.MuscleGroupCount)
-	chForErr := make(chan error, 3)
-	ctx, cancel := context.WithCancel(context.Background())
+	result := &model.ExerciseListStatistic{}
+	countCh := 3
+	chResult := make(chan statResult, countCh)
+
 	// AllExercise
 	go func() {
-		var countAllExercise int32
-		query := "SELECT COUNT(id) FROM exercise_list"
-		err := r.QueryRow(query).Scan(&countAllExercise)
-		if err != nil {
-			chForErr <- fmt.Errorf("all exercise: %w", err)
-			cancel()
-		}
-		chForAll <- countAllExercise
+		var count int32
+		err := r.QueryRow("SELECT COUNT(id) FROM exercise_list").Scan(&count)
+		chResult <- statResult{label: "AllExercise", value: count, err: err}
 	}()
 
 	// AllCategory
 	go func() {
-		var countCategory int32
-		query := "SELECT COUNT(DISTINCT category_muscle) FROM exercise_list"
-		err := r.QueryRow(query).Scan(&countCategory)
-		if err != nil {
-			chForErr <- fmt.Errorf("all category: %w", err)
-			cancel()
-		}
-		chForCat <- countCategory
+		var count int32
+		err := r.QueryRow("SELECT COUNT(DISTINCT category_muscle) FROM exercise_list").Scan(&count)
+		chResult <- statResult{label: "AllCategory", value: count, err: err}
 	}()
 
 	// StatisticCategory
 	go func() {
 		// StatisticCategory []*MuscleGroupCount
-		var mgc []*model.MuscleGroupCount
-		query := "SELECT category_muscle, COUNT(*) as count FROM exercise_list GROUP BY category_muscle"
-		rows, err := r.Query(query)
+		rows, err := r.Query("SELECT category_muscle, COUNT(*) as count FROM exercise_list GROUP BY category_muscle")
 		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				chForErr <- fmt.Errorf("statistic category query: %w", err)
-				cancel()
-			}
+			chResult <- statResult{label: "StatisticCategory", err: err}
+			return
 		}
+		defer rows.Close()
+
+		var list []*model.MuscleGroupCount
 		for rows.Next() {
-			var countCat model.MuscleGroupCount
-			err := rows.Scan(&countCat.CategoryMuscle, &countCat.Count)
+			var c model.MuscleGroupCount
+			err := rows.Scan(&c.CategoryMuscle, &c.Count)
 			if err != nil {
-				chForErr <- fmt.Errorf("statistic category scan: %w", err)
-				cancel()
+				chResult <- statResult{label: "StatisticCategory", err: err}
+				return
 			}
-			mgc = append(mgc, &countCat)
+			list = append(list, &c)
 		}
-		chForStat <- mgc
+		chResult <- statResult{label: "StatisticCategory", value: list}
 	}()
 
-	if len(chForErr) > 0 {
-		return nil, <-chForErr
-	}
-	count := 0
-	for {
+	for i := 0; i < countCh; i++ {
 		select {
-		case v := <-chForAll:
-			count++
-			result.AllExercise = v
-			if count == 2 {
-				return &result, nil
+		case r := <-chResult:
+			if r.err != nil {
+				return nil, r.err
 			}
-		case v := <- chForCat:
-			count++
-			result.AllCategory = v
-			if count == 2 {
-				return &result, nil
+			switch r.label {
+			case "AllExercise":
+				result.AllExercise = r.value.(int32)
+			case "AllCategory":
+				result.AllCategory = r.value.(int32)
+			case "StatisticCategory":
+				result.StatisticCategory = r.value.([]*model.MuscleGroupCount)
 			}
-		case v := <- chForStat:
-			count++
-			result.StatisticCategory = v
-			if count == 2 {
-				return &result, nil
-			}
-		case <- ctx.Done():
-			return nil, <-chForErr
 		}
 	}
-	// result.AllExercise = <-chForAll
-	// result.AllCategory = <-chForCat
-	// result.StatisticCategory = <-chForStat
+	return result, nil
 }
