@@ -16,6 +16,9 @@ type Training {
 	id: ID!
 	user_id: String!
 	title: String!
+    approach_count: Int!
+    total_weight: Int!
+    exercises_count: Int!
 	duration: String! # 01:30
 	date: Date!
 	notes: String
@@ -95,15 +98,24 @@ input GetExerciseList {
 	Offset: Int!
 }
 
-
-
 #Сделать notes необязательным
 input CreateTraining {
 	title: String!
 	duration: String!
 	date: Date! #2025-07-02T08:30:00Z
 	notes: String!
-	type: Int!
+    exercises: [CreateExercise!]!
+
+}
+
+input CreateExercise {
+    exercise_list_id: ID!
+    approaches: [CreateApproach!]!
+}
+
+input CreateApproach {
+    repetition: Int!
+    weight: Int!
 }
 
 input SearchTrainings {
@@ -111,15 +123,6 @@ input SearchTrainings {
 	type: Int
 	limit: Int!
 	offset: Int!
-}
-
-#EXERCISE
-input CreateExercise {
-	title: String!
-	muscle_group: Int!
-	approach_count: Int!
-	weight: Int!
-	training_id: ID!
 }
 
 input SearchExercise {

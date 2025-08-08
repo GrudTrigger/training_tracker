@@ -3,9 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/GrudTrigger/trainin_tracker/internal/exlist"
 	"log"
 	"net/http"
+
+	"github.com/GrudTrigger/trainin_tracker/internal/approach"
+	"github.com/GrudTrigger/trainin_tracker/internal/exlist"
 
 	"github.com/GrudTrigger/trainin_tracker/internal/exercise"
 	"github.com/go-playground/validator/v10"
@@ -37,8 +39,9 @@ func main() {
 	defer dbPostgres.Close()
 
 	userRepository := user.NewRepository(dbPostgres)
-	trainingRepository := training.NewTrainingRepository(dbPostgres)
-	exerciseRepository := exercise.NewRepository(dbPostgres)
+	approachRepository := approach.NewRepository(dbPostgres)
+	exerciseRepository := exercise.NewRepository(dbPostgres, approachRepository)
+	trainingRepository := training.NewTrainingRepository(dbPostgres, exerciseRepository)
 	exerciseListRepository := exlist.NewRepository(dbPostgres)
 
 	userService := user.NewUserService(userRepository)

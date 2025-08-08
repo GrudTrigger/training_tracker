@@ -8,10 +8,10 @@ type IService interface {
 }
 
 type Service struct {
-	repo IRepository
+	repo IExerciseRepository
 }
 
-func NewService(repo IRepository) IService {
+func NewService(repo IExerciseRepository) IService {
 	return &Service{repo}
 }
 

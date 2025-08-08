@@ -1,11 +1,13 @@
 package exercise
 
 import (
+	"github.com/GrudTrigger/trainin_tracker/graph/model"
+	"github.com/GrudTrigger/trainin_tracker/internal/approach"
 	"github.com/GrudTrigger/trainin_tracker/pkg/storage"
 )
 
-type IRepository interface {
-	//Create(input *model.CreateExercise) (*model.Exercise, error)
+type IExerciseRepository interface {
+	Create(input []*model.CreateExercise, trainingId string) ([]*model.Exercise, error)
 	//GetAll(input *model.SearchExercise) ([]*model.Exercise, error)
 	//GetById(id string) (*model.Exercise, error)
 	//DeleteById(id string) (string, error)
@@ -13,24 +15,44 @@ type IRepository interface {
 
 type Repository struct {
 	*storage.DbPostgres
+	repoApproach approach.IApproachRepository
 }
 
-func NewRepository(db *storage.DbPostgres) IRepository {
-	return &Repository{db}
+func NewRepository(db *storage.DbPostgres, repoApproach approach.IApproachRepository) IExerciseRepository {
+	return &Repository{db, repoApproach}
 }
 
-//func (r *Repository) Create(input *model.CreateExercise) (*model.Exercise, error) {
-//	var e model.Exercise
-//
-//	query := `INSERT INTO exercise(title, muscle_group, approach_count, weight, training_id) VALUES ($1, $2, $3, $4, $5)
-//				RETURNING id, title, muscle_group, approach_count, weight, created_at`
-//	err := r.QueryRow(query, input.Title, input.MuscleGroup, input.ApproachCount, input.Weight, input.TrainingID).
-//		Scan(e.ID, e.Title, e.MuscleGroup, e.ApproachCount, e.Weight, e.CreatedAt)
-//	if err != nil {
-//		return nil, err
-//	}
-//	return &e, nil
-//}
+func (r *Repository) Create(input []*model.CreateExercise, trainingId string) ([]*model.Exercise, error) {
+	var list []*model.Exercise
+	for _, v := range input {
+		var e model.Exercise
+		e = model.Exercise{
+			Approaches:   []*model.Approach{},
+			ExerciseList: &model.ExerciseList{},
+		}
+		query := "INSERT INTO exercise(training_id, exercise_list_id) VALUES ($1, $2) RETURNING id, training_id"
+		err := r.QueryRow(query, trainingId, v.ExerciseListID).Scan(&e.ID, &e.TrainingID)
+		if err != nil {
+			return nil, err
+		}
+
+		querySearchExerciseList := "SELECT * FROM exercise_list WHERE id = $1"
+
+		var exList model.ExerciseList
+		err = r.QueryRow(querySearchExerciseList, v.ExerciseListID).Scan(&exList.ID, &exList.Title, &exList.CategoryMuscle, &exList.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+
+		e.ExerciseList = &exList
+
+		approaches, err := r.repoApproach.Create(v.Approaches, e.ID)
+		e.Approaches = approaches
+		list = append(list, &e)
+	}
+	return list, nil
+}
+
 //
 //func (r *Repository) GetAll(input *model.SearchExercise) ([]*model.Exercise, error) {
 //	var exercise []*model.Exercise

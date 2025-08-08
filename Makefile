@@ -1,7 +1,7 @@
 include .env
 
 MIGRATIONS_DIR = migrations
-MIGRATE_BIN = $(HOME)/go/bin/migrate
+MIGRATE_BIN = /usr/bin/migrate
 MIGRATE_CREATE = $(MIGRATE_BIN) create -ext sql -dir $(MIGRATIONS_DIR) -seq
 
 .PHONY: migrate

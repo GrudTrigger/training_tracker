@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/GrudTrigger/trainin_tracker/graph/model"
+	"github.com/GrudTrigger/trainin_tracker/internal/exercise"
 	"github.com/GrudTrigger/trainin_tracker/pkg/res"
 	"github.com/GrudTrigger/trainin_tracker/pkg/storage"
 	"github.com/GrudTrigger/trainin_tracker/pkg/utils"
@@ -20,28 +21,37 @@ type IRepository interface {
 
 type Repository struct {
 	*storage.DbPostgres
+	repoExercise exercise.IExerciseRepository
 }
 
-func NewTrainingRepository(db *storage.DbPostgres) IRepository {
-	return &Repository{db}
+func NewTrainingRepository(db *storage.DbPostgres, repoExercise exercise.IExerciseRepository) IRepository {
+	return &Repository{db, repoExercise}
 }
 
 func (r *Repository) Create(input InputWithUser) (*model.Training, error) {
 	var training model.Training
-	query := `INSERT INTO training(user_id, duration, date, notes) 
+	training = model.Training{
+		Exercises: []*model.Exercise{},
+	}
+	query := `INSERT INTO training(user_id, name, duration, date, notes) 
 									VALUES($1, $2, $3, $4, $5)
-									RETURNING id, user_id, duration, date, notes, created_at`
-	err := r.QueryRow(query, input.Title, input.UserId, input.Duration, input.Date, input.Notes, input.Type).
+									RETURNING id, user_id, name,duration, date, notes, created_at`
+	err := r.QueryRow(query, input.UserId, input.Title, input.Duration, input.Date, input.Notes).
 		Scan(&training.ID, &training.UserID, &training.Title, &training.Duration, &training.Date, &training.Notes, &training.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
+
+	e, err := r.repoExercise.Create(input.Exercises, training.ID)
+	if err != nil {
+		return nil, err
+	}
+	training.Exercises = e
 	return &training, nil
 }
 
 func (r *Repository) GetAll(input model.SearchTrainings) ([]*model.Training, error) {
 	var trainings []*model.Training
-
 	query, args := QueryGetAll(input)
 	rows, err := r.Query(query, args...)
 	if err != nil {

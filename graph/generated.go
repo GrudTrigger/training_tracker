@@ -107,15 +107,18 @@ type ComplexityRoot struct {
 	}
 
 	Training struct {
-		CreatedAt func(childComplexity int) int
-		Date      func(childComplexity int) int
-		Duration  func(childComplexity int) int
-		Exercises func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Notes     func(childComplexity int) int
-		Title     func(childComplexity int) int
-		User      func(childComplexity int) int
-		UserID    func(childComplexity int) int
+		ApproachCount  func(childComplexity int) int
+		CreatedAt      func(childComplexity int) int
+		Date           func(childComplexity int) int
+		Duration       func(childComplexity int) int
+		Exercises      func(childComplexity int) int
+		ExercisesCount func(childComplexity int) int
+		ID             func(childComplexity int) int
+		Notes          func(childComplexity int) int
+		Title          func(childComplexity int) int
+		TotalWeight    func(childComplexity int) int
+		User           func(childComplexity int) int
+		UserID         func(childComplexity int) int
 	}
 
 	User struct {
@@ -461,6 +464,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Users(childComplexity), true
 
+	case "Training.approach_count":
+		if e.complexity.Training.ApproachCount == nil {
+			break
+		}
+
+		return e.complexity.Training.ApproachCount(childComplexity), true
+
 	case "Training.created_at":
 		if e.complexity.Training.CreatedAt == nil {
 			break
@@ -489,6 +499,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Training.Exercises(childComplexity), true
 
+	case "Training.exercises_count":
+		if e.complexity.Training.ExercisesCount == nil {
+			break
+		}
+
+		return e.complexity.Training.ExercisesCount(childComplexity), true
+
 	case "Training.id":
 		if e.complexity.Training.ID == nil {
 			break
@@ -509,6 +526,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Training.Title(childComplexity), true
+
+	case "Training.total_weight":
+		if e.complexity.Training.TotalWeight == nil {
+			break
+		}
+
+		return e.complexity.Training.TotalWeight(childComplexity), true
 
 	case "Training.user":
 		if e.complexity.Training.User == nil {
@@ -581,6 +605,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputCreateApproach,
 		ec.unmarshalInputCreateExercise,
 		ec.unmarshalInputCreateExerciseForList,
 		ec.unmarshalInputCreateTraining,
@@ -709,369 +734,177 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_addTraining_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Mutation_addTraining_argsInput(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateTraining2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐCreateTraining)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Mutation_addTraining_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (model.CreateTraining, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNCreateTraining2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐCreateTraining(ctx, tmp)
-	}
-
-	var zeroVal model.CreateTraining
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_createExerciseForList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Mutation_createExerciseForList_argsInput(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateExerciseForList2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐCreateExerciseForList)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_createExerciseForList_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (model.CreateExerciseForList, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNCreateExerciseForList2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐCreateExerciseForList(ctx, tmp)
-	}
-
-	var zeroVal model.CreateExerciseForList
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Mutation_deleteExerciseForList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Mutation_deleteExerciseForList_argsID(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
 	if err != nil {
 		return nil, err
 	}
 	args["id"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_deleteExerciseForList_argsID(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-	if tmp, ok := rawArgs["id"]; ok {
-		return ec.unmarshalNID2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Mutation_login_argsInput(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNLoginInput2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐLoginInput)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Mutation_login_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (model.LoginInput, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNLoginInput2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐLoginInput(ctx, tmp)
-	}
-
-	var zeroVal model.LoginInput
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_register_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Mutation_register_argsInput(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRegisterInput2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐRegisterInput)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Mutation_register_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (model.RegisterInput, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNRegisterInput2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐRegisterInput(ctx, tmp)
-	}
-
-	var zeroVal model.RegisterInput
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_updateExerciseForList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Mutation_updateExerciseForList_argsInput(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateExerciseForList2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐUpdateExerciseForList)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_updateExerciseForList_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (model.UpdateExerciseForList, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNUpdateExerciseForList2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐUpdateExerciseForList(ctx, tmp)
-	}
-
-	var zeroVal model.UpdateExerciseForList
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query___type_argsName(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["name"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query___type_argsName(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-	if tmp, ok := rawArgs["name"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query_exerciseList_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_exerciseList_argsInput(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNGetExerciseList2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐGetExerciseList)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_exerciseList_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (model.GetExerciseList, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNGetExerciseList2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐGetExerciseList(ctx, tmp)
-	}
-
-	var zeroVal model.GetExerciseList
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_training_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_training_argsID(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
 	if err != nil {
 		return nil, err
 	}
 	args["id"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_training_argsID(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-	if tmp, ok := rawArgs["id"]; ok {
-		return ec.unmarshalNID2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query_trainings_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_trainings_argsInput(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNSearchTrainings2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐSearchTrainings)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_trainings_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (model.SearchTrainings, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNSearchTrainings2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐSearchTrainings(ctx, tmp)
-	}
-
-	var zeroVal model.SearchTrainings
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query_userById_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_userById_argsID(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
 	if err != nil {
 		return nil, err
 	}
 	args["id"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_userById_argsID(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-	if tmp, ok := rawArgs["id"]; ok {
-		return ec.unmarshalNID2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_user_argsEmail(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "email", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["email"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_user_argsEmail(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-	if tmp, ok := rawArgs["email"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field___Directive_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Directive_args_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Directive_args_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*bool, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Field_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Field_args_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Field_args_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*bool, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Type_enumValues_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Type_enumValues_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (bool, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2bool(ctx, tmp)
-	}
-
-	var zeroVal bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Type_fields_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (bool, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2bool(ctx, tmp)
-	}
-
-	var zeroVal bool
-	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************
@@ -2303,6 +2136,12 @@ func (ec *executionContext) fieldContext_Mutation_addTraining(ctx context.Contex
 				return ec.fieldContext_Training_user_id(ctx, field)
 			case "title":
 				return ec.fieldContext_Training_title(ctx, field)
+			case "approach_count":
+				return ec.fieldContext_Training_approach_count(ctx, field)
+			case "total_weight":
+				return ec.fieldContext_Training_total_weight(ctx, field)
+			case "exercises_count":
+				return ec.fieldContext_Training_exercises_count(ctx, field)
 			case "duration":
 				return ec.fieldContext_Training_duration(ctx, field)
 			case "date":
@@ -2751,6 +2590,12 @@ func (ec *executionContext) fieldContext_Query_trainings(ctx context.Context, fi
 				return ec.fieldContext_Training_user_id(ctx, field)
 			case "title":
 				return ec.fieldContext_Training_title(ctx, field)
+			case "approach_count":
+				return ec.fieldContext_Training_approach_count(ctx, field)
+			case "total_weight":
+				return ec.fieldContext_Training_total_weight(ctx, field)
+			case "exercises_count":
+				return ec.fieldContext_Training_exercises_count(ctx, field)
 			case "duration":
 				return ec.fieldContext_Training_duration(ctx, field)
 			case "date":
@@ -2823,6 +2668,12 @@ func (ec *executionContext) fieldContext_Query_training(ctx context.Context, fie
 				return ec.fieldContext_Training_user_id(ctx, field)
 			case "title":
 				return ec.fieldContext_Training_title(ctx, field)
+			case "approach_count":
+				return ec.fieldContext_Training_approach_count(ctx, field)
+			case "total_weight":
+				return ec.fieldContext_Training_total_weight(ctx, field)
+			case "exercises_count":
+				return ec.fieldContext_Training_exercises_count(ctx, field)
 			case "duration":
 				return ec.fieldContext_Training_duration(ctx, field)
 			case "date":
@@ -2898,6 +2749,12 @@ func (ec *executionContext) fieldContext_Query_my_training(_ context.Context, fi
 				return ec.fieldContext_Training_user_id(ctx, field)
 			case "title":
 				return ec.fieldContext_Training_title(ctx, field)
+			case "approach_count":
+				return ec.fieldContext_Training_approach_count(ctx, field)
+			case "total_weight":
+				return ec.fieldContext_Training_total_weight(ctx, field)
+			case "exercises_count":
+				return ec.fieldContext_Training_exercises_count(ctx, field)
 			case "duration":
 				return ec.fieldContext_Training_duration(ctx, field)
 			case "date":
@@ -3175,6 +3032,138 @@ func (ec *executionContext) fieldContext_Training_title(_ context.Context, field
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Training_approach_count(ctx context.Context, field graphql.CollectedField, obj *model.Training) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Training_approach_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ApproachCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Training_approach_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Training",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Training_total_weight(ctx context.Context, field graphql.CollectedField, obj *model.Training) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Training_total_weight(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalWeight, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Training_total_weight(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Training",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Training_exercises_count(ctx context.Context, field graphql.CollectedField, obj *model.Training) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Training_exercises_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ExercisesCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Training_exercises_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Training",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5714,41 +5703,27 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputCreateExercise(ctx context.Context, obj any) (model.CreateExercise, error) {
-	var it model.CreateExercise
+func (ec *executionContext) unmarshalInputCreateApproach(ctx context.Context, obj any) (model.CreateApproach, error) {
+	var it model.CreateApproach
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "muscle_group", "approach_count", "weight", "training_id"}
+	fieldsInOrder := [...]string{"repetition", "weight"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "title":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Title = data
-		case "muscle_group":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("muscle_group"))
+		case "repetition":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("repetition"))
 			data, err := ec.unmarshalNInt2int32(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.MuscleGroup = data
-		case "approach_count":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("approach_count"))
-			data, err := ec.unmarshalNInt2int32(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ApproachCount = data
+			it.Repetition = data
 		case "weight":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("weight"))
 			data, err := ec.unmarshalNInt2int32(ctx, v)
@@ -5756,13 +5731,40 @@ func (ec *executionContext) unmarshalInputCreateExercise(ctx context.Context, ob
 				return it, err
 			}
 			it.Weight = data
-		case "training_id":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("training_id"))
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateExercise(ctx context.Context, obj any) (model.CreateExercise, error) {
+	var it model.CreateExercise
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"exercise_list_id", "approaches"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "exercise_list_id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("exercise_list_id"))
 			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.TrainingID = data
+			it.ExerciseListID = data
+		case "approaches":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("approaches"))
+			data, err := ec.unmarshalNCreateApproach2ᚕᚖgithubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐCreateApproachᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Approaches = data
 		}
 	}
 
@@ -5810,7 +5812,7 @@ func (ec *executionContext) unmarshalInputCreateTraining(ctx context.Context, ob
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "duration", "date", "notes", "type"}
+	fieldsInOrder := [...]string{"title", "duration", "date", "notes", "exercises"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5845,13 +5847,13 @@ func (ec *executionContext) unmarshalInputCreateTraining(ctx context.Context, ob
 				return it, err
 			}
 			it.Notes = data
-		case "type":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			data, err := ec.unmarshalNInt2int32(ctx, v)
+		case "exercises":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("exercises"))
+			data, err := ec.unmarshalNCreateExercise2ᚕᚖgithubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐCreateExerciseᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Type = data
+			it.Exercises = data
 		}
 	}
 
@@ -6786,6 +6788,21 @@ func (ec *executionContext) _Training(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "approach_count":
+			out.Values[i] = ec._Training_approach_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "total_weight":
+			out.Values[i] = ec._Training_total_weight(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "exercises_count":
+			out.Values[i] = ec._Training_exercises_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "duration":
 			out.Values[i] = ec._Training_duration(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -7310,6 +7327,46 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNCreateApproach2ᚕᚖgithubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐCreateApproachᚄ(ctx context.Context, v any) ([]*model.CreateApproach, error) {
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]*model.CreateApproach, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNCreateApproach2ᚖgithubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐCreateApproach(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNCreateApproach2ᚖgithubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐCreateApproach(ctx context.Context, v any) (*model.CreateApproach, error) {
+	res, err := ec.unmarshalInputCreateApproach(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNCreateExercise2ᚕᚖgithubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐCreateExerciseᚄ(ctx context.Context, v any) ([]*model.CreateExercise, error) {
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]*model.CreateExercise, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNCreateExercise2ᚖgithubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐCreateExercise(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNCreateExercise2ᚖgithubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐCreateExercise(ctx context.Context, v any) (*model.CreateExercise, error) {
+	res, err := ec.unmarshalInputCreateExercise(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNCreateExerciseForList2githubᚗcomᚋGrudTriggerᚋtrainin_trackerᚋgraphᚋmodelᚐCreateExerciseForList(ctx context.Context, v any) (model.CreateExerciseForList, error) {

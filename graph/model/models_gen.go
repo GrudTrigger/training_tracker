@@ -18,12 +18,14 @@ type AuthPayload struct {
 	User  *User  `json:"user"`
 }
 
+type CreateApproach struct {
+	Repetition int32 `json:"repetition"`
+	Weight     int32 `json:"weight"`
+}
+
 type CreateExercise struct {
-	Title         string `json:"title"`
-	MuscleGroup   int32  `json:"muscle_group"`
-	ApproachCount int32  `json:"approach_count"`
-	Weight        int32  `json:"weight"`
-	TrainingID    string `json:"training_id"`
+	ExerciseListID string            `json:"exercise_list_id"`
+	Approaches     []*CreateApproach `json:"approaches"`
 }
 
 type CreateExerciseForList struct {
@@ -32,11 +34,11 @@ type CreateExerciseForList struct {
 }
 
 type CreateTraining struct {
-	Title    string `json:"title"`
-	Duration string `json:"duration"`
-	Date     string `json:"date"`
-	Notes    string `json:"notes"`
-	Type     int32  `json:"type"`
+	Title     string            `json:"title"`
+	Duration  string            `json:"duration"`
+	Date      string            `json:"date"`
+	Notes     string            `json:"notes"`
+	Exercises []*CreateExercise `json:"exercises"`
 }
 
 type Exercise struct {
@@ -106,15 +108,18 @@ type SearchTrainings struct {
 }
 
 type Training struct {
-	ID        string      `json:"id"`
-	UserID    string      `json:"user_id"`
-	Title     string      `json:"title"`
-	Duration  string      `json:"duration"`
-	Date      string      `json:"date"`
-	Notes     *string     `json:"notes,omitempty"`
-	Exercises []*Exercise `json:"exercises"`
-	User      *User       `json:"user,omitempty"`
-	CreatedAt *time.Time  `json:"created_at,omitempty"`
+	ID             string      `json:"id"`
+	UserID         string      `json:"user_id"`
+	Title          string      `json:"title"`
+	ApproachCount  int32       `json:"approach_count"`
+	TotalWeight    int32       `json:"total_weight"`
+	ExercisesCount int32       `json:"exercises_count"`
+	Duration       string      `json:"duration"`
+	Date           string      `json:"date"`
+	Notes          *string     `json:"notes,omitempty"`
+	Exercises      []*Exercise `json:"exercises"`
+	User           *User       `json:"user,omitempty"`
+	CreatedAt      *time.Time  `json:"created_at,omitempty"`
 }
 
 type UpdateExerciseForList struct {

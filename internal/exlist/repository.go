@@ -28,7 +28,7 @@ func NewRepository(db *storage.DbPostgres) IRepository {
 func (r *Repository) Create(input *model.CreateExerciseForList) (*model.ExerciseList, error) {
 	var e model.ExerciseList
 	query := "INSERT INTO exercise_list(title, category_muscle)  VALUES($1, $2) RETURNING id, title, category_muscle, created_at"
-	err := r.QueryRow(query, input.Title, input.CategoryMuscle).Scan(e.ID, e.Title, e.CategoryMuscle, e.CreatedAt)
+	err := r.QueryRow(query, input.Title, input.CategoryMuscle).Scan(&e.ID, &e.Title, &e.CategoryMuscle, &e.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
