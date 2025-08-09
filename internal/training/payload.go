@@ -6,3 +6,9 @@ type InputWithUser struct {
 	model.CreateTraining
 	UserId string
 }
+
+type ChanCounter struct {
+	label string
+	value interface{}
+	err   error
+}

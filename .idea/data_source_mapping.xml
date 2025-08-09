@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/97615129-16a1-41e4-9a09-91afbcc0b6ad/console.sql" value="97615129-16a1-41e4-9a09-91afbcc0b6ad" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/97615129-16a1-41e4-9a09-91afbcc0b6ad/console_1.sql" value="97615129-16a1-41e4-9a09-91afbcc0b6ad" />
     <file url="file://$PROJECT_DIR$/internal/exlist/repository.go" value="97615129-16a1-41e4-9a09-91afbcc0b6ad" />
   </component>
 </project>

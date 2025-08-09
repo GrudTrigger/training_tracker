@@ -13,7 +13,7 @@ func QueryGetAll(input model.SearchTrainings) (string, []interface{}) {
 		args         []interface{}
 		conditions   []string
 	)
-	queryBuilder.WriteString("SELECT * FROM training")
+	queryBuilder.WriteString("SELECT training.*, exercise.id, exercise.training_id, exercise_list.id, exercise_list.title, exercise_list.category_muscle, exercise_list.created_at, approach.id, approach.exercise_id, approach.repetition, approach.weight FROM training JOIN exercise ON training.id = exercise.training_id JOIN exercise_list ON exercise.exercise_list_id = exercise_list.id JOIN approach ON exercise.id = approach.exercise_id")
 
 	if input.Name != nil {
 		args = append(args, "%"+*input.Name+"%")

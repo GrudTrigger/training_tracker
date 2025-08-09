@@ -3,6 +3,7 @@ package training
 import (
 	"database/sql"
 	"errors"
+	"sync"
 
 	"github.com/GrudTrigger/trainin_tracker/graph/model"
 	"github.com/GrudTrigger/trainin_tracker/internal/exercise"
@@ -51,22 +52,128 @@ func (r *Repository) Create(input InputWithUser) (*model.Training, error) {
 }
 
 func (r *Repository) GetAll(input model.SearchTrainings) ([]*model.Training, error) {
-	var trainings []*model.Training
+
 	query, args := QueryGetAll(input)
 	rows, err := r.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
+
+	trainingsMap := make(map[string]*model.Training)
 	for rows.Next() {
-		training := utils.NewTraining()
-		err = rows.Scan(&training.ID, &training.UserID, &training.Title, &training.Duration, &training.Date, &training.Notes, &training.CreatedAt)
+		t := utils.NewTraining()
+		e := model.Exercise{}
+		el := model.ExerciseList{}
+		ap := model.Approach{}
+
+		err = rows.Scan(
+			&t.ID,
+			&t.UserID,
+			&t.Title,
+			&t.Duration,
+			&t.Date,
+			&t.Notes,
+			&t.CreatedAt,
+			&e.ID,
+			&e.TrainingID,
+			&el.ID,
+			&el.Title,
+			&el.CategoryMuscle,
+			&el.CreatedAt,
+			&ap.ID,
+			&ap.ExerciseID,
+			&ap.Repetition,
+			&ap.Weight,
+		)
 		if err != nil {
 			return nil, err
 		}
-		trainings = append(trainings, training)
+
+		// 1. Получаем или создаём тренировку
+		tr, ok := trainingsMap[t.ID]
+		if !ok {
+			ch := make(chan ChanCounter, 3)
+			wg := sync.WaitGroup{}
+
+			tr = t
+			tr.Exercises = []*model.Exercise{}
+			trainingsMap[t.ID] = tr
+
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				var appCount int32
+				var weightCount int32
+				var exerciseCount int32
+
+				q := "SELECT COUNT(approach.id) AS count_approach, SUM(approach.weight) AS sum_weight, COUNT(DISTINCT exercise.id) AS exercises_count  FROM training JOIN exercise ON exercise.training_id = training.id JOIN approach ON approach.exercise_id = exercise.id GROUP BY training.id"
+				err = r.QueryRow(q).Scan(&appCount, &weightCount, &exerciseCount)
+				ch <- ChanCounter{label: "approach_count", value: appCount, err: err}
+				ch <- ChanCounter{label: "total_weight", value: weightCount, err: err}
+				ch <- ChanCounter{label: "exercise_count", value: exerciseCount, err: err}
+			}()
+			go func() {
+				wg.Wait()
+				close(ch)
+			}()
+
+			for v := range ch {
+				if v.err != nil {
+					return nil, v.err
+				}
+				if v.label == "approach_count" {
+					tr.ApproachCount = v.value.(int32)
+				}
+				if v.label == "total_weight" {
+					tr.TotalWeight = v.value.(int32)
+				}
+				if v.label == "exercise_count" {
+					tr.ExercisesCount = v.value.(int32)
+				}
+			}
+		}
+
+		// 2. Если есть упражнение
+		var ex *model.Exercise
+		if e.ID != "" {
+			// ищем в существующих упражнениях
+			found := false
+			for _, existingEx := range tr.Exercises {
+				if existingEx.ID == e.ID {
+					ex = existingEx
+					found = true
+					break
+				}
+			}
+
+			// если нет — добавляем
+			if !found {
+				e.ExerciseList = &el
+				e.Approaches = []*model.Approach{}
+				tr.Exercises = append(tr.Exercises, &e)
+				ex = &e
+			}
+		}
+
+		// 3. Если есть подход
+		if ap.ID != "" && ex != nil {
+			found := false
+			for _, existingAp := range ex.Approaches {
+				if existingAp.ID == ap.ID {
+					found = true
+					break
+				}
+			}
+			if !found {
+				ex.Approaches = append(ex.Approaches, &ap)
+			}
+		}
 	}
-	if rows.Err() != nil {
-		return nil, err
+
+	// Конвертируем map в slice
+	trainings := make([]*model.Training, 0, len(trainingsMap))
+	for _, tr := range trainingsMap {
+		trainings = append(trainings, tr)
 	}
 	return trainings, nil
 }
