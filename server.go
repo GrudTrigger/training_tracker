@@ -8,6 +8,7 @@ import (
 
 	"github.com/GrudTrigger/trainin_tracker/internal/approach"
 	"github.com/GrudTrigger/trainin_tracker/internal/exlist"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/GrudTrigger/trainin_tracker/internal/exercise"
 	"github.com/go-playground/validator/v10"
@@ -38,10 +39,16 @@ func main() {
 	dbPostgres := storage.NewDbPostgres(cfg.Dsn)
 	defer dbPostgres.Close()
 
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+
 	userRepository := user.NewRepository(dbPostgres)
 	approachRepository := approach.NewRepository(dbPostgres)
 	exerciseRepository := exercise.NewRepository(dbPostgres, approachRepository)
-	trainingRepository := training.NewTrainingRepository(dbPostgres, exerciseRepository)
+	trainingRepository := training.NewTrainingRepository(dbPostgres, exerciseRepository, rdb)
 	exerciseListRepository := exlist.NewRepository(dbPostgres)
 
 	userService := user.NewUserService(userRepository)
@@ -61,7 +68,9 @@ func main() {
 	router := chi.NewRouter()
 
 	router.Use(cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8080"},
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,
 	}).Handler)
 	router.Use(middleware.Logging)

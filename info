@@ -9,3 +9,7 @@ migrate create -ext sql -dir migrations -seq create_table
 https://training-tracker-fv65.onrender.com
 
 переписать авторизацию на cookie
+
+
+Editor -> General -> Inline Completion
+убрать: Enable local Full Line completion suggestions

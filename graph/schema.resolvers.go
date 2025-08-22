@@ -120,7 +120,7 @@ func (r *mutationResolver) AddTraining(ctx context.Context, input model.CreateTr
 		return nil, res.ErrAccessDenied
 	}
 	fmt.Println("resolver")
-	t, err := r.TrainingService.Create(input, u.Id)
+	t, err := r.TrainingService.Create(ctx, input, u.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +187,7 @@ func (r *queryResolver) ExerciseListStatistics(ctx context.Context) (*model.Exer
 
 // Trainings is the resolver for the trainings field.
 func (r *queryResolver) Trainings(ctx context.Context, input model.SearchTrainings) ([]*model.Training, error) {
-	t, err := r.TrainingService.FindAll(input)
+	t, err := r.TrainingService.FindAll(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -205,15 +205,16 @@ func (r *queryResolver) Training(ctx context.Context, id string) (*model.Trainin
 
 // MyTraining is the resolver for the my_training field.
 func (r *queryResolver) MyTraining(ctx context.Context) ([]*model.Training, error) {
-	u := middleware.GetUserForContext(ctx)
-	if u == nil {
-		return nil, res.ErrAccessDenied
-	}
-	t, err := r.TrainingService.GetMy(u.Id)
-	if err != nil {
-		return nil, err
-	}
-	return t, err
+	//u := middleware.GetUserForContext(ctx)
+	//if u == nil {
+	//	return nil, res.ErrAccessDenied
+	//}
+	//t, err := r.TrainingService.GetMy(u.Id)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//return t, err
+	return []*model.Training{}, nil
 }
 
 // Mutation returns MutationResolver implementation.

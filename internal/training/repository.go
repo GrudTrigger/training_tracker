@@ -1,35 +1,40 @@
 package training
 
 import (
+	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"sync"
+	"time"
 
 	"github.com/GrudTrigger/trainin_tracker/graph/model"
 	"github.com/GrudTrigger/trainin_tracker/internal/exercise"
 	"github.com/GrudTrigger/trainin_tracker/pkg/res"
 	"github.com/GrudTrigger/trainin_tracker/pkg/storage"
 	"github.com/GrudTrigger/trainin_tracker/pkg/utils"
+	"github.com/redis/go-redis/v9"
 )
 
 type IRepository interface {
-	Create(input InputWithUser) (*model.Training, error)
-	GetAll(input model.SearchTrainings) ([]*model.Training, error)
+	Create(ctx context.Context, input InputWithUser) (*model.Training, error)
+	GetAll(ctx context.Context, input model.SearchTrainings) ([]*model.Training, error)
 	GetById(id string) (*model.Training, error)
-	GetMyTrainings(userId string) ([]*model.Training, error)
 	DeleteById(id string) (string, error)
 }
 
 type Repository struct {
 	*storage.DbPostgres
 	repoExercise exercise.IExerciseRepository
+	rdb          *redis.Client
 }
 
-func NewTrainingRepository(db *storage.DbPostgres, repoExercise exercise.IExerciseRepository) IRepository {
-	return &Repository{db, repoExercise}
+func NewTrainingRepository(db *storage.DbPostgres, repoExercise exercise.IExerciseRepository, rdb *redis.Client) IRepository {
+	return &Repository{db, repoExercise, rdb}
 }
 
-func (r *Repository) Create(input InputWithUser) (*model.Training, error) {
+func (r *Repository) Create(ctx context.Context, input InputWithUser) (*model.Training, error) {
 	var training model.Training
 	training = model.Training{
 		Exercises: []*model.Exercise{},
@@ -48,10 +53,17 @@ func (r *Repository) Create(input InputWithUser) (*model.Training, error) {
 		return nil, err
 	}
 	training.Exercises = e
+	r.rdb.Del(ctx, "trainings")
 	return &training, nil
 }
 
-func (r *Repository) GetAll(input model.SearchTrainings) ([]*model.Training, error) {
+func (r *Repository) GetAll(ctx context.Context, input model.SearchTrainings) ([]*model.Training, error) {
+	start := time.Now()
+	if v, err := r.rdb.Get(ctx, "trainings").Result(); err == nil {
+		var t []*model.Training
+		_ = json.Unmarshal([]byte(v), &t)
+		return t, nil
+	}
 
 	query, args := QueryGetAll(input)
 	rows, err := r.Query(query, args...)
@@ -94,7 +106,6 @@ func (r *Repository) GetAll(input model.SearchTrainings) ([]*model.Training, err
 		if !ok {
 			ch := make(chan ChanCounter, 3)
 			wg := sync.WaitGroup{}
-
 			tr = t
 			tr.Exercises = []*model.Exercise{}
 			trainingsMap[t.ID] = tr
@@ -116,7 +127,6 @@ func (r *Repository) GetAll(input model.SearchTrainings) ([]*model.Training, err
 				wg.Wait()
 				close(ch)
 			}()
-
 			for v := range ch {
 				if v.err != nil {
 					return nil, v.err
@@ -168,13 +178,21 @@ func (r *Repository) GetAll(input model.SearchTrainings) ([]*model.Training, err
 				ex.Approaches = append(ex.Approaches, &ap)
 			}
 		}
-	}
 
+	}
 	// Конвертируем map в slice
 	trainings := make([]*model.Training, 0, len(trainingsMap))
 	for _, tr := range trainingsMap {
 		trainings = append(trainings, tr)
 	}
+
+	data, _ := json.Marshal(trainings)
+	err = r.rdb.Set(ctx, "trainings", data, time.Minute*10).Err()
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("Время работы GetAll - ", time.Since(start))
 	return trainings, nil
 }
 
@@ -200,30 +218,6 @@ func (r *Repository) GetById(id string) (*model.Training, error) {
 		return nil, err
 	}
 	return training, nil
-}
-
-func (r *Repository) GetMyTrainings(userId string) ([]*model.Training, error) {
-
-	var trainings []*model.Training
-
-	query := "SELECT * FROM training WHERE user_id = $1"
-
-	rows, err := r.Query(query, userId)
-
-	if !errors.Is(err, sql.ErrNoRows) {
-		return nil, errors.New("тренировки не найдены")
-	}
-
-	for rows.Next() {
-		var training model.Training
-		err = rows.Scan(&training.ID, &training.UserID, &training.Title, &training.Duration, &training.Date, &training.Notes, &training.CreatedAt)
-		if err != nil {
-			return nil, err
-		}
-		trainings = append(trainings, &training)
-	}
-
-	return trainings, nil
 }
 
 func (r *Repository) DeleteById(id string) (string, error) {

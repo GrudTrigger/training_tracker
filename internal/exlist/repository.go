@@ -3,6 +3,7 @@ package exlist
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/GrudTrigger/trainin_tracker/graph/model"
 	"github.com/GrudTrigger/trainin_tracker/pkg/res"
@@ -38,6 +39,7 @@ func (r *Repository) FindAll(input *model.GetExerciseList) ([]*model.ExerciseLis
 	var eList []*model.ExerciseList
 
 	query, args := getQueryFindAll(input)
+	fmt.Println(query, args)
 	rows, err := r.Query(query, args...)
 
 	if errors.Is(err, sql.ErrNoRows) {
@@ -46,7 +48,7 @@ func (r *Repository) FindAll(input *model.GetExerciseList) ([]*model.ExerciseLis
 
 	for rows.Next() {
 		var e model.ExerciseList
-		err := rows.Scan(&e.ID, &e.Title, &e.CategoryMuscle, &e.CreatedAt)
+		err = rows.Scan(&e.ID, &e.Title, &e.CategoryMuscle, &e.CreatedAt)
 		if err != nil {
 			return nil, err
 		}

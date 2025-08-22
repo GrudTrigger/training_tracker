@@ -2,8 +2,9 @@ package exlist
 
 import (
 	"fmt"
-	"github.com/GrudTrigger/trainin_tracker/graph/model"
 	"strings"
+
+	"github.com/GrudTrigger/trainin_tracker/graph/model"
 )
 
 func getQueryFindAll(input *model.GetExerciseList) (string, []interface{}) {
@@ -30,6 +31,6 @@ func getQueryFindAll(input *model.GetExerciseList) (string, []interface{}) {
 		queryBuilder.WriteString(strings.Join(conditions, " AND "))
 	}
 	args = append(args, input.Limit, input.Offset)
-	queryBuilder.WriteString(fmt.Sprintf(" ORDER BY category_muscle LIMIT %d OFFSET %d", len(args)-1, len(args)))
+	queryBuilder.WriteString(fmt.Sprintf(" ORDER BY category_muscle LIMIT $%d OFFSET $%d", len(args)-1, len(args)))
 	return queryBuilder.String(), args
 }
