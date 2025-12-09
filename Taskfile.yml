@@ -1,0 +1,31 @@
+version: "3"
+
+vars:
+  BACKEND_DIR: "./backend"
+  FRONTEND_DIR: "./frontend"
+
+tasks:
+  format:
+    desc: "Форматирует код backend с помощью gofumpt + gci"
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - |
+        echo 'Форматирование кода gofumpt...'
+        gofumpt -w ./
+
+        echo 'Сортировка импортов gci...'
+        gci write ./ -s standard -s default
+
+        echo '✅ Форматирование кода и сортировка импортов - успешно'
+  lint:
+    desc: "Запускает golangci-lint"
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - golangci-lint run
+  goa:gen:
+    desc: "Генерация кода и swagger с помощью Goa"
+    dir: "{{.BACKEND_DIR}}"
+    cmds:
+      - |
+        goa gen github.com/GrudTrigger/training_tracker/backend/design
+        echo '✅ GOA: Генерация кода прошла успешно'
