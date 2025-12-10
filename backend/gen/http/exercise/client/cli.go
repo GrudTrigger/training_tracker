@@ -10,19 +10,20 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"unicode/utf8"
 
 	exercise "github.com/GrudTrigger/training_tracker/backend/gen/exercise"
 	goa "goa.design/goa/v3/pkg"
 )
 
-// BuildCreatePayload builds the payload for the exercise create endpoint from
-// CLI flags.
-func BuildCreatePayload(exerciseCreateBody string) (*exercise.ExerciseListPayload, error) {
+// BuildExerciseCreatePayload builds the payload for the exercise
+// exercise/create endpoint from CLI flags.
+func BuildExerciseCreatePayload(exerciseExerciseCreateBody string) (*exercise.ExerciseListPayload, error) {
 	var err error
-	var body CreateRequestBody
+	var body ExerciseCreateRequestBody
 	{
-		err = json.Unmarshal([]byte(exerciseCreateBody), &body)
+		err = json.Unmarshal([]byte(exerciseExerciseCreateBody), &body)
 		if err != nil {
 			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'")
 		}
@@ -46,6 +47,51 @@ func BuildCreatePayload(exerciseCreateBody string) (*exercise.ExerciseListPayloa
 		Title:       body.Title,
 		MuscleGroup: body.MuscleGroup,
 	}
+
+	return v, nil
+}
+
+// BuildAllPayload builds the payload for the exercise all endpoint from CLI
+// flags.
+func BuildAllPayload(exerciseAllLimit string, exerciseAllOffset string) (*exercise.AllPayload, error) {
+	var err error
+	var limit int
+	{
+		if exerciseAllLimit != "" {
+			var v int64
+			v, err = strconv.ParseInt(exerciseAllLimit, 10, strconv.IntSize)
+			limit = int(v)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for limit, must be INT")
+			}
+			if limit < 1 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 1, true))
+			}
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	var offset int
+	{
+		if exerciseAllOffset != "" {
+			var v int64
+			v, err = strconv.ParseInt(exerciseAllOffset, 10, strconv.IntSize)
+			offset = int(v)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for offset, must be INT")
+			}
+			if offset < 0 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("offset", offset, 0, true))
+			}
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	v := &exercise.AllPayload{}
+	v.Limit = limit
+	v.Offset = offset
 
 	return v, nil
 }

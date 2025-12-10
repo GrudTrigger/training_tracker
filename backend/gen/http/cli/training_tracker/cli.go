@@ -23,13 +23,13 @@ import (
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() []string {
 	return []string{
-		"exercise create",
+		"exercise (exercise-create|all)",
 	}
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + " " + "exercise create --body '{\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'" + "\n" +
+	return os.Args[0] + " " + "exercise exercise-create --body '{\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'" + "\n" +
 		""
 }
 
@@ -45,11 +45,16 @@ func ParseEndpoint(
 	var (
 		exerciseFlags = flag.NewFlagSet("exercise", flag.ContinueOnError)
 
-		exerciseCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
-		exerciseCreateBodyFlag = exerciseCreateFlags.String("body", "REQUIRED", "")
+		exerciseExerciseCreateFlags    = flag.NewFlagSet("exercise-create", flag.ExitOnError)
+		exerciseExerciseCreateBodyFlag = exerciseExerciseCreateFlags.String("body", "REQUIRED", "")
+
+		exerciseAllFlags      = flag.NewFlagSet("all", flag.ExitOnError)
+		exerciseAllLimitFlag  = exerciseAllFlags.String("limit", "1", "")
+		exerciseAllOffsetFlag = exerciseAllFlags.String("offset", "", "")
 	)
 	exerciseFlags.Usage = exerciseUsage
-	exerciseCreateFlags.Usage = exerciseCreateUsage
+	exerciseExerciseCreateFlags.Usage = exerciseExerciseCreateUsage
+	exerciseAllFlags.Usage = exerciseAllUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -85,8 +90,11 @@ func ParseEndpoint(
 		switch svcn {
 		case "exercise":
 			switch epn {
-			case "create":
-				epf = exerciseCreateFlags
+			case "exercise-create":
+				epf = exerciseExerciseCreateFlags
+
+			case "all":
+				epf = exerciseAllFlags
 
 			}
 
@@ -113,9 +121,12 @@ func ParseEndpoint(
 		case "exercise":
 			c := exercisec.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
-			case "create":
-				endpoint = c.Create()
-				data, err = exercisec.BuildCreatePayload(*exerciseCreateBodyFlag)
+			case "exercise-create":
+				endpoint = c.ExerciseCreate()
+				data, err = exercisec.BuildExerciseCreatePayload(*exerciseExerciseCreateBodyFlag)
+			case "all":
+				endpoint = c.All()
+				data, err = exercisec.BuildAllPayload(*exerciseAllLimitFlag, *exerciseAllOffsetFlag)
 			}
 		}
 	}
@@ -131,14 +142,15 @@ func exerciseUsage() {
 	fmt.Fprintln(os.Stderr, `Сервис для CRUD операция с моделью ExerciseList`)
 	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] exercise COMMAND [flags]\n\n", os.Args[0])
 	fmt.Fprintln(os.Stderr, "COMMAND:")
-	fmt.Fprintln(os.Stderr, `    create: Создание нового упражнения`)
+	fmt.Fprintln(os.Stderr, `    exercise-create: Создание нового упражнения`)
+	fmt.Fprintln(os.Stderr, `    all: Получение всех упражнений с пагинацией`)
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Additional help:")
 	fmt.Fprintf(os.Stderr, "    %s exercise COMMAND --help\n", os.Args[0])
 }
-func exerciseCreateUsage() {
+func exerciseExerciseCreateUsage() {
 	// Header with flags
-	fmt.Fprintf(os.Stderr, "%s [flags] exercise create", os.Args[0])
+	fmt.Fprintf(os.Stderr, "%s [flags] exercise exercise-create", os.Args[0])
 	fmt.Fprint(os.Stderr, " -body JSON")
 	fmt.Fprintln(os.Stderr)
 
@@ -151,5 +163,25 @@ func exerciseCreateUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "exercise create --body '{\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "exercise exercise-create --body '{\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'")
+}
+
+func exerciseAllUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] exercise all", os.Args[0])
+	fmt.Fprint(os.Stderr, " -limit INT")
+	fmt.Fprint(os.Stderr, " -offset INT")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Получение всех упражнений с пагинацией`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -limit INT: `)
+	fmt.Fprintln(os.Stderr, `    -offset INT: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "exercise all --limit 20 --offset 0")
 }

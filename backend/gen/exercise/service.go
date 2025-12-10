@@ -16,7 +16,9 @@ import (
 // Сервис для CRUD операция с моделью ExerciseList
 type Service interface {
 	// Создание нового упражнения
-	Create(context.Context, *ExerciseListPayload) (res *ExerciseList, err error)
+	ExerciseCreate(context.Context, *ExerciseListPayload) (res *ExerciseList, err error)
+	// Получение всех упражнений с пагинацией
+	All(context.Context, *AllPayload) (res []*ExerciseList, err error)
 }
 
 // APIName is the name of the API as defined in the design.
@@ -33,9 +35,18 @@ const ServiceName = "exercise"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [1]string{"create"}
+var MethodNames = [2]string{"exercise/create", "all"}
 
-// ExerciseList is the result type of the exercise service create method.
+// AllPayload is the payload type of the exercise service all method.
+type AllPayload struct {
+	// Количество запрашиваемых элементов за один offset
+	Limit int
+	// Сколько делать шаг для пагинации
+	Offset int
+}
+
+// ExerciseList is the result type of the exercise service exercise/create
+// method.
 type ExerciseList struct {
 	// System-generated unique identifier
 	ID string
@@ -46,8 +57,8 @@ type ExerciseList struct {
 	MuscleGroup int32
 }
 
-// ExerciseListPayload is the payload type of the exercise service create
-// method.
+// ExerciseListPayload is the payload type of the exercise service
+// exercise/create method.
 type ExerciseListPayload struct {
 	// Название упражнения
 	Title string

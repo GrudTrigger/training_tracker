@@ -15,26 +15,38 @@ import (
 
 // Endpoints wraps the "exercise" service endpoints.
 type Endpoints struct {
-	Create goa.Endpoint
+	ExerciseCreate goa.Endpoint
+	All            goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "exercise" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
-		Create: NewCreateEndpoint(s),
+		ExerciseCreate: NewExerciseCreateEndpoint(s),
+		All:            NewAllEndpoint(s),
 	}
 }
 
 // Use applies the given middleware to all the "exercise" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
-	e.Create = m(e.Create)
+	e.ExerciseCreate = m(e.ExerciseCreate)
+	e.All = m(e.All)
 }
 
-// NewCreateEndpoint returns an endpoint function that calls the method
-// "create" of service "exercise".
-func NewCreateEndpoint(s Service) goa.Endpoint {
+// NewExerciseCreateEndpoint returns an endpoint function that calls the method
+// "exercise/create" of service "exercise".
+func NewExerciseCreateEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*ExerciseListPayload)
-		return s.Create(ctx, p)
+		return s.ExerciseCreate(ctx, p)
+	}
+}
+
+// NewAllEndpoint returns an endpoint function that calls the method "all" of
+// service "exercise".
+func NewAllEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*AllPayload)
+		return s.All(ctx, p)
 	}
 }

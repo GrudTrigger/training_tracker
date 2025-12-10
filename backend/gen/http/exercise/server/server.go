@@ -18,8 +18,9 @@ import (
 
 // Server lists the exercise service endpoint HTTP handlers.
 type Server struct {
-	Mounts []*MountPoint
-	Create http.Handler
+	Mounts         []*MountPoint
+	ExerciseCreate http.Handler
+	All            http.Handler
 }
 
 // MountPoint holds information about the mounted endpoints.
@@ -49,9 +50,11 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"Create", "POST", "/exercise-list"},
+			{"ExerciseCreate", "POST", "/exercise"},
+			{"All", "GET", "/exercise/all"},
 		},
-		Create: NewCreateHandler(e.Create, mux, decoder, encoder, errhandler, formatter),
+		ExerciseCreate: NewExerciseCreateHandler(e.ExerciseCreate, mux, decoder, encoder, errhandler, formatter),
+		All:            NewAllHandler(e.All, mux, decoder, encoder, errhandler, formatter),
 	}
 }
 
@@ -60,7 +63,8 @@ func (s *Server) Service() string { return "exercise" }
 
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
-	s.Create = m(s.Create)
+	s.ExerciseCreate = m(s.ExerciseCreate)
+	s.All = m(s.All)
 }
 
 // MethodNames returns the methods served.
@@ -68,7 +72,8 @@ func (s *Server) MethodNames() []string { return exercise.MethodNames[:] }
 
 // Mount configures the mux to serve the exercise endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
-	MountCreateHandler(mux, h.Create)
+	MountExerciseCreateHandler(mux, h.ExerciseCreate)
+	MountAllHandler(mux, h.All)
 }
 
 // Mount configures the mux to serve the exercise endpoints.
@@ -76,21 +81,21 @@ func (s *Server) Mount(mux goahttp.Muxer) {
 	Mount(mux, s)
 }
 
-// MountCreateHandler configures the mux to serve the "exercise" service
-// "create" endpoint.
-func MountCreateHandler(mux goahttp.Muxer, h http.Handler) {
+// MountExerciseCreateHandler configures the mux to serve the "exercise"
+// service "exercise/create" endpoint.
+func MountExerciseCreateHandler(mux goahttp.Muxer, h http.Handler) {
 	f, ok := h.(http.HandlerFunc)
 	if !ok {
 		f = func(w http.ResponseWriter, r *http.Request) {
 			h.ServeHTTP(w, r)
 		}
 	}
-	mux.Handle("POST", "/exercise-list", f)
+	mux.Handle("POST", "/exercise", f)
 }
 
-// NewCreateHandler creates a HTTP handler which loads the HTTP request and
-// calls the "exercise" service "create" endpoint.
-func NewCreateHandler(
+// NewExerciseCreateHandler creates a HTTP handler which loads the HTTP request
+// and calls the "exercise" service "exercise/create" endpoint.
+func NewExerciseCreateHandler(
 	endpoint goa.Endpoint,
 	mux goahttp.Muxer,
 	decoder func(*http.Request) goahttp.Decoder,
@@ -99,13 +104,66 @@ func NewCreateHandler(
 	formatter func(ctx context.Context, err error) goahttp.Statuser,
 ) http.Handler {
 	var (
-		decodeRequest  = DecodeCreateRequest(mux, decoder)
-		encodeResponse = EncodeCreateResponse(encoder)
-		encodeError    = EncodeCreateError(encoder, formatter)
+		decodeRequest  = DecodeExerciseCreateRequest(mux, decoder)
+		encodeResponse = EncodeExerciseCreateResponse(encoder)
+		encodeError    = EncodeExerciseCreateError(encoder, formatter)
 	)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "create")
+		ctx = context.WithValue(ctx, goa.MethodKey, "exercise/create")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "exercise")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			if errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+		}
+	})
+}
+
+// MountAllHandler configures the mux to serve the "exercise" service "all"
+// endpoint.
+func MountAllHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("GET", "/exercise/all", f)
+}
+
+// NewAllHandler creates a HTTP handler which loads the HTTP request and calls
+// the "exercise" service "all" endpoint.
+func NewAllHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeAllRequest(mux, decoder)
+		encodeResponse = EncodeAllResponse(encoder)
+		encodeError    = goahttp.ErrorEncoder(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "all")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "exercise")
 		payload, err := decodeRequest(r)
 		if err != nil {

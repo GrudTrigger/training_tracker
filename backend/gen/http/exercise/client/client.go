@@ -17,8 +17,12 @@ import (
 
 // Client lists the exercise service endpoint HTTP clients.
 type Client struct {
-	// Create Doer is the HTTP client used to make requests to the create endpoint.
-	CreateDoer goahttp.Doer
+	// ExerciseCreate Doer is the HTTP client used to make requests to the
+	// exercise/create endpoint.
+	ExerciseCreateDoer goahttp.Doer
+
+	// All Doer is the HTTP client used to make requests to the all endpoint.
+	AllDoer goahttp.Doer
 
 	// RestoreResponseBody controls whether the response bodies are reset after
 	// decoding so they can be read again.
@@ -40,7 +44,8 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		CreateDoer:          doer,
+		ExerciseCreateDoer:  doer,
+		AllDoer:             doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
 		host:                host,
@@ -49,15 +54,15 @@ func NewClient(
 	}
 }
 
-// Create returns an endpoint that makes HTTP requests to the exercise service
-// create server.
-func (c *Client) Create() goa.Endpoint {
+// ExerciseCreate returns an endpoint that makes HTTP requests to the exercise
+// service exercise/create server.
+func (c *Client) ExerciseCreate() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeCreateRequest(c.encoder)
-		decodeResponse = DecodeCreateResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeExerciseCreateRequest(c.encoder)
+		decodeResponse = DecodeExerciseCreateResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildCreateRequest(ctx, v)
+		req, err := c.BuildExerciseCreateRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -65,9 +70,33 @@ func (c *Client) Create() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.CreateDoer.Do(req)
+		resp, err := c.ExerciseCreateDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("exercise", "create", err)
+			return nil, goahttp.ErrRequestError("exercise", "exercise/create", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// All returns an endpoint that makes HTTP requests to the exercise service all
+// server.
+func (c *Client) All() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeAllRequest(c.encoder)
+		decodeResponse = DecodeAllResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildAllRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.AllDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("exercise", "all", err)
 		}
 		return decodeResponse(resp)
 	}

@@ -7,7 +7,12 @@
 
 package client
 
-// CreateExercisePath returns the URL path to the exercise service create HTTP endpoint.
-func CreateExercisePath() string {
-	return "/exercise-list"
+// ExerciseCreateExercisePath returns the URL path to the exercise service exercise/create HTTP endpoint.
+func ExerciseCreateExercisePath() string {
+	return "/exercise"
+}
+
+// AllExercisePath returns the URL path to the exercise service all HTTP endpoint.
+func AllExercisePath() string {
+	return "/exercise/all"
 }

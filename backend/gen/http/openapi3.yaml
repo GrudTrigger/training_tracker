@@ -6,13 +6,13 @@ info:
 servers:
     - url: http://localhost:8080
 paths:
-    /exercise-list:
+    /exercise:
         post:
             tags:
                 - exercise
             summary: Создание нового упражнения
             description: Создание нового упражнения
-            operationId: exercise#create
+            operationId: exercise#exercise/create
             requestBody:
                 required: true
                 content:
@@ -39,6 +39,61 @@ paths:
                         application/vnd.goa.error:
                             schema:
                                 $ref: '#/components/schemas/Error'
+    /exercise/all:
+        get:
+            tags:
+                - exercise
+            summary: Получение всех упражнений с пагинацией
+            description: Получение всех упражнений с пагинацией
+            operationId: exercise#all
+            parameters:
+                - name: limit
+                  in: query
+                  description: limit
+                  allowEmptyValue: true
+                  schema:
+                    type: integer
+                    description: limit
+                    default: 1
+                    example: 20
+                    format: int64
+                    minimum: 1
+                  example: 20
+                - name: offset
+                  in: query
+                  description: offset
+                  allowEmptyValue: true
+                  schema:
+                    type: integer
+                    description: offset
+                    default: 0
+                    example: 0
+                    format: int64
+                    minimum: 0
+                  example: 0
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/ExerciseList'
+                                example:
+                                    - id: 550e8400-e29b-41d4-a716-446655440000
+                                      muscle_group: 1
+                                      title: Жим лежа на скамье
+                                    - id: 550e8400-e29b-41d4-a716-446655440000
+                                      muscle_group: 1
+                                      title: Жим лежа на скамье
+                            example:
+                                - id: 550e8400-e29b-41d4-a716-446655440000
+                                  muscle_group: 1
+                                  title: Жим лежа на скамье
+                                - id: 550e8400-e29b-41d4-a716-446655440000
+                                  muscle_group: 1
+                                  title: Жим лежа на скамье
 components:
     schemas:
         Error:
@@ -47,7 +102,7 @@ components:
                 fault:
                     type: boolean
                     description: Is the error a server-side fault?
-                    example: false
+                    example: true
                 id:
                     type: string
                     description: ID is a unique identifier for this particular occurrence of the problem.
@@ -67,15 +122,15 @@ components:
                 timeout:
                     type: boolean
                     description: Is the error a timeout?
-                    example: true
+                    example: false
             description: Invalid input data provided
             example:
-                fault: true
+                fault: false
                 id: 123abc
                 message: parameter 'p' must be an integer
                 name: bad_request
-                temporary: true
-                timeout: false
+                temporary: false
+                timeout: true
             required:
                 - name
                 - id
@@ -212,10 +267,6 @@ components:
                         $ref: '#/components/schemas/ExerciseModel'
                     description: Упражнения выполненные за тренировку
                     example:
-                        - reps: 10
-                          sets: 4
-                          title: Жим лежа на скамейке
-                          weight: 102.5
                         - reps: 10
                           sets: 4
                           title: Жим лежа на скамейке

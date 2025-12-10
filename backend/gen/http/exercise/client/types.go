@@ -14,9 +14,9 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// CreateRequestBody is the type of the "exercise" service "create" endpoint
-// HTTP request body.
-type CreateRequestBody struct {
+// ExerciseCreateRequestBody is the type of the "exercise" service
+// "exercise/create" endpoint HTTP request body.
+type ExerciseCreateRequestBody struct {
 	// Название упражнения
 	Title string `form:"title" json:"title" xml:"title"`
 	// Группа мыщц указывается в виде числа, нужна для получения упражнений по
@@ -24,9 +24,9 @@ type CreateRequestBody struct {
 	MuscleGroup int32 `form:"muscle_group" json:"muscle_group" xml:"muscle_group"`
 }
 
-// CreateResponseBody is the type of the "exercise" service "create" endpoint
-// HTTP response body.
-type CreateResponseBody struct {
+// ExerciseCreateResponseBody is the type of the "exercise" service
+// "exercise/create" endpoint HTTP response body.
+type ExerciseCreateResponseBody struct {
 	// System-generated unique identifier
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Название упражнения
@@ -36,9 +36,13 @@ type CreateResponseBody struct {
 	MuscleGroup *int32 `form:"muscle_group,omitempty" json:"muscle_group,omitempty" xml:"muscle_group,omitempty"`
 }
 
-// CreateBadRequestResponseBody is the type of the "exercise" service "create"
-// endpoint HTTP response body for the "bad_request" error.
-type CreateBadRequestResponseBody struct {
+// AllResponseBody is the type of the "exercise" service "all" endpoint HTTP
+// response body.
+type AllResponseBody []*ExerciseListResponse
+
+// ExerciseCreateBadRequestResponseBody is the type of the "exercise" service
+// "exercise/create" endpoint HTTP response body for the "bad_request" error.
+type ExerciseCreateBadRequestResponseBody struct {
 	// Name is the name of this class of errors.
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// ID is a unique identifier for this particular occurrence of the problem.
@@ -54,19 +58,30 @@ type CreateBadRequestResponseBody struct {
 	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
-// NewCreateRequestBody builds the HTTP request body from the payload of the
-// "create" endpoint of the "exercise" service.
-func NewCreateRequestBody(p *exercise.ExerciseListPayload) *CreateRequestBody {
-	body := &CreateRequestBody{
+// ExerciseListResponse is used to define fields on response body types.
+type ExerciseListResponse struct {
+	// System-generated unique identifier
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Название упражнения
+	Title *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
+	// Группа мыщц указывается в виде числа, нужна для получения упражнений по
+	// группе мыщц
+	MuscleGroup *int32 `form:"muscle_group,omitempty" json:"muscle_group,omitempty" xml:"muscle_group,omitempty"`
+}
+
+// NewExerciseCreateRequestBody builds the HTTP request body from the payload
+// of the "exercise/create" endpoint of the "exercise" service.
+func NewExerciseCreateRequestBody(p *exercise.ExerciseListPayload) *ExerciseCreateRequestBody {
+	body := &ExerciseCreateRequestBody{
 		Title:       p.Title,
 		MuscleGroup: p.MuscleGroup,
 	}
 	return body
 }
 
-// NewCreateExerciseListCreated builds a "exercise" service "create" endpoint
-// result from a HTTP "Created" response.
-func NewCreateExerciseListCreated(body *CreateResponseBody) *exercise.ExerciseList {
+// NewExerciseCreateExerciseListCreated builds a "exercise" service
+// "exercise/create" endpoint result from a HTTP "Created" response.
+func NewExerciseCreateExerciseListCreated(body *ExerciseCreateResponseBody) *exercise.ExerciseList {
 	v := &exercise.ExerciseList{
 		ID:          *body.ID,
 		Title:       *body.Title,
@@ -76,9 +91,9 @@ func NewCreateExerciseListCreated(body *CreateResponseBody) *exercise.ExerciseLi
 	return v
 }
 
-// NewCreateBadRequest builds a exercise service create endpoint bad_request
-// error.
-func NewCreateBadRequest(body *CreateBadRequestResponseBody) *goa.ServiceError {
+// NewExerciseCreateBadRequest builds a exercise service exercise/create
+// endpoint bad_request error.
+func NewExerciseCreateBadRequest(body *ExerciseCreateBadRequestResponseBody) *goa.ServiceError {
 	v := &goa.ServiceError{
 		Name:      *body.Name,
 		ID:        *body.ID,
@@ -91,8 +106,24 @@ func NewCreateBadRequest(body *CreateBadRequestResponseBody) *goa.ServiceError {
 	return v
 }
 
-// ValidateCreateResponseBody runs the validations defined on CreateResponseBody
-func ValidateCreateResponseBody(body *CreateResponseBody) (err error) {
+// NewAllExerciseListOK builds a "exercise" service "all" endpoint result from
+// a HTTP "OK" response.
+func NewAllExerciseListOK(body []*ExerciseListResponse) []*exercise.ExerciseList {
+	v := make([]*exercise.ExerciseList, len(body))
+	for i, val := range body {
+		if val == nil {
+			v[i] = nil
+			continue
+		}
+		v[i] = unmarshalExerciseListResponseToExerciseExerciseList(val)
+	}
+
+	return v
+}
+
+// ValidateExerciseCreateResponseBody runs the validations defined on
+// Exercise/CreateResponseBody
+func ValidateExerciseCreateResponseBody(body *ExerciseCreateResponseBody) (err error) {
 	if body.ID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
 	}
@@ -128,9 +159,9 @@ func ValidateCreateResponseBody(body *CreateResponseBody) (err error) {
 	return
 }
 
-// ValidateCreateBadRequestResponseBody runs the validations defined on
-// create_bad_request_response_body
-func ValidateCreateBadRequestResponseBody(body *CreateBadRequestResponseBody) (err error) {
+// ValidateExerciseCreateBadRequestResponseBody runs the validations defined on
+// exercise/create_bad_request_response_body
+func ValidateExerciseCreateBadRequestResponseBody(body *ExerciseCreateBadRequestResponseBody) (err error) {
 	if body.Name == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
 	}
@@ -148,6 +179,44 @@ func ValidateCreateBadRequestResponseBody(body *CreateBadRequestResponseBody) (e
 	}
 	if body.Fault == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
+// ValidateExerciseListResponse runs the validations defined on
+// ExerciseListResponse
+func ValidateExerciseListResponse(body *ExerciseListResponse) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Title == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("title", "body"))
+	}
+	if body.MuscleGroup == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("muscle_group", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	if body.Title != nil {
+		if utf8.RuneCountInString(*body.Title) < 1 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.title", *body.Title, utf8.RuneCountInString(*body.Title), 1, true))
+		}
+	}
+	if body.Title != nil {
+		if utf8.RuneCountInString(*body.Title) > 50 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.title", *body.Title, utf8.RuneCountInString(*body.Title), 50, false))
+		}
+	}
+	if body.MuscleGroup != nil {
+		if *body.MuscleGroup < 0 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError("body.muscle_group", *body.MuscleGroup, 0, true))
+		}
+	}
+	if body.MuscleGroup != nil {
+		if *body.MuscleGroup > 10 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError("body.muscle_group", *body.MuscleGroup, 10, false))
+		}
 	}
 	return
 }

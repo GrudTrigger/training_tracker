@@ -14,9 +14,9 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// CreateRequestBody is the type of the "exercise" service "create" endpoint
-// HTTP request body.
-type CreateRequestBody struct {
+// ExerciseCreateRequestBody is the type of the "exercise" service
+// "exercise/create" endpoint HTTP request body.
+type ExerciseCreateRequestBody struct {
 	// Название упражнения
 	Title *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
 	// Группа мыщц указывается в виде числа, нужна для получения упражнений по
@@ -24,9 +24,9 @@ type CreateRequestBody struct {
 	MuscleGroup *int32 `form:"muscle_group,omitempty" json:"muscle_group,omitempty" xml:"muscle_group,omitempty"`
 }
 
-// CreateResponseBody is the type of the "exercise" service "create" endpoint
-// HTTP response body.
-type CreateResponseBody struct {
+// ExerciseCreateResponseBody is the type of the "exercise" service
+// "exercise/create" endpoint HTTP response body.
+type ExerciseCreateResponseBody struct {
 	// System-generated unique identifier
 	ID string `form:"id" json:"id" xml:"id"`
 	// Название упражнения
@@ -36,9 +36,13 @@ type CreateResponseBody struct {
 	MuscleGroup int32 `form:"muscle_group" json:"muscle_group" xml:"muscle_group"`
 }
 
-// CreateBadRequestResponseBody is the type of the "exercise" service "create"
-// endpoint HTTP response body for the "bad_request" error.
-type CreateBadRequestResponseBody struct {
+// AllResponseBody is the type of the "exercise" service "all" endpoint HTTP
+// response body.
+type AllResponseBody []*ExerciseListResponse
+
+// ExerciseCreateBadRequestResponseBody is the type of the "exercise" service
+// "exercise/create" endpoint HTTP response body for the "bad_request" error.
+type ExerciseCreateBadRequestResponseBody struct {
 	// Name is the name of this class of errors.
 	Name string `form:"name" json:"name" xml:"name"`
 	// ID is a unique identifier for this particular occurrence of the problem.
@@ -54,10 +58,21 @@ type CreateBadRequestResponseBody struct {
 	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
-// NewCreateResponseBody builds the HTTP response body from the result of the
-// "create" endpoint of the "exercise" service.
-func NewCreateResponseBody(res *exercise.ExerciseList) *CreateResponseBody {
-	body := &CreateResponseBody{
+// ExerciseListResponse is used to define fields on response body types.
+type ExerciseListResponse struct {
+	// System-generated unique identifier
+	ID string `form:"id" json:"id" xml:"id"`
+	// Название упражнения
+	Title string `form:"title" json:"title" xml:"title"`
+	// Группа мыщц указывается в виде числа, нужна для получения упражнений по
+	// группе мыщц
+	MuscleGroup int32 `form:"muscle_group" json:"muscle_group" xml:"muscle_group"`
+}
+
+// NewExerciseCreateResponseBody builds the HTTP response body from the result
+// of the "exercise/create" endpoint of the "exercise" service.
+func NewExerciseCreateResponseBody(res *exercise.ExerciseList) *ExerciseCreateResponseBody {
+	body := &ExerciseCreateResponseBody{
 		ID:          res.ID,
 		Title:       res.Title,
 		MuscleGroup: res.MuscleGroup,
@@ -65,10 +80,24 @@ func NewCreateResponseBody(res *exercise.ExerciseList) *CreateResponseBody {
 	return body
 }
 
-// NewCreateBadRequestResponseBody builds the HTTP response body from the
-// result of the "create" endpoint of the "exercise" service.
-func NewCreateBadRequestResponseBody(res *goa.ServiceError) *CreateBadRequestResponseBody {
-	body := &CreateBadRequestResponseBody{
+// NewAllResponseBody builds the HTTP response body from the result of the
+// "all" endpoint of the "exercise" service.
+func NewAllResponseBody(res []*exercise.ExerciseList) AllResponseBody {
+	body := make([]*ExerciseListResponse, len(res))
+	for i, val := range res {
+		if val == nil {
+			body[i] = nil
+			continue
+		}
+		body[i] = marshalExerciseExerciseListToExerciseListResponse(val)
+	}
+	return body
+}
+
+// NewExerciseCreateBadRequestResponseBody builds the HTTP response body from
+// the result of the "exercise/create" endpoint of the "exercise" service.
+func NewExerciseCreateBadRequestResponseBody(res *goa.ServiceError) *ExerciseCreateBadRequestResponseBody {
+	body := &ExerciseCreateBadRequestResponseBody{
 		Name:      res.Name,
 		ID:        res.ID,
 		Message:   res.Message,
@@ -79,9 +108,9 @@ func NewCreateBadRequestResponseBody(res *goa.ServiceError) *CreateBadRequestRes
 	return body
 }
 
-// NewCreateExerciseListPayload builds a exercise service create endpoint
-// payload.
-func NewCreateExerciseListPayload(body *CreateRequestBody) *exercise.ExerciseListPayload {
+// NewExerciseCreateExerciseListPayload builds a exercise service
+// exercise/create endpoint payload.
+func NewExerciseCreateExerciseListPayload(body *ExerciseCreateRequestBody) *exercise.ExerciseListPayload {
 	v := &exercise.ExerciseListPayload{
 		Title:       *body.Title,
 		MuscleGroup: *body.MuscleGroup,
@@ -90,8 +119,18 @@ func NewCreateExerciseListPayload(body *CreateRequestBody) *exercise.ExerciseLis
 	return v
 }
 
-// ValidateCreateRequestBody runs the validations defined on CreateRequestBody
-func ValidateCreateRequestBody(body *CreateRequestBody) (err error) {
+// NewAllPayload builds a exercise service all endpoint payload.
+func NewAllPayload(limit int, offset int) *exercise.AllPayload {
+	v := &exercise.AllPayload{}
+	v.Limit = limit
+	v.Offset = offset
+
+	return v
+}
+
+// ValidateExerciseCreateRequestBody runs the validations defined on
+// Exercise/CreateRequestBody
+func ValidateExerciseCreateRequestBody(body *ExerciseCreateRequestBody) (err error) {
 	if body.Title == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("title", "body"))
 	}

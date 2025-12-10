@@ -15,25 +15,38 @@ import (
 
 // Client is the "exercise" service client.
 type Client struct {
-	CreateEndpoint goa.Endpoint
+	ExerciseCreateEndpoint goa.Endpoint
+	AllEndpoint            goa.Endpoint
 }
 
 // NewClient initializes a "exercise" service client given the endpoints.
-func NewClient(create goa.Endpoint) *Client {
+func NewClient(exerciseCreate, all goa.Endpoint) *Client {
 	return &Client{
-		CreateEndpoint: create,
+		ExerciseCreateEndpoint: exerciseCreate,
+		AllEndpoint:            all,
 	}
 }
 
-// Create calls the "create" endpoint of the "exercise" service.
-// Create may return the following errors:
+// ExerciseCreate calls the "exercise/create" endpoint of the "exercise"
+// service.
+// ExerciseCreate may return the following errors:
 //   - "bad_request" (type *goa.ServiceError): Invalid input data provided
 //   - error: internal error
-func (c *Client) Create(ctx context.Context, p *ExerciseListPayload) (res *ExerciseList, err error) {
+func (c *Client) ExerciseCreate(ctx context.Context, p *ExerciseListPayload) (res *ExerciseList, err error) {
 	var ires any
-	ires, err = c.CreateEndpoint(ctx, p)
+	ires, err = c.ExerciseCreateEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
 	return ires.(*ExerciseList), nil
+}
+
+// All calls the "all" endpoint of the "exercise" service.
+func (c *Client) All(ctx context.Context, p *AllPayload) (res []*ExerciseList, err error) {
+	var ires any
+	ires, err = c.AllEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.([]*ExerciseList), nil
 }

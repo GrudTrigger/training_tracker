@@ -10,21 +10,23 @@ package client
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 
 	exercise "github.com/GrudTrigger/training_tracker/backend/gen/exercise"
 	goahttp "goa.design/goa/v3/http"
+	goa "goa.design/goa/v3/pkg"
 )
 
-// BuildCreateRequest instantiates a HTTP request object with method and path
-// set to call the "exercise" service "create" endpoint
-func (c *Client) BuildCreateRequest(ctx context.Context, v any) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: CreateExercisePath()}
+// BuildExerciseCreateRequest instantiates a HTTP request object with method
+// and path set to call the "exercise" service "exercise/create" endpoint
+func (c *Client) BuildExerciseCreateRequest(ctx context.Context, v any) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ExerciseCreateExercisePath()}
 	req, err := http.NewRequest("POST", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("exercise", "create", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("exercise", "exercise/create", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -33,29 +35,29 @@ func (c *Client) BuildCreateRequest(ctx context.Context, v any) (*http.Request, 
 	return req, nil
 }
 
-// EncodeCreateRequest returns an encoder for requests sent to the exercise
-// create server.
-func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+// EncodeExerciseCreateRequest returns an encoder for requests sent to the
+// exercise exercise/create server.
+func EncodeExerciseCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
 	return func(req *http.Request, v any) error {
 		p, ok := v.(*exercise.ExerciseListPayload)
 		if !ok {
-			return goahttp.ErrInvalidType("exercise", "create", "*exercise.ExerciseListPayload", v)
+			return goahttp.ErrInvalidType("exercise", "exercise/create", "*exercise.ExerciseListPayload", v)
 		}
-		body := NewCreateRequestBody(p)
+		body := NewExerciseCreateRequestBody(p)
 		if err := encoder(req).Encode(&body); err != nil {
-			return goahttp.ErrEncodingError("exercise", "create", err)
+			return goahttp.ErrEncodingError("exercise", "exercise/create", err)
 		}
 		return nil
 	}
 }
 
-// DecodeCreateResponse returns a decoder for responses returned by the
-// exercise create endpoint. restoreBody controls whether the response body
-// should be restored after having been read.
-// DecodeCreateResponse may return the following errors:
+// DecodeExerciseCreateResponse returns a decoder for responses returned by the
+// exercise exercise/create endpoint. restoreBody controls whether the response
+// body should be restored after having been read.
+// DecodeExerciseCreateResponse may return the following errors:
 //   - "bad_request" (type *goa.ServiceError): http.StatusBadRequest
 //   - error: internal error
-func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+func DecodeExerciseCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
@@ -72,36 +74,125 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 		switch resp.StatusCode {
 		case http.StatusCreated:
 			var (
-				body CreateResponseBody
+				body ExerciseCreateResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("exercise", "create", err)
+				return nil, goahttp.ErrDecodingError("exercise", "exercise/create", err)
 			}
-			err = ValidateCreateResponseBody(&body)
+			err = ValidateExerciseCreateResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("exercise", "create", err)
+				return nil, goahttp.ErrValidationError("exercise", "exercise/create", err)
 			}
-			res := NewCreateExerciseListCreated(&body)
+			res := NewExerciseCreateExerciseListCreated(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			var (
-				body CreateBadRequestResponseBody
+				body ExerciseCreateBadRequestResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("exercise", "create", err)
+				return nil, goahttp.ErrDecodingError("exercise", "exercise/create", err)
 			}
-			err = ValidateCreateBadRequestResponseBody(&body)
+			err = ValidateExerciseCreateBadRequestResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("exercise", "create", err)
+				return nil, goahttp.ErrValidationError("exercise", "exercise/create", err)
 			}
-			return nil, NewCreateBadRequest(&body)
+			return nil, NewExerciseCreateBadRequest(&body)
 		default:
 			body, _ := io.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("exercise", "create", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("exercise", "exercise/create", resp.StatusCode, string(body))
 		}
 	}
+}
+
+// BuildAllRequest instantiates a HTTP request object with method and path set
+// to call the "exercise" service "all" endpoint
+func (c *Client) BuildAllRequest(ctx context.Context, v any) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: AllExercisePath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("exercise", "all", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeAllRequest returns an encoder for requests sent to the exercise all
+// server.
+func EncodeAllRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*exercise.AllPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("exercise", "all", "*exercise.AllPayload", v)
+		}
+		values := req.URL.Query()
+		values.Add("limit", fmt.Sprintf("%v", p.Limit))
+		values.Add("offset", fmt.Sprintf("%v", p.Offset))
+		req.URL.RawQuery = values.Encode()
+		return nil
+	}
+}
+
+// DecodeAllResponse returns a decoder for responses returned by the exercise
+// all endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+func DecodeAllResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body AllResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("exercise", "all", err)
+			}
+			for _, e := range body {
+				if e != nil {
+					if err2 := ValidateExerciseListResponse(e); err2 != nil {
+						err = goa.MergeErrors(err, err2)
+					}
+				}
+			}
+			if err != nil {
+				return nil, goahttp.ErrValidationError("exercise", "all", err)
+			}
+			res := NewAllExerciseListOK(body)
+			return res, nil
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("exercise", "all", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// unmarshalExerciseListResponseToExerciseExerciseList builds a value of type
+// *exercise.ExerciseList from a value of type *ExerciseListResponse.
+func unmarshalExerciseListResponseToExerciseExerciseList(v *ExerciseListResponse) *exercise.ExerciseList {
+	res := &exercise.ExerciseList{
+		ID:          *v.ID,
+		Title:       *v.Title,
+		MuscleGroup: *v.MuscleGroup,
+	}
+
+	return res
 }

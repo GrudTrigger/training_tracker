@@ -13,15 +13,15 @@ produces:
     - application/xml
     - application/gob
 paths:
-    /exercise-list:
+    /exercise:
         post:
             tags:
                 - exercise
             summary: Создание нового упражнения
             description: Создание нового упражнения
-            operationId: exercise#create
+            operationId: exercise#exercise/create
             parameters:
-                - name: CreateRequestBody
+                - name: Exercise/CreateRequestBody
                   in: body
                   required: true
                   schema:
@@ -41,18 +41,49 @@ paths:
                 "400":
                     description: Bad Request response.
                     schema:
-                        $ref: '#/definitions/ExerciseCreateBadRequestResponseBody'
+                        $ref: '#/definitions/ExerciseExerciseCreateBadRequestResponseBody'
+            schemes:
+                - http
+    /exercise/all:
+        get:
+            tags:
+                - exercise
+            summary: Получение всех упражнений с пагинацией
+            description: Получение всех упражнений с пагинацией
+            operationId: exercise#all
+            parameters:
+                - name: limit
+                  in: query
+                  description: limit
+                  required: false
+                  type: integer
+                  default: 1
+                  minimum: 1
+                - name: offset
+                  in: query
+                  description: offset
+                  required: false
+                  type: integer
+                  default: 0
+                  minimum: 0
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        type: array
+                        items:
+                            $ref: '#/definitions/ExerciseList'
             schemes:
                 - http
 definitions:
-    ExerciseCreateBadRequestResponseBody:
+    ExerciseExerciseCreateBadRequestResponseBody:
         title: 'Mediatype identifier: application/vnd.goa.error; view=default'
         type: object
         properties:
             fault:
                 type: boolean
                 description: Is the error a server-side fault?
-                example: true
+                example: false
             id:
                 type: string
                 description: ID is a unique identifier for this particular occurrence of the problem.
@@ -68,19 +99,19 @@ definitions:
             temporary:
                 type: boolean
                 description: Is the error temporary?
-                example: false
+                example: true
             timeout:
                 type: boolean
                 description: Is the error a timeout?
                 example: true
         description: Invalid input data provided (default view)
         example:
-            fault: true
+            fault: false
             id: 123abc
             message: parameter 'p' must be an integer
             name: bad_request
-            temporary: false
-            timeout: false
+            temporary: true
+            timeout: true
         required:
             - name
             - id
