@@ -1,4 +1,4 @@
-package exersice
+package exercise
 
 import (
 	"context"
