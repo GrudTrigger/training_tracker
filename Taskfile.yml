@@ -32,4 +32,10 @@ tasks:
   dev:up:
     desc: "Запуска develop контейнеров docker для локальной разработки"
     cmds:
-      - docker compose -f docker-compose.dev.yaml up --build --detach
+      - |
+        docker compose -f docker-compose.dev.yaml up --build --detach
+        echo '📋 SWAGGER -> localhost:8081'
+  dev:down:
+    desc: "Остановка контейнеров запущенных в режиме develop"
+    cmds:
+      - docker compose -f docker-compose.dev.yaml down --volumes
