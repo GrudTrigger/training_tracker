@@ -39,12 +39,6 @@ var ExerciseModel = Type("ExerciseModel", func() {
 		Example("Жим лежа на скамейке")
 	})
 
-	Attribute("muscle_group", Int32, "Группа мыщц указывается в виде числа, нужна для получения упражнений по группе мыщц", func() {
-		Minimum(0)
-		Maximum(10) //TODO: посчитать общее количество групп и указать валидное значение, пока стоит рандом
-		Example(1)
-	})
-
 	Attribute("sets", Int32, "Количество подходов", func() {
 		Minimum(1)
 		Maximum(100)
@@ -62,4 +56,41 @@ var ExerciseModel = Type("ExerciseModel", func() {
 		Maximum(500)
 		Example(102.5)
 	})
+})
+
+var ExerciseListModel = Type("ExerciseListModel", func() {
+	Description("Список доступных упражнений")
+
+	Attribute("title", String, "Название упражнения", func() {
+		MinLength(1)
+		MaxLength(50) // TODO: подобрать значение потом
+		Example("Жим лежа на скамье")
+	})
+
+	Attribute("muscle_group", Int32, "Группа мыщц указывается в виде числа, нужна для получения упражнений по группе мыщц", func() {
+		Minimum(0)
+		Maximum(10) //TODO: посчитать общее количество групп и указать валидное значение, пока стоит рандом
+		Example(1)
+	})
+
+})
+
+var ExerciseListPayload = Type("ExerciseListPayload", func() {
+	Description("Необходимые поля для создания упражнения")
+
+	Extend(ExerciseListModel)
+	Required("title", "muscle_group")
+})
+
+var ExerciseList = Type("ExerciseList", func() {
+	Description("Модель Списка Упражнений с UUID")
+
+	Attribute("id", String, "Unique concert identifier", func() {
+		Format(FormatUUID)
+		Example("550e8400-e29b-41d4-a716-446655440000")
+		Description("System-generated unique identifier")
+	})
+
+	Extend(ExerciseListModel)
+	Required("id", "title", "muscle_group")
 })

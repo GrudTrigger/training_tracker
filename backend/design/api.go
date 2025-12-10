@@ -9,7 +9,7 @@ var _ = API("training_tracker", func() {
 	Description("Описание методов взаимодействия с API приложения Training Tracker")
 	Version("1.0")
 
-	Server("training tracker", func() {
+	Server("training_tracker", func() {
 		Host("localhost", func() {
 			URI("http://localhost:8080")
 		})
