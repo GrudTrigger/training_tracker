@@ -29,3 +29,7 @@ tasks:
       - |
         goa gen github.com/GrudTrigger/training_tracker/backend/design
         echo '✅ GOA: Генерация кода прошла успешно'
+  dev:up:
+    desc: "Запуска develop контейнеров docker для локальной разработки"
+    cmds:
+      - docker compose -f docker-compose.dev.yaml up --build --detach
