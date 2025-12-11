@@ -7,7 +7,7 @@ import (
 var _ = Service("exercise", func() {
 	Description("Сервис для CRUD операция с моделью ExerciseList")
 
-	Method("exercise/create", func() {
+	Method("create", func() {
 		Description("Создание нового упражнения")
 		Meta("openapi:summary", "Создание нового упражнения")
 
@@ -52,6 +52,52 @@ var _ = Service("exercise", func() {
 				Example(0)
 			})
 			Response(StatusOK)
+		})
+	})
+
+	Method("update", func() {
+		Description("Редактирование упражнения")
+		Meta("openapi:summary", "Редактирование упражнения")
+
+		Payload(func() {
+			Extend(ExerciseListPayload)
+			Attribute("exerciseId", String, func() {
+				Format(FormatUUID)
+				Example("550e8400-e29b-41d4-a716-446655440000")
+			})
+			Required("exerciseId")
+		})
+
+		Result(ExerciseList)
+		Error("not_found", ErrorResult, "Упражнение не найдено, проверьте UUID")
+		Error("bad_request", ErrorResult, "Invalid update date exercise")
+
+		HTTP(func() {
+			PUT("exercise/update")
+			Response(StatusOK)
+			Response("not_found", StatusNotFound)
+			Response("bad_request", StatusBadRequest)
+		})
+	})
+
+	Method("delete", func() {
+		Description("Удаление упражнения по uuid")
+		Meta("openapi:summary", "Удаление упражнения по uuid")
+
+		Payload(func() {
+			Attribute("exerciseId", String, func() {
+				Format(FormatUUID)
+				Example("550e8400-e29b-41d4-a716-446655440000")
+			})
+			Required("exerciseId")
+		})
+
+		Error("not_found", ErrorResult, "Упражнение не найдено")
+
+		HTTP(func() {
+			DELETE("exercise/{exerciseId}")
+			Response(StatusNoContent)
+			Response("not_found", StatusNotFound)
 		})
 	})
 })

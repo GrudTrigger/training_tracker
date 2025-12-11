@@ -16,9 +16,13 @@ import (
 // Сервис для CRUD операция с моделью ExerciseList
 type Service interface {
 	// Создание нового упражнения
-	ExerciseCreate(context.Context, *ExerciseListPayload) (res *ExerciseList, err error)
+	Create(context.Context, *ExerciseListPayload) (res *ExerciseList, err error)
 	// Получение всех упражнений с пагинацией
 	All(context.Context, *AllPayload) (res []*ExerciseList, err error)
+	// Редактирование упражнения
+	Update(context.Context, *UpdatePayload) (res *ExerciseList, err error)
+	// Удаление упражнения по uuid
+	Delete(context.Context, *DeletePayload) (err error)
 }
 
 // APIName is the name of the API as defined in the design.
@@ -35,7 +39,7 @@ const ServiceName = "exercise"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [2]string{"exercise/create", "all"}
+var MethodNames = [4]string{"create", "all", "update", "delete"}
 
 // AllPayload is the payload type of the exercise service all method.
 type AllPayload struct {
@@ -45,8 +49,12 @@ type AllPayload struct {
 	Offset int
 }
 
-// ExerciseList is the result type of the exercise service exercise/create
-// method.
+// DeletePayload is the payload type of the exercise service delete method.
+type DeletePayload struct {
+	ExerciseID string
+}
+
+// ExerciseList is the result type of the exercise service create method.
 type ExerciseList struct {
 	// System-generated unique identifier
 	ID string
@@ -57,9 +65,19 @@ type ExerciseList struct {
 	MuscleGroup int32
 }
 
-// ExerciseListPayload is the payload type of the exercise service
-// exercise/create method.
+// ExerciseListPayload is the payload type of the exercise service create
+// method.
 type ExerciseListPayload struct {
+	// Название упражнения
+	Title string
+	// Группа мыщц указывается в виде числа, нужна для получения упражнений по
+	// группе мыщц
+	MuscleGroup int32
+}
+
+// UpdatePayload is the payload type of the exercise service update method.
+type UpdatePayload struct {
+	ExerciseID string
 	// Название упражнения
 	Title string
 	// Группа мыщц указывается в виде числа, нужна для получения упражнений по
@@ -70,4 +88,9 @@ type ExerciseListPayload struct {
 // MakeBadRequest builds a goa.ServiceError from an error.
 func MakeBadRequest(err error) *goa.ServiceError {
 	return goa.NewServiceError(err, "bad_request", false, false, false)
+}
+
+// MakeNotFound builds a goa.ServiceError from an error.
+func MakeNotFound(err error) *goa.ServiceError {
+	return goa.NewServiceError(err, "not_found", false, false, false)
 }

@@ -7,12 +7,26 @@
 
 package client
 
-// ExerciseCreateExercisePath returns the URL path to the exercise service exercise/create HTTP endpoint.
-func ExerciseCreateExercisePath() string {
+import (
+	"fmt"
+)
+
+// CreateExercisePath returns the URL path to the exercise service create HTTP endpoint.
+func CreateExercisePath() string {
 	return "/exercise"
 }
 
 // AllExercisePath returns the URL path to the exercise service all HTTP endpoint.
 func AllExercisePath() string {
 	return "/exercise/all"
+}
+
+// UpdateExercisePath returns the URL path to the exercise service update HTTP endpoint.
+func UpdateExercisePath() string {
+	return "/exercise/update"
+}
+
+// DeleteExercisePath returns the URL path to the exercise service delete HTTP endpoint.
+func DeleteExercisePath(exerciseID string) string {
+	return fmt.Sprintf("/exercise/%v", exerciseID)
 }

@@ -18,9 +18,11 @@ import (
 
 // Server lists the exercise service endpoint HTTP handlers.
 type Server struct {
-	Mounts         []*MountPoint
-	ExerciseCreate http.Handler
-	All            http.Handler
+	Mounts []*MountPoint
+	Create http.Handler
+	All    http.Handler
+	Update http.Handler
+	Delete http.Handler
 }
 
 // MountPoint holds information about the mounted endpoints.
@@ -50,11 +52,15 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"ExerciseCreate", "POST", "/exercise"},
+			{"Create", "POST", "/exercise"},
 			{"All", "GET", "/exercise/all"},
+			{"Update", "PUT", "/exercise/update"},
+			{"Delete", "DELETE", "/exercise/{exerciseId}"},
 		},
-		ExerciseCreate: NewExerciseCreateHandler(e.ExerciseCreate, mux, decoder, encoder, errhandler, formatter),
-		All:            NewAllHandler(e.All, mux, decoder, encoder, errhandler, formatter),
+		Create: NewCreateHandler(e.Create, mux, decoder, encoder, errhandler, formatter),
+		All:    NewAllHandler(e.All, mux, decoder, encoder, errhandler, formatter),
+		Update: NewUpdateHandler(e.Update, mux, decoder, encoder, errhandler, formatter),
+		Delete: NewDeleteHandler(e.Delete, mux, decoder, encoder, errhandler, formatter),
 	}
 }
 
@@ -63,8 +69,10 @@ func (s *Server) Service() string { return "exercise" }
 
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
-	s.ExerciseCreate = m(s.ExerciseCreate)
+	s.Create = m(s.Create)
 	s.All = m(s.All)
+	s.Update = m(s.Update)
+	s.Delete = m(s.Delete)
 }
 
 // MethodNames returns the methods served.
@@ -72,8 +80,10 @@ func (s *Server) MethodNames() []string { return exercise.MethodNames[:] }
 
 // Mount configures the mux to serve the exercise endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
-	MountExerciseCreateHandler(mux, h.ExerciseCreate)
+	MountCreateHandler(mux, h.Create)
 	MountAllHandler(mux, h.All)
+	MountUpdateHandler(mux, h.Update)
+	MountDeleteHandler(mux, h.Delete)
 }
 
 // Mount configures the mux to serve the exercise endpoints.
@@ -81,9 +91,9 @@ func (s *Server) Mount(mux goahttp.Muxer) {
 	Mount(mux, s)
 }
 
-// MountExerciseCreateHandler configures the mux to serve the "exercise"
-// service "exercise/create" endpoint.
-func MountExerciseCreateHandler(mux goahttp.Muxer, h http.Handler) {
+// MountCreateHandler configures the mux to serve the "exercise" service
+// "create" endpoint.
+func MountCreateHandler(mux goahttp.Muxer, h http.Handler) {
 	f, ok := h.(http.HandlerFunc)
 	if !ok {
 		f = func(w http.ResponseWriter, r *http.Request) {
@@ -93,9 +103,9 @@ func MountExerciseCreateHandler(mux goahttp.Muxer, h http.Handler) {
 	mux.Handle("POST", "/exercise", f)
 }
 
-// NewExerciseCreateHandler creates a HTTP handler which loads the HTTP request
-// and calls the "exercise" service "exercise/create" endpoint.
-func NewExerciseCreateHandler(
+// NewCreateHandler creates a HTTP handler which loads the HTTP request and
+// calls the "exercise" service "create" endpoint.
+func NewCreateHandler(
 	endpoint goa.Endpoint,
 	mux goahttp.Muxer,
 	decoder func(*http.Request) goahttp.Decoder,
@@ -104,13 +114,13 @@ func NewExerciseCreateHandler(
 	formatter func(ctx context.Context, err error) goahttp.Statuser,
 ) http.Handler {
 	var (
-		decodeRequest  = DecodeExerciseCreateRequest(mux, decoder)
-		encodeResponse = EncodeExerciseCreateResponse(encoder)
-		encodeError    = EncodeExerciseCreateError(encoder, formatter)
+		decodeRequest  = DecodeCreateRequest(mux, decoder)
+		encodeResponse = EncodeCreateResponse(encoder)
+		encodeError    = EncodeCreateError(encoder, formatter)
 	)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "exercise/create")
+		ctx = context.WithValue(ctx, goa.MethodKey, "create")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "exercise")
 		payload, err := decodeRequest(r)
 		if err != nil {
@@ -164,6 +174,112 @@ func NewAllHandler(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
 		ctx = context.WithValue(ctx, goa.MethodKey, "all")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "exercise")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			if errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+		}
+	})
+}
+
+// MountUpdateHandler configures the mux to serve the "exercise" service
+// "update" endpoint.
+func MountUpdateHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("PUT", "/exercise/update", f)
+}
+
+// NewUpdateHandler creates a HTTP handler which loads the HTTP request and
+// calls the "exercise" service "update" endpoint.
+func NewUpdateHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeUpdateRequest(mux, decoder)
+		encodeResponse = EncodeUpdateResponse(encoder)
+		encodeError    = EncodeUpdateError(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "update")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "exercise")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			if errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+		}
+	})
+}
+
+// MountDeleteHandler configures the mux to serve the "exercise" service
+// "delete" endpoint.
+func MountDeleteHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("DELETE", "/exercise/{exerciseId}", f)
+}
+
+// NewDeleteHandler creates a HTTP handler which loads the HTTP request and
+// calls the "exercise" service "delete" endpoint.
+func NewDeleteHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeDeleteRequest(mux, decoder)
+		encodeResponse = EncodeDeleteResponse(encoder)
+		encodeError    = EncodeDeleteError(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "delete")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "exercise")
 		payload, err := decodeRequest(r)
 		if err != nil {

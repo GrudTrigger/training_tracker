@@ -19,24 +19,24 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// EncodeExerciseCreateResponse returns an encoder for responses returned by
-// the exercise exercise/create endpoint.
-func EncodeExerciseCreateResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+// EncodeCreateResponse returns an encoder for responses returned by the
+// exercise create endpoint.
+func EncodeCreateResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
 		res, _ := v.(*exercise.ExerciseList)
 		enc := encoder(ctx, w)
-		body := NewExerciseCreateResponseBody(res)
+		body := NewCreateResponseBody(res)
 		w.WriteHeader(http.StatusCreated)
 		return enc.Encode(body)
 	}
 }
 
-// DecodeExerciseCreateRequest returns a decoder for requests sent to the
-// exercise exercise/create endpoint.
-func DecodeExerciseCreateRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*exercise.ExerciseListPayload, error) {
+// DecodeCreateRequest returns a decoder for requests sent to the exercise
+// create endpoint.
+func DecodeCreateRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*exercise.ExerciseListPayload, error) {
 	return func(r *http.Request) (*exercise.ExerciseListPayload, error) {
 		var (
-			body ExerciseCreateRequestBody
+			body CreateRequestBody
 			err  error
 		)
 		err = decoder(r).Decode(&body)
@@ -50,19 +50,19 @@ func DecodeExerciseCreateRequest(mux goahttp.Muxer, decoder func(*http.Request) 
 			}
 			return nil, goa.DecodePayloadError(err.Error())
 		}
-		err = ValidateExerciseCreateRequestBody(&body)
+		err = ValidateCreateRequestBody(&body)
 		if err != nil {
 			return nil, err
 		}
-		payload := NewExerciseCreateExerciseListPayload(&body)
+		payload := NewCreateExerciseListPayload(&body)
 
 		return payload, nil
 	}
 }
 
-// EncodeExerciseCreateError returns an encoder for errors returned by the
-// exercise/create exercise endpoint.
-func EncodeExerciseCreateError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+// EncodeCreateError returns an encoder for errors returned by the create
+// exercise endpoint.
+func EncodeCreateError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
 	encodeError := goahttp.ErrorEncoder(encoder, formatter)
 	return func(ctx context.Context, w http.ResponseWriter, v error) error {
 		var en goa.GoaErrorNamer
@@ -78,7 +78,7 @@ func EncodeExerciseCreateError(encoder func(context.Context, http.ResponseWriter
 			if formatter != nil {
 				body = formatter(ctx, res)
 			} else {
-				body = NewExerciseCreateBadRequestResponseBody(res)
+				body = NewCreateBadRequestResponseBody(res)
 			}
 			w.Header().Set("goa-error", res.GoaErrorName())
 			w.WriteHeader(http.StatusBadRequest)
@@ -145,6 +145,148 @@ func DecodeAllRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Dec
 		payload := NewAllPayload(limit, offset)
 
 		return payload, nil
+	}
+}
+
+// EncodeUpdateResponse returns an encoder for responses returned by the
+// exercise update endpoint.
+func EncodeUpdateResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+	return func(ctx context.Context, w http.ResponseWriter, v any) error {
+		res, _ := v.(*exercise.ExerciseList)
+		enc := encoder(ctx, w)
+		body := NewUpdateResponseBody(res)
+		w.WriteHeader(http.StatusOK)
+		return enc.Encode(body)
+	}
+}
+
+// DecodeUpdateRequest returns a decoder for requests sent to the exercise
+// update endpoint.
+func DecodeUpdateRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*exercise.UpdatePayload, error) {
+	return func(r *http.Request) (*exercise.UpdatePayload, error) {
+		var (
+			body UpdateRequestBody
+			err  error
+		)
+		err = decoder(r).Decode(&body)
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return nil, goa.MissingPayloadError()
+			}
+			var gerr *goa.ServiceError
+			if errors.As(err, &gerr) {
+				return nil, gerr
+			}
+			return nil, goa.DecodePayloadError(err.Error())
+		}
+		err = ValidateUpdateRequestBody(&body)
+		if err != nil {
+			return nil, err
+		}
+		payload := NewUpdatePayload(&body)
+
+		return payload, nil
+	}
+}
+
+// EncodeUpdateError returns an encoder for errors returned by the update
+// exercise endpoint.
+func EncodeUpdateError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "not_found":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewUpdateNotFoundResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusNotFound)
+			return enc.Encode(body)
+		case "bad_request":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewUpdateBadRequestResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
+	}
+}
+
+// EncodeDeleteResponse returns an encoder for responses returned by the
+// exercise delete endpoint.
+func EncodeDeleteResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+	return func(ctx context.Context, w http.ResponseWriter, v any) error {
+		w.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+}
+
+// DecodeDeleteRequest returns a decoder for requests sent to the exercise
+// delete endpoint.
+func DecodeDeleteRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*exercise.DeletePayload, error) {
+	return func(r *http.Request) (*exercise.DeletePayload, error) {
+		var (
+			exerciseID string
+			err        error
+
+			params = mux.Vars(r)
+		)
+		exerciseID = params["exerciseId"]
+		err = goa.MergeErrors(err, goa.ValidateFormat("exerciseId", exerciseID, goa.FormatUUID))
+		if err != nil {
+			return nil, err
+		}
+		payload := NewDeletePayload(exerciseID)
+
+		return payload, nil
+	}
+}
+
+// EncodeDeleteError returns an encoder for errors returned by the delete
+// exercise endpoint.
+func EncodeDeleteError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "not_found":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewDeleteNotFoundResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusNotFound)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
 	}
 }
 

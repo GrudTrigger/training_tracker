@@ -14,9 +14,9 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// ExerciseCreateRequestBody is the type of the "exercise" service
-// "exercise/create" endpoint HTTP request body.
-type ExerciseCreateRequestBody struct {
+// CreateRequestBody is the type of the "exercise" service "create" endpoint
+// HTTP request body.
+type CreateRequestBody struct {
 	// Название упражнения
 	Title *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
 	// Группа мыщц указывается в виде числа, нужна для получения упражнений по
@@ -24,9 +24,20 @@ type ExerciseCreateRequestBody struct {
 	MuscleGroup *int32 `form:"muscle_group,omitempty" json:"muscle_group,omitempty" xml:"muscle_group,omitempty"`
 }
 
-// ExerciseCreateResponseBody is the type of the "exercise" service
-// "exercise/create" endpoint HTTP response body.
-type ExerciseCreateResponseBody struct {
+// UpdateRequestBody is the type of the "exercise" service "update" endpoint
+// HTTP request body.
+type UpdateRequestBody struct {
+	ExerciseID *string `form:"exerciseId,omitempty" json:"exerciseId,omitempty" xml:"exerciseId,omitempty"`
+	// Название упражнения
+	Title *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
+	// Группа мыщц указывается в виде числа, нужна для получения упражнений по
+	// группе мыщц
+	MuscleGroup *int32 `form:"muscle_group,omitempty" json:"muscle_group,omitempty" xml:"muscle_group,omitempty"`
+}
+
+// CreateResponseBody is the type of the "exercise" service "create" endpoint
+// HTTP response body.
+type CreateResponseBody struct {
 	// System-generated unique identifier
 	ID string `form:"id" json:"id" xml:"id"`
 	// Название упражнения
@@ -40,9 +51,75 @@ type ExerciseCreateResponseBody struct {
 // response body.
 type AllResponseBody []*ExerciseListResponse
 
-// ExerciseCreateBadRequestResponseBody is the type of the "exercise" service
-// "exercise/create" endpoint HTTP response body for the "bad_request" error.
-type ExerciseCreateBadRequestResponseBody struct {
+// UpdateResponseBody is the type of the "exercise" service "update" endpoint
+// HTTP response body.
+type UpdateResponseBody struct {
+	// System-generated unique identifier
+	ID string `form:"id" json:"id" xml:"id"`
+	// Название упражнения
+	Title string `form:"title" json:"title" xml:"title"`
+	// Группа мыщц указывается в виде числа, нужна для получения упражнений по
+	// группе мыщц
+	MuscleGroup int32 `form:"muscle_group" json:"muscle_group" xml:"muscle_group"`
+}
+
+// CreateBadRequestResponseBody is the type of the "exercise" service "create"
+// endpoint HTTP response body for the "bad_request" error.
+type CreateBadRequestResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// UpdateNotFoundResponseBody is the type of the "exercise" service "update"
+// endpoint HTTP response body for the "not_found" error.
+type UpdateNotFoundResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// UpdateBadRequestResponseBody is the type of the "exercise" service "update"
+// endpoint HTTP response body for the "bad_request" error.
+type UpdateBadRequestResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// DeleteNotFoundResponseBody is the type of the "exercise" service "delete"
+// endpoint HTTP response body for the "not_found" error.
+type DeleteNotFoundResponseBody struct {
 	// Name is the name of this class of errors.
 	Name string `form:"name" json:"name" xml:"name"`
 	// ID is a unique identifier for this particular occurrence of the problem.
@@ -69,10 +146,10 @@ type ExerciseListResponse struct {
 	MuscleGroup int32 `form:"muscle_group" json:"muscle_group" xml:"muscle_group"`
 }
 
-// NewExerciseCreateResponseBody builds the HTTP response body from the result
-// of the "exercise/create" endpoint of the "exercise" service.
-func NewExerciseCreateResponseBody(res *exercise.ExerciseList) *ExerciseCreateResponseBody {
-	body := &ExerciseCreateResponseBody{
+// NewCreateResponseBody builds the HTTP response body from the result of the
+// "create" endpoint of the "exercise" service.
+func NewCreateResponseBody(res *exercise.ExerciseList) *CreateResponseBody {
+	body := &CreateResponseBody{
 		ID:          res.ID,
 		Title:       res.Title,
 		MuscleGroup: res.MuscleGroup,
@@ -94,10 +171,21 @@ func NewAllResponseBody(res []*exercise.ExerciseList) AllResponseBody {
 	return body
 }
 
-// NewExerciseCreateBadRequestResponseBody builds the HTTP response body from
-// the result of the "exercise/create" endpoint of the "exercise" service.
-func NewExerciseCreateBadRequestResponseBody(res *goa.ServiceError) *ExerciseCreateBadRequestResponseBody {
-	body := &ExerciseCreateBadRequestResponseBody{
+// NewUpdateResponseBody builds the HTTP response body from the result of the
+// "update" endpoint of the "exercise" service.
+func NewUpdateResponseBody(res *exercise.ExerciseList) *UpdateResponseBody {
+	body := &UpdateResponseBody{
+		ID:          res.ID,
+		Title:       res.Title,
+		MuscleGroup: res.MuscleGroup,
+	}
+	return body
+}
+
+// NewCreateBadRequestResponseBody builds the HTTP response body from the
+// result of the "create" endpoint of the "exercise" service.
+func NewCreateBadRequestResponseBody(res *goa.ServiceError) *CreateBadRequestResponseBody {
+	body := &CreateBadRequestResponseBody{
 		Name:      res.Name,
 		ID:        res.ID,
 		Message:   res.Message,
@@ -108,9 +196,51 @@ func NewExerciseCreateBadRequestResponseBody(res *goa.ServiceError) *ExerciseCre
 	return body
 }
 
-// NewExerciseCreateExerciseListPayload builds a exercise service
-// exercise/create endpoint payload.
-func NewExerciseCreateExerciseListPayload(body *ExerciseCreateRequestBody) *exercise.ExerciseListPayload {
+// NewUpdateNotFoundResponseBody builds the HTTP response body from the result
+// of the "update" endpoint of the "exercise" service.
+func NewUpdateNotFoundResponseBody(res *goa.ServiceError) *UpdateNotFoundResponseBody {
+	body := &UpdateNotFoundResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
+// NewUpdateBadRequestResponseBody builds the HTTP response body from the
+// result of the "update" endpoint of the "exercise" service.
+func NewUpdateBadRequestResponseBody(res *goa.ServiceError) *UpdateBadRequestResponseBody {
+	body := &UpdateBadRequestResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
+// NewDeleteNotFoundResponseBody builds the HTTP response body from the result
+// of the "delete" endpoint of the "exercise" service.
+func NewDeleteNotFoundResponseBody(res *goa.ServiceError) *DeleteNotFoundResponseBody {
+	body := &DeleteNotFoundResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
+// NewCreateExerciseListPayload builds a exercise service create endpoint
+// payload.
+func NewCreateExerciseListPayload(body *CreateRequestBody) *exercise.ExerciseListPayload {
 	v := &exercise.ExerciseListPayload{
 		Title:       *body.Title,
 		MuscleGroup: *body.MuscleGroup,
@@ -128,14 +258,69 @@ func NewAllPayload(limit int, offset int) *exercise.AllPayload {
 	return v
 }
 
-// ValidateExerciseCreateRequestBody runs the validations defined on
-// Exercise/CreateRequestBody
-func ValidateExerciseCreateRequestBody(body *ExerciseCreateRequestBody) (err error) {
+// NewUpdatePayload builds a exercise service update endpoint payload.
+func NewUpdatePayload(body *UpdateRequestBody) *exercise.UpdatePayload {
+	v := &exercise.UpdatePayload{
+		ExerciseID:  *body.ExerciseID,
+		Title:       *body.Title,
+		MuscleGroup: *body.MuscleGroup,
+	}
+
+	return v
+}
+
+// NewDeletePayload builds a exercise service delete endpoint payload.
+func NewDeletePayload(exerciseID string) *exercise.DeletePayload {
+	v := &exercise.DeletePayload{}
+	v.ExerciseID = exerciseID
+
+	return v
+}
+
+// ValidateCreateRequestBody runs the validations defined on CreateRequestBody
+func ValidateCreateRequestBody(body *CreateRequestBody) (err error) {
 	if body.Title == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("title", "body"))
 	}
 	if body.MuscleGroup == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("muscle_group", "body"))
+	}
+	if body.Title != nil {
+		if utf8.RuneCountInString(*body.Title) < 1 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.title", *body.Title, utf8.RuneCountInString(*body.Title), 1, true))
+		}
+	}
+	if body.Title != nil {
+		if utf8.RuneCountInString(*body.Title) > 50 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.title", *body.Title, utf8.RuneCountInString(*body.Title), 50, false))
+		}
+	}
+	if body.MuscleGroup != nil {
+		if *body.MuscleGroup < 0 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError("body.muscle_group", *body.MuscleGroup, 0, true))
+		}
+	}
+	if body.MuscleGroup != nil {
+		if *body.MuscleGroup > 10 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError("body.muscle_group", *body.MuscleGroup, 10, false))
+		}
+	}
+	return
+}
+
+// ValidateUpdateRequestBody runs the validations defined on UpdateRequestBody
+func ValidateUpdateRequestBody(body *UpdateRequestBody) (err error) {
+	if body.ExerciseID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("exerciseId", "body"))
+	}
+	if body.Title == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("title", "body"))
+	}
+	if body.MuscleGroup == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("muscle_group", "body"))
+	}
+	if body.ExerciseID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.exerciseId", *body.ExerciseID, goa.FormatUUID))
 	}
 	if body.Title != nil {
 		if utf8.RuneCountInString(*body.Title) < 1 {

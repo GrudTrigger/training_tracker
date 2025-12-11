@@ -15,26 +15,29 @@ import (
 
 // Client is the "exercise" service client.
 type Client struct {
-	ExerciseCreateEndpoint goa.Endpoint
-	AllEndpoint            goa.Endpoint
+	CreateEndpoint goa.Endpoint
+	AllEndpoint    goa.Endpoint
+	UpdateEndpoint goa.Endpoint
+	DeleteEndpoint goa.Endpoint
 }
 
 // NewClient initializes a "exercise" service client given the endpoints.
-func NewClient(exerciseCreate, all goa.Endpoint) *Client {
+func NewClient(create, all, update, delete_ goa.Endpoint) *Client {
 	return &Client{
-		ExerciseCreateEndpoint: exerciseCreate,
-		AllEndpoint:            all,
+		CreateEndpoint: create,
+		AllEndpoint:    all,
+		UpdateEndpoint: update,
+		DeleteEndpoint: delete_,
 	}
 }
 
-// ExerciseCreate calls the "exercise/create" endpoint of the "exercise"
-// service.
-// ExerciseCreate may return the following errors:
+// Create calls the "create" endpoint of the "exercise" service.
+// Create may return the following errors:
 //   - "bad_request" (type *goa.ServiceError): Invalid input data provided
 //   - error: internal error
-func (c *Client) ExerciseCreate(ctx context.Context, p *ExerciseListPayload) (res *ExerciseList, err error) {
+func (c *Client) Create(ctx context.Context, p *ExerciseListPayload) (res *ExerciseList, err error) {
 	var ires any
-	ires, err = c.ExerciseCreateEndpoint(ctx, p)
+	ires, err = c.CreateEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
@@ -49,4 +52,27 @@ func (c *Client) All(ctx context.Context, p *AllPayload) (res []*ExerciseList, e
 		return
 	}
 	return ires.([]*ExerciseList), nil
+}
+
+// Update calls the "update" endpoint of the "exercise" service.
+// Update may return the following errors:
+//   - "not_found" (type *goa.ServiceError): Упражнение не найдено, проверьте UUID
+//   - "bad_request" (type *goa.ServiceError): Invalid update date exercise
+//   - error: internal error
+func (c *Client) Update(ctx context.Context, p *UpdatePayload) (res *ExerciseList, err error) {
+	var ires any
+	ires, err = c.UpdateEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(*ExerciseList), nil
+}
+
+// Delete calls the "delete" endpoint of the "exercise" service.
+// Delete may return the following errors:
+//   - "not_found" (type *goa.ServiceError): Упражнение не найдено
+//   - error: internal error
+func (c *Client) Delete(ctx context.Context, p *DeletePayload) (err error) {
+	_, err = c.DeleteEndpoint(ctx, p)
+	return
 }

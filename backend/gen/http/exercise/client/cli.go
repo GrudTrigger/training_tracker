@@ -17,13 +17,13 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// BuildExerciseCreatePayload builds the payload for the exercise
-// exercise/create endpoint from CLI flags.
-func BuildExerciseCreatePayload(exerciseExerciseCreateBody string) (*exercise.ExerciseListPayload, error) {
+// BuildCreatePayload builds the payload for the exercise create endpoint from
+// CLI flags.
+func BuildCreatePayload(exerciseCreateBody string) (*exercise.ExerciseListPayload, error) {
 	var err error
-	var body ExerciseCreateRequestBody
+	var body CreateRequestBody
 	{
-		err = json.Unmarshal([]byte(exerciseExerciseCreateBody), &body)
+		err = json.Unmarshal([]byte(exerciseCreateBody), &body)
 		if err != nil {
 			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'")
 		}
@@ -92,6 +92,60 @@ func BuildAllPayload(exerciseAllLimit string, exerciseAllOffset string) (*exerci
 	v := &exercise.AllPayload{}
 	v.Limit = limit
 	v.Offset = offset
+
+	return v, nil
+}
+
+// BuildUpdatePayload builds the payload for the exercise update endpoint from
+// CLI flags.
+func BuildUpdatePayload(exerciseUpdateBody string) (*exercise.UpdatePayload, error) {
+	var err error
+	var body UpdateRequestBody
+	{
+		err = json.Unmarshal([]byte(exerciseUpdateBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"exerciseId\": \"550e8400-e29b-41d4-a716-446655440000\",\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'")
+		}
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.exerciseId", body.ExerciseID, goa.FormatUUID))
+		if utf8.RuneCountInString(body.Title) < 1 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.title", body.Title, utf8.RuneCountInString(body.Title), 1, true))
+		}
+		if utf8.RuneCountInString(body.Title) > 50 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.title", body.Title, utf8.RuneCountInString(body.Title), 50, false))
+		}
+		if body.MuscleGroup < 0 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError("body.muscle_group", body.MuscleGroup, 0, true))
+		}
+		if body.MuscleGroup > 10 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError("body.muscle_group", body.MuscleGroup, 10, false))
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	v := &exercise.UpdatePayload{
+		ExerciseID:  body.ExerciseID,
+		Title:       body.Title,
+		MuscleGroup: body.MuscleGroup,
+	}
+
+	return v, nil
+}
+
+// BuildDeletePayload builds the payload for the exercise delete endpoint from
+// CLI flags.
+func BuildDeletePayload(exerciseDeleteExerciseID string) (*exercise.DeletePayload, error) {
+	var err error
+	var exerciseID string
+	{
+		exerciseID = exerciseDeleteExerciseID
+		err = goa.MergeErrors(err, goa.ValidateFormat("exerciseId", exerciseID, goa.FormatUUID))
+		if err != nil {
+			return nil, err
+		}
+	}
+	v := &exercise.DeletePayload{}
+	v.ExerciseID = exerciseID
 
 	return v, nil
 }

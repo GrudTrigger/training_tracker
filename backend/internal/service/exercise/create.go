@@ -3,11 +3,11 @@ package exercise
 import (
 	"context"
 
-	gen "github.com/GrudTrigger/training_tracker/backend/gen/exercise"
+	model "github.com/GrudTrigger/training_tracker/backend/gen/exercise"
 )
 
-func (s *ExerciseService) Create(context.Context, *gen.ExerciseListPayload) (res *gen.ExerciseList, err error) {
-	return &gen.ExerciseList{
+func (s *ExerciseService) Create(ctx context.Context, data *model.ExerciseListPayload) (*model.ExerciseList, error) {
+	return &model.ExerciseList{
 		ID:          "asdasd",
 		Title:       "Жим лежа",
 		MuscleGroup: 1,

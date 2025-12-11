@@ -15,30 +15,36 @@ import (
 
 // Endpoints wraps the "exercise" service endpoints.
 type Endpoints struct {
-	ExerciseCreate goa.Endpoint
-	All            goa.Endpoint
+	Create goa.Endpoint
+	All    goa.Endpoint
+	Update goa.Endpoint
+	Delete goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "exercise" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
-		ExerciseCreate: NewExerciseCreateEndpoint(s),
-		All:            NewAllEndpoint(s),
+		Create: NewCreateEndpoint(s),
+		All:    NewAllEndpoint(s),
+		Update: NewUpdateEndpoint(s),
+		Delete: NewDeleteEndpoint(s),
 	}
 }
 
 // Use applies the given middleware to all the "exercise" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
-	e.ExerciseCreate = m(e.ExerciseCreate)
+	e.Create = m(e.Create)
 	e.All = m(e.All)
+	e.Update = m(e.Update)
+	e.Delete = m(e.Delete)
 }
 
-// NewExerciseCreateEndpoint returns an endpoint function that calls the method
-// "exercise/create" of service "exercise".
-func NewExerciseCreateEndpoint(s Service) goa.Endpoint {
+// NewCreateEndpoint returns an endpoint function that calls the method
+// "create" of service "exercise".
+func NewCreateEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*ExerciseListPayload)
-		return s.ExerciseCreate(ctx, p)
+		return s.Create(ctx, p)
 	}
 }
 
@@ -48,5 +54,23 @@ func NewAllEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*AllPayload)
 		return s.All(ctx, p)
+	}
+}
+
+// NewUpdateEndpoint returns an endpoint function that calls the method
+// "update" of service "exercise".
+func NewUpdateEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*UpdatePayload)
+		return s.Update(ctx, p)
+	}
+}
+
+// NewDeleteEndpoint returns an endpoint function that calls the method
+// "delete" of service "exercise".
+func NewDeleteEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*DeletePayload)
+		return nil, s.Delete(ctx, p)
 	}
 }

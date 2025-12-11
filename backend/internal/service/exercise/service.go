@@ -1,14 +1,14 @@
 package exercise
 
 import (
-	exerciseRepo "github.com/GrudTrigger/training_tracker/backend/internal/repository/exercise"
+	"github.com/GrudTrigger/training_tracker/backend/internal/repository"
 )
 
 type ExerciseService struct {
-	repo *exerciseRepo.ExersiceRepository //TODO: передалать на интерфейс
+	repo repository.ExerciseRepo //TODO: передалать на интерфейс
 }
 
-func NewExerciseService(repo *exerciseRepo.ExersiceRepository) *ExerciseService {
+func NewExerciseService(repo repository.ExerciseRepo) *ExerciseService {
 	return &ExerciseService{
 		repo: repo,
 	}
