@@ -1,4 +1,3 @@
-# .github/workflows/golangci-lint.yml
 name: golangci-lint
 
 on:
