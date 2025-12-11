@@ -43,7 +43,7 @@ jobs:
         run: |
           echo "==> gofumpt check"
           # если есть несформатированные файлы, gofumpt -l выведет их
-          UNFORMATTED=$(gofumpt -l ./... || true)
+          UNFORMATTED=$(gofumpt -w ./ || true)
           if [ -n "$UNFORMATTED" ]; then
             echo "gofumpt found unformatted files:"
             echo "$UNFORMATTED"
@@ -60,7 +60,7 @@ jobs:
           TMPDIR=$(mktemp -d)
           cp -r . "$TMPDIR/src"
           cd "$TMPDIR/src"
-          gci write ./... --skip-generated
+          gci write ./ -s standard -s default
           # если есть diff — значит gci изменил файлы
           if [ -n "$(git status --porcelain)" ]; then
             echo "gci would reformat imports. Run 'gci write ./...' locally to fix."
