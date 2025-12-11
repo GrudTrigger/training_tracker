@@ -1,0 +1,76 @@
+name: Backend CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+
+jobs:
+  fmt-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.24.6
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      - name: Install tools
+        run: |
+          go install mvdan.cc/gofumpt@latest
+          go install github.com/daixiang0/gci@latest
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+      - name: Run gofumpt (check)
+        working-directory: backend
+        run: |
+          echo "==> gofumpt check"
+          # если есть несформатированные файлы, gofumpt -l выведет их
+          UNFORMATTED=$(gofumpt -l ./... || true)
+          if [ -n "$UNFORMATTED" ]; then
+            echo "gofumpt found unformatted files:"
+            echo "$UNFORMATTED"
+            echo "Run 'gofumpt -w ./...' locally to fix."
+            exit 1
+          fi
+          echo "gofumpt: ok"
+
+      - name: Run gci (imports) (check)
+        working-directory: backend
+        run: |
+          echo "==> gci check"
+          # gci не имеет отдельного 'check' флага, поэтому делаем так: запишем в temp и сравним
+          TMPDIR=$(mktemp -d)
+          cp -r . "$TMPDIR/src"
+          cd "$TMPDIR/src"
+          gci write ./... --skip-generated
+          # если есть diff — значит gci изменил файлы
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "gci would reformat imports. Run 'gci write ./...' locally to fix."
+            exit 1
+          fi
+          echo "gci: ok"
+
+      - name: Run golangci-lint
+        working-directory: backend
+        run: |
+          echo "==> golangci-lint run"
+          # Если хочешь, можешь положить .golangci.yml в backend/
+          golangci-lint run ./...
