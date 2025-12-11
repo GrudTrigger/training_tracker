@@ -8,6 +8,6 @@ import (
 )
 
 func (s *ExerciseService) Update(ctx context.Context, data *model.UpdatePayload) (*model.ExerciseList, error) {
-	fmt.Println("test actions CI")
+	fmt.Println("test actions")
 	return &model.ExerciseList{}, nil
 }
