@@ -16,7 +16,7 @@ var WorkoutModel = Type("WorkoutModel", func() {
 
 	Attribute("date", String, "Дата проведение тренировки", func() {
 		Format(FormatDate)
-		Example("2025-12-08") //YYYY-MM-DD
+		Example("2025-12-08") // YYYY-MM-DD
 	})
 
 	Attribute("duration", Int, "Продолжительность тренировки в секундах", func() {
@@ -69,10 +69,9 @@ var ExerciseListModel = Type("ExerciseListModel", func() {
 
 	Attribute("muscle_group", Int32, "Группа мыщц указывается в виде числа, нужна для получения упражнений по группе мыщц", func() {
 		Minimum(0)
-		Maximum(10) //TODO: посчитать общее количество групп и указать валидное значение, пока стоит рандом
+		Maximum(10) // TODO: посчитать общее количество групп и указать валидное значение, пока стоит рандом
 		Example(1)
 	})
-
 })
 
 var ExerciseListPayload = Type("ExerciseListPayload", func() {

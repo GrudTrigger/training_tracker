@@ -5,7 +5,7 @@ import (
 )
 
 type ExerciseService struct {
-	repo repository.ExerciseRepo //TODO: передалать на интерфейс
+	repo repository.ExerciseRepo // TODO: передалать на интерфейс
 }
 
 func NewExerciseService(repo repository.ExerciseRepo) *ExerciseService {

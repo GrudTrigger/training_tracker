@@ -1,4 +1,3 @@
 package service
 
-type ExerciseService interface {
-}
+type ExerciseService interface{}

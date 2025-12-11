@@ -11,12 +11,11 @@ import (
 	"github.com/GrudTrigger/training_tracker/backend/internal/config"
 	repoExercise "github.com/GrudTrigger/training_tracker/backend/internal/repository/exercise"
 	"github.com/GrudTrigger/training_tracker/backend/internal/service/exercise"
-
 	"github.com/jackc/pgx/v5"
 	goahttp "goa.design/goa/v3/http"
 )
 
-const envPath = "../.env" //TODO: после заменить на /.env потому что при билде будет лежать в корне с .envß
+const envPath = "../.env" // TODO: после заменить на /.env потому что при билде будет лежать в корне с .envß
 
 func main() {
 	err := config.Load(envPath)
