@@ -13,7 +13,7 @@ import (
 	"net/http"
 	"os"
 
-	exercisec "github.com/GrudTrigger/training_tracker/backend/gen/http/exercise/client"
+	exercisesc "github.com/GrudTrigger/training_tracker/backend/gen/http/exercises/client"
 	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
 )
@@ -23,13 +23,13 @@ import (
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() []string {
 	return []string{
-		"exercise (create|all|update|delete)",
+		"exercises (create|all|update|delete)",
 	}
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + " " + "exercise create --body '{\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'" + "\n" +
+	return os.Args[0] + " " + "exercises create --body '{\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'" + "\n" +
 		""
 }
 
@@ -43,26 +43,26 @@ func ParseEndpoint(
 	restore bool,
 ) (goa.Endpoint, any, error) {
 	var (
-		exerciseFlags = flag.NewFlagSet("exercise", flag.ContinueOnError)
+		exercisesFlags = flag.NewFlagSet("exercises", flag.ContinueOnError)
 
-		exerciseCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
-		exerciseCreateBodyFlag = exerciseCreateFlags.String("body", "REQUIRED", "")
+		exercisesCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
+		exercisesCreateBodyFlag = exercisesCreateFlags.String("body", "REQUIRED", "")
 
-		exerciseAllFlags      = flag.NewFlagSet("all", flag.ExitOnError)
-		exerciseAllLimitFlag  = exerciseAllFlags.String("limit", "1", "")
-		exerciseAllOffsetFlag = exerciseAllFlags.String("offset", "", "")
+		exercisesAllFlags      = flag.NewFlagSet("all", flag.ExitOnError)
+		exercisesAllLimitFlag  = exercisesAllFlags.String("limit", "1", "")
+		exercisesAllOffsetFlag = exercisesAllFlags.String("offset", "", "")
 
-		exerciseUpdateFlags    = flag.NewFlagSet("update", flag.ExitOnError)
-		exerciseUpdateBodyFlag = exerciseUpdateFlags.String("body", "REQUIRED", "")
+		exercisesUpdateFlags    = flag.NewFlagSet("update", flag.ExitOnError)
+		exercisesUpdateBodyFlag = exercisesUpdateFlags.String("body", "REQUIRED", "")
 
-		exerciseDeleteFlags          = flag.NewFlagSet("delete", flag.ExitOnError)
-		exerciseDeleteExerciseIDFlag = exerciseDeleteFlags.String("exercise-id", "REQUIRED", "")
+		exercisesDeleteFlags          = flag.NewFlagSet("delete", flag.ExitOnError)
+		exercisesDeleteExerciseIDFlag = exercisesDeleteFlags.String("exercise-id", "REQUIRED", "")
 	)
-	exerciseFlags.Usage = exerciseUsage
-	exerciseCreateFlags.Usage = exerciseCreateUsage
-	exerciseAllFlags.Usage = exerciseAllUsage
-	exerciseUpdateFlags.Usage = exerciseUpdateUsage
-	exerciseDeleteFlags.Usage = exerciseDeleteUsage
+	exercisesFlags.Usage = exercisesUsage
+	exercisesCreateFlags.Usage = exercisesCreateUsage
+	exercisesAllFlags.Usage = exercisesAllUsage
+	exercisesUpdateFlags.Usage = exercisesUpdateUsage
+	exercisesDeleteFlags.Usage = exercisesDeleteUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -79,8 +79,8 @@ func ParseEndpoint(
 	{
 		svcn = flag.Arg(0)
 		switch svcn {
-		case "exercise":
-			svcf = exerciseFlags
+		case "exercises":
+			svcf = exercisesFlags
 		default:
 			return nil, nil, fmt.Errorf("unknown service %q", svcn)
 		}
@@ -96,19 +96,19 @@ func ParseEndpoint(
 	{
 		epn = svcf.Arg(0)
 		switch svcn {
-		case "exercise":
+		case "exercises":
 			switch epn {
 			case "create":
-				epf = exerciseCreateFlags
+				epf = exercisesCreateFlags
 
 			case "all":
-				epf = exerciseAllFlags
+				epf = exercisesAllFlags
 
 			case "update":
-				epf = exerciseUpdateFlags
+				epf = exercisesUpdateFlags
 
 			case "delete":
-				epf = exerciseDeleteFlags
+				epf = exercisesDeleteFlags
 
 			}
 
@@ -132,21 +132,21 @@ func ParseEndpoint(
 	)
 	{
 		switch svcn {
-		case "exercise":
-			c := exercisec.NewClient(scheme, host, doer, enc, dec, restore)
+		case "exercises":
+			c := exercisesc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
 			case "create":
 				endpoint = c.Create()
-				data, err = exercisec.BuildCreatePayload(*exerciseCreateBodyFlag)
+				data, err = exercisesc.BuildCreatePayload(*exercisesCreateBodyFlag)
 			case "all":
 				endpoint = c.All()
-				data, err = exercisec.BuildAllPayload(*exerciseAllLimitFlag, *exerciseAllOffsetFlag)
+				data, err = exercisesc.BuildAllPayload(*exercisesAllLimitFlag, *exercisesAllOffsetFlag)
 			case "update":
 				endpoint = c.Update()
-				data, err = exercisec.BuildUpdatePayload(*exerciseUpdateBodyFlag)
+				data, err = exercisesc.BuildUpdatePayload(*exercisesUpdateBodyFlag)
 			case "delete":
 				endpoint = c.Delete()
-				data, err = exercisec.BuildDeletePayload(*exerciseDeleteExerciseIDFlag)
+				data, err = exercisesc.BuildDeletePayload(*exercisesDeleteExerciseIDFlag)
 			}
 		}
 	}
@@ -157,10 +157,11 @@ func ParseEndpoint(
 	return endpoint, data, nil
 }
 
-// exerciseUsage displays the usage of the exercise command and its subcommands.
-func exerciseUsage() {
-	fmt.Fprintln(os.Stderr, `Сервис для CRUD операция с моделью ExerciseList`)
-	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] exercise COMMAND [flags]\n\n", os.Args[0])
+// exercisesUsage displays the usage of the exercises command and its
+// subcommands.
+func exercisesUsage() {
+	fmt.Fprintln(os.Stderr, `Сервис для CRUD операция с моделью Exercises(Упражнения)`)
+	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] exercises COMMAND [flags]\n\n", os.Args[0])
 	fmt.Fprintln(os.Stderr, "COMMAND:")
 	fmt.Fprintln(os.Stderr, `    create: Создание нового упражнения`)
 	fmt.Fprintln(os.Stderr, `    all: Получение всех упражнений с пагинацией`)
@@ -168,11 +169,11 @@ func exerciseUsage() {
 	fmt.Fprintln(os.Stderr, `    delete: Удаление упражнения по uuid`)
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Additional help:")
-	fmt.Fprintf(os.Stderr, "    %s exercise COMMAND --help\n", os.Args[0])
+	fmt.Fprintf(os.Stderr, "    %s exercises COMMAND --help\n", os.Args[0])
 }
-func exerciseCreateUsage() {
+func exercisesCreateUsage() {
 	// Header with flags
-	fmt.Fprintf(os.Stderr, "%s [flags] exercise create", os.Args[0])
+	fmt.Fprintf(os.Stderr, "%s [flags] exercises create", os.Args[0])
 	fmt.Fprint(os.Stderr, " -body JSON")
 	fmt.Fprintln(os.Stderr)
 
@@ -185,12 +186,12 @@ func exerciseCreateUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "exercise create --body '{\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "exercises create --body '{\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'")
 }
 
-func exerciseAllUsage() {
+func exercisesAllUsage() {
 	// Header with flags
-	fmt.Fprintf(os.Stderr, "%s [flags] exercise all", os.Args[0])
+	fmt.Fprintf(os.Stderr, "%s [flags] exercises all", os.Args[0])
 	fmt.Fprint(os.Stderr, " -limit INT")
 	fmt.Fprint(os.Stderr, " -offset INT")
 	fmt.Fprintln(os.Stderr)
@@ -205,12 +206,12 @@ func exerciseAllUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "exercise all --limit 20 --offset 0")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "exercises all --limit 20 --offset 0")
 }
 
-func exerciseUpdateUsage() {
+func exercisesUpdateUsage() {
 	// Header with flags
-	fmt.Fprintf(os.Stderr, "%s [flags] exercise update", os.Args[0])
+	fmt.Fprintf(os.Stderr, "%s [flags] exercises update", os.Args[0])
 	fmt.Fprint(os.Stderr, " -body JSON")
 	fmt.Fprintln(os.Stderr)
 
@@ -223,12 +224,12 @@ func exerciseUpdateUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "exercise update --body '{\n      \"exerciseId\": \"550e8400-e29b-41d4-a716-446655440000\",\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "exercises update --body '{\n      \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'")
 }
 
-func exerciseDeleteUsage() {
+func exercisesDeleteUsage() {
 	// Header with flags
-	fmt.Fprintf(os.Stderr, "%s [flags] exercise delete", os.Args[0])
+	fmt.Fprintf(os.Stderr, "%s [flags] exercises delete", os.Args[0])
 	fmt.Fprint(os.Stderr, " -exercise-id STRING")
 	fmt.Fprintln(os.Stderr)
 
@@ -241,5 +242,5 @@ func exerciseDeleteUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "exercise delete --exercise-id \"550e8400-e29b-41d4-a716-446655440000\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "exercises delete --exercise-id \"550e8400-e29b-41d4-a716-446655440000\"")
 }

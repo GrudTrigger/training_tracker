@@ -16,16 +16,16 @@ paths:
     /exercise:
         post:
             tags:
-                - exercise
+                - exercises
             summary: Создание нового упражнения
             description: Создание нового упражнения
-            operationId: exercise#create
+            operationId: exercises#create
             parameters:
                 - name: CreateRequestBody
                   in: body
                   required: true
                   schema:
-                    $ref: '#/definitions/ExerciseListPayload'
+                    $ref: '#/definitions/ExercisePayload'
                     required:
                         - title
                         - muscle_group
@@ -33,7 +33,7 @@ paths:
                 "201":
                     description: Created response.
                     schema:
-                        $ref: '#/definitions/ExerciseList'
+                        $ref: '#/definitions/Exercises'
                         required:
                             - id
                             - title
@@ -41,16 +41,16 @@ paths:
                 "400":
                     description: Bad Request response.
                     schema:
-                        $ref: '#/definitions/ExerciseCreateBadRequestResponseBody'
+                        $ref: '#/definitions/ExercisesCreateBadRequestResponseBody'
             schemes:
                 - http
     /exercise/{exerciseId}:
         delete:
             tags:
-                - exercise
+                - exercises
             summary: Удаление упражнения по uuid
             description: Удаление упражнения по uuid
-            operationId: exercise#delete
+            operationId: exercises#delete
             parameters:
                 - name: exerciseId
                   in: path
@@ -63,16 +63,16 @@ paths:
                 "404":
                     description: Not Found response.
                     schema:
-                        $ref: '#/definitions/ExerciseDeleteNotFoundResponseBody'
+                        $ref: '#/definitions/ExercisesDeleteNotFoundResponseBody'
             schemes:
                 - http
     /exercise/all:
         get:
             tags:
-                - exercise
+                - exercises
             summary: Получение всех упражнений с пагинацией
             description: Получение всех упражнений с пагинацией
-            operationId: exercise#all
+            operationId: exercises#all
             parameters:
                 - name: limit
                   in: query
@@ -94,31 +94,31 @@ paths:
                     schema:
                         type: array
                         items:
-                            $ref: '#/definitions/ExerciseList'
+                            $ref: '#/definitions/Exercises'
             schemes:
                 - http
     /exercise/update:
         put:
             tags:
-                - exercise
+                - exercises
             summary: Редактирование упражнения
             description: Редактирование упражнения
-            operationId: exercise#update
+            operationId: exercises#update
             parameters:
                 - name: UpdateRequestBody
                   in: body
                   required: true
                   schema:
-                    $ref: '#/definitions/ExerciseUpdateRequestBody'
+                    $ref: '#/definitions/ExercisesUpdateRequestBody'
                     required:
-                        - exerciseId
+                        - id
                         - title
                         - muscle_group
             responses:
                 "200":
                     description: OK response.
                     schema:
-                        $ref: '#/definitions/ExerciseList'
+                        $ref: '#/definitions/Exercises'
                         required:
                             - id
                             - title
@@ -126,15 +126,68 @@ paths:
                 "400":
                     description: Bad Request response.
                     schema:
-                        $ref: '#/definitions/ExerciseUpdateBadRequestResponseBody'
+                        $ref: '#/definitions/ExercisesUpdateBadRequestResponseBody'
                 "404":
                     description: Not Found response.
                     schema:
-                        $ref: '#/definitions/ExerciseUpdateNotFoundResponseBody'
+                        $ref: '#/definitions/ExercisesUpdateNotFoundResponseBody'
             schemes:
                 - http
 definitions:
-    ExerciseCreateBadRequestResponseBody:
+    ExercisePayload:
+        title: ExercisePayload
+        type: object
+        properties:
+            muscle_group:
+                type: integer
+                description: Группа мыщц указывается в виде числа, нужна для получения упражнений по группе мыщц
+                example: 1
+                format: int32
+                minimum: 0
+                maximum: 10
+            title:
+                type: string
+                description: Название упражнения
+                example: Жим лежа на скамье
+                minLength: 1
+                maxLength: 50
+        example:
+            muscle_group: 1
+            title: Жим лежа на скамье
+        required:
+            - title
+            - muscle_group
+    Exercises:
+        title: Exercises
+        type: object
+        properties:
+            id:
+                type: string
+                description: System-generated unique identifier
+                example: 550e8400-e29b-41d4-a716-446655440000
+                format: uuid
+            muscle_group:
+                type: integer
+                description: Группа мыщц указывается в виде числа, нужна для получения упражнений по группе мыщц
+                example: 1
+                format: int32
+                minimum: 0
+                maximum: 10
+            title:
+                type: string
+                description: Название упражнения
+                example: Жим лежа на скамье
+                minLength: 1
+                maxLength: 50
+        example:
+            id: 550e8400-e29b-41d4-a716-446655440000
+            muscle_group: 1
+            title: Жим лежа на скамье
+        required:
+            - id
+            - title
+            - muscle_group
+    ExercisesCreateBadRequestResponseBody:
         title: 'Mediatype identifier: application/vnd.goa.error; view=default'
         type: object
         properties:
@@ -177,7 +230,7 @@ definitions:
             - temporary
             - timeout
             - fault
-    ExerciseDeleteNotFoundResponseBody:
+    ExercisesDeleteNotFoundResponseBody:
         title: 'Mediatype identifier: application/vnd.goa.error; view=default'
         type: object
         properties:
@@ -220,60 +273,7 @@ definitions:
             - temporary
             - timeout
             - fault
-    ExerciseList:
-        title: ExerciseList
-        type: object
-        properties:
-            id:
-                type: string
-                description: System-generated unique identifier
-                example: 550e8400-e29b-41d4-a716-446655440000
-                format: uuid
-            muscle_group:
-                type: integer
-                description: Группа мыщц указывается в виде числа, нужна для получения упражнений по группе мыщц
-                example: 1
-                format: int32
-                minimum: 0
-                maximum: 10
-            title:
-                type: string
-                description: Название упражнения
-                example: Жим лежа на скамье
-                minLength: 1
-                maxLength: 50
-        example:
-            id: 550e8400-e29b-41d4-a716-446655440000
-            muscle_group: 1
-            title: Жим лежа на скамье
-        required:
-            - id
-            - title
-            - muscle_group
-    ExerciseListPayload:
-        title: ExerciseListPayload
-        type: object
-        properties:
-            muscle_group:
-                type: integer
-                description: Группа мыщц указывается в виде числа, нужна для получения упражнений по группе мыщц
-                example: 1
-                format: int32
-                minimum: 0
-                maximum: 10
-            title:
-                type: string
-                description: Название упражнения
-                example: Жим лежа на скамье
-                minLength: 1
-                maxLength: 50
-        example:
-            muscle_group: 1
-            title: Жим лежа на скамье
-        required:
-            - title
-            - muscle_group
-    ExerciseUpdateBadRequestResponseBody:
+    ExercisesUpdateBadRequestResponseBody:
         title: 'Mediatype identifier: application/vnd.goa.error; view=default'
         type: object
         properties:
@@ -316,7 +316,7 @@ definitions:
             - temporary
             - timeout
             - fault
-    ExerciseUpdateNotFoundResponseBody:
+    ExercisesUpdateNotFoundResponseBody:
         title: 'Mediatype identifier: application/vnd.goa.error; view=default'
         type: object
         properties:
@@ -359,11 +359,11 @@ definitions:
             - temporary
             - timeout
             - fault
-    ExerciseUpdateRequestBody:
-        title: ExerciseUpdateRequestBody
+    ExercisesUpdateRequestBody:
+        title: ExercisesUpdateRequestBody
         type: object
         properties:
-            exerciseId:
+            id:
                 type: string
                 example: 550e8400-e29b-41d4-a716-446655440000
                 format: uuid
@@ -381,10 +381,10 @@ definitions:
                 minLength: 1
                 maxLength: 50
         example:
-            exerciseId: 550e8400-e29b-41d4-a716-446655440000
+            id: 550e8400-e29b-41d4-a716-446655440000
             muscle_group: 1
             title: Жим лежа на скамье
         required:
-            - exerciseId
+            - id
             - title
             - muscle_group

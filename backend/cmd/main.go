@@ -6,12 +6,14 @@ import (
 	"log"
 	"net/http"
 
-	genexercise "github.com/GrudTrigger/training_tracker/backend/gen/exercise"
-	genhttp "github.com/GrudTrigger/training_tracker/backend/gen/http/exercise/server"
+	genexercise "github.com/GrudTrigger/training_tracker/backend/gen/exercises"
+	genhttp "github.com/GrudTrigger/training_tracker/backend/gen/http/exercises/server"
 	"github.com/GrudTrigger/training_tracker/backend/internal/config"
+	"github.com/GrudTrigger/training_tracker/backend/internal/migrator"
 	repoExercise "github.com/GrudTrigger/training_tracker/backend/internal/repository/exercise"
 	"github.com/GrudTrigger/training_tracker/backend/internal/service/exercise"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/stdlib"
 	goahttp "goa.design/goa/v3/http"
 )
 
@@ -35,6 +37,11 @@ func main() {
 		panic(fmt.Errorf("failed to connect to database in ping: %w", err))
 	}
 
+	m := migrator.NewMigrator(stdlib.OpenDB(*conn.Config().Copy()), "../migrations")
+	err = m.Up()
+	if err != nil {
+		panic(fmt.Errorf("failed migrations: %w", err))
+	}
 	exerciseRepo := repoExercise.NewExerciseRepository(conn)
 	exerciseSvc := exercise.NewExerciseService(exerciseRepo)
 	endpoints := genexercise.NewEndpoints(exerciseSvc)

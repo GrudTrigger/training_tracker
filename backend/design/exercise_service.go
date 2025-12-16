@@ -4,15 +4,15 @@ import (
 	. "goa.design/goa/v3/dsl" //nolint:staticcheck
 )
 
-var _ = Service("exercise", func() {
-	Description("Сервис для CRUD операция с моделью ExerciseList")
+var _ = Service("exercises", func() {
+	Description("Сервис для CRUD операция с моделью Exercises(Упражнения)")
 
 	Method("create", func() {
 		Description("Создание нового упражнения")
 		Meta("openapi:summary", "Создание нового упражнения")
 
-		Payload(ExerciseListPayload)
-		Result(ExerciseList)
+		Payload(ExercisesPayload)
+		Result(Exercises)
 
 		Error("bad_request", ErrorResult, "Invalid input data provided")
 
@@ -39,7 +39,7 @@ var _ = Service("exercise", func() {
 			})
 		})
 
-		Result(ArrayOf(ExerciseList))
+		Result(ArrayOf(Exercises))
 
 		HTTP(func() {
 			GET("exercise/all")
@@ -60,15 +60,15 @@ var _ = Service("exercise", func() {
 		Meta("openapi:summary", "Редактирование упражнения")
 
 		Payload(func() {
-			Extend(ExerciseListPayload)
-			Attribute("exerciseId", String, func() {
+			Extend(ExercisesPayload)
+			Attribute("id", String, func() {
 				Format(FormatUUID)
 				Example("550e8400-e29b-41d4-a716-446655440000")
 			})
-			Required("exerciseId")
+			Required("id")
 		})
 
-		Result(ExerciseList)
+		Result(Exercises)
 		Error("not_found", ErrorResult, "Упражнение не найдено, проверьте UUID")
 		Error("bad_request", ErrorResult, "Invalid update date exercise")
 

@@ -3,13 +3,13 @@ package exercise
 import (
 	"context"
 
-	model "github.com/GrudTrigger/training_tracker/backend/gen/exercise"
+	model "github.com/GrudTrigger/training_tracker/backend/gen/exercises"
 )
 
-func (s *ExerciseService) Create(ctx context.Context, data *model.ExerciseListPayload) (*model.ExerciseList, error) {
-	return &model.ExerciseList{
-		ID:          "asdasd",
-		Title:       "Жим лежа",
-		MuscleGroup: 1,
-	}, nil
+func (s *ExerciseService) Create(ctx context.Context, data *model.ExercisePayload) (*model.Exercises, error) {
+	e, err := s.repo.Create(ctx, data)
+	if err != nil {
+		return nil, err
+	}
+	return e, nil
 }

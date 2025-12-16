@@ -26,39 +26,12 @@ var WorkoutModel = Type("WorkoutModel", func() {
 		Description("На фронте нужно будет преобразовывать из секунд в дату, так удобнее хранить в БД")
 	})
 
-	Attribute("exercises", ArrayOf(ExerciseModel), "Упражнения выполненные за тренировку", func() {
-		MinLength(1)
-	})
+	// Attribute("exercises", ArrayOf(ExerciseModel), "Упражнения выполненные за тренировку", func() {
+	// 	MinLength(1)
+	// })
 })
 
-// Упражнение
-var ExerciseModel = Type("ExerciseModel", func() {
-	Attribute("title", String, "Название упражнения", func() {
-		MinLength(1)
-		MaxLength(50)
-		Example("Жим лежа на скамейке")
-	})
-
-	Attribute("sets", Int32, "Количество подходов", func() {
-		Minimum(1)
-		Maximum(100)
-		Example(4)
-	})
-
-	Attribute("reps", Int32, "Количество повторений в подходе", func() {
-		Minimum(1)
-		Maximum(30)
-		Example(10)
-	})
-
-	Attribute("weight", Float32, "Вес в кг", func() {
-		Minimum(1)
-		Maximum(500)
-		Example(102.5)
-	})
-})
-
-var ExerciseListModel = Type("ExerciseListModel", func() {
+var ExercisesModel = Type("ExercisesModel", func() {
 	Description("Список доступных упражнений")
 
 	Attribute("title", String, "Название упражнения", func() {
@@ -74,14 +47,14 @@ var ExerciseListModel = Type("ExerciseListModel", func() {
 	})
 })
 
-var ExerciseListPayload = Type("ExerciseListPayload", func() {
+var ExercisesPayload = Type("ExercisePayload", func() {
 	Description("Необходимые поля для создания упражнения")
 
-	Extend(ExerciseListModel)
+	Extend(ExercisesModel)
 	Required("title", "muscle_group")
 })
 
-var ExerciseList = Type("ExerciseList", func() {
+var Exercises = Type("Exercises", func() {
 	Description("Модель Списка Упражнений с UUID")
 
 	Attribute("id", String, "Unique concert identifier", func() {
@@ -90,6 +63,6 @@ var ExerciseList = Type("ExerciseList", func() {
 		Description("System-generated unique identifier")
 	})
 
-	Extend(ExerciseListModel)
+	Extend(ExercisesModel)
 	Required("id", "title", "muscle_group")
 })
