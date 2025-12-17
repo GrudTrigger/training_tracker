@@ -3,6 +3,7 @@ package trainings
 import (
 	"context"
 	"fmt"
+	"time"
 
 	t "github.com/GrudTrigger/training_tracker/backend/gen/trainings"
 	"github.com/jackc/pgx/v5"
@@ -15,10 +16,18 @@ func(r *Repository) Create(ctx context.Context, data *t.CreateTrainingPayload) (
 		return nil, fmt.Errorf("starting transaction: %w", err)
 	}
 	// Откат транзакции
-	defer tx.Rollback(ctx)
+	defer func(){
+		var _ = tx.Rollback(ctx)
+	}()
 
 	//Сначала создаем сущность тренировки, чтобы потом пользоваться ее UUID
-	var training t.Training
+	var training struct{
+		ID        string
+    Title     string
+    Date      time.Time
+    Duration  int
+    CreatedAt *time.Time
+	}
 	err = tx.QueryRow(ctx, "INSERT INTO trainings(title, date, duration) VALUES($1, $2, $3) RETURNING id, title, date, duration, created_at", data.Title, data.Date, data.Duration).
 	Scan(&training.ID, &training.Title, &training.Date, &training.Duration, &training.CreatedAt)
 	if err != nil {
@@ -41,5 +50,13 @@ func(r *Repository) Create(ctx context.Context, data *t.CreateTrainingPayload) (
 	if err := tx.Commit(ctx); err != nil {
 		return nil, fmt.Errorf("commiting transaction: %w", err)
 	}
-	return &training, nil
+
+	c := training.CreatedAt.Format(time.DateTime)
+	return &t.Training{
+		ID: training.ID,
+		Title: training.Title,
+		Date: training.Date.Format(time.DateOnly),
+		Duration: training.Duration,
+		CreatedAt: &c,
+	}, nil
 }

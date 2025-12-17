@@ -27,7 +27,7 @@ var WorkoutModel = Type("WorkoutModel", func() {
 	})
 
 	Attribute("create_at", String, "Дата создания", func(){
-		Format(FormatDate)
+		Format(FormatDateTime)
 	})
 })
 
