@@ -5,12 +5,14 @@ import {
 	Clock,
 	Dumbbell,
 	Home,
+	Moon,
 	Plus,
 	Settings,
+	Sun,
 	TrendingUp,
 	Users,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const App = () => {
 	const [currentPage, setCurrentPage] = useState('home')
@@ -36,6 +38,30 @@ const App = () => {
 		duration: '',
 		date: '',
 	})
+	const [theme, setTheme] = useState('dark')
+
+	// Load theme from localStorage or system preference
+	useEffect(() => {
+		const savedTheme = localStorage.getItem('theme')
+		if (savedTheme) {
+			setTheme(savedTheme)
+		} else {
+			const systemPrefersDark = window.matchMedia(
+				'(prefers-color-scheme: dark)'
+			).matches
+			setTheme(systemPrefersDark ? 'dark' : 'light')
+		}
+	}, [])
+
+	// Save theme to localStorage
+	useEffect(() => {
+		localStorage.setItem('theme', theme)
+		if (theme === 'dark') {
+			document.documentElement.classList.add('dark')
+		} else {
+			document.documentElement.classList.remove('dark')
+		}
+	}, [theme])
 
 	const handleAddWorkout = () => {
 		if (newWorkout.name && newWorkout.duration && newWorkout.date) {
@@ -65,32 +91,43 @@ const App = () => {
 	const renderHome = () => (
 		<div className='space-y-4'>
 			<div className='flex justify-between items-center'>
-				<h1 className='text-2xl font-bold'>Мои тренировки</h1>
+				<h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
+					Мои тренировки
+				</h1>
 				<button
 					onClick={() => setCurrentPage('add')}
-					className='bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors'
+					className='bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors shadow-lg'
 				>
 					<Plus size={20} />
 				</button>
 			</div>
 
 			{workouts.length === 0 ? (
-				<div className='text-center py-8 text-gray-500'>
-					<Dumbbell size={48} className='mx-auto mb-4 text-gray-400' />
-					<p>Нет добавленных тренировок</p>
-					<p className='text-sm'>Нажмите + чтобы добавить первую тренировку</p>
+				<div className='text-center py-8'>
+					<Dumbbell
+						size={48}
+						className='mx-auto mb-4 text-gray-400 dark:text-gray-500'
+					/>
+					<p className='text-gray-500 dark:text-gray-400'>
+						Нет добавленных тренировок
+					</p>
+					<p className='text-sm text-gray-400 dark:text-gray-500'>
+						Нажмите + чтобы добавить первую тренировку
+					</p>
 				</div>
 			) : (
 				<div className='space-y-3'>
 					{workouts.map(workout => (
 						<div
 							key={workout.id}
-							className='bg-white rounded-lg p-4 shadow-sm border border-gray-100'
+							className='bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700'
 						>
 							<div className='flex justify-between items-start'>
 								<div className='flex-1'>
-									<h3 className='font-semibold text-lg'>{workout.name}</h3>
-									<div className='flex items-center gap-2 mt-2 text-sm text-gray-600'>
+									<h3 className='font-semibold text-lg text-gray-900 dark:text-white'>
+										{workout.name}
+									</h3>
+									<div className='flex items-center gap-2 mt-2 text-sm text-gray-600 dark:text-gray-400'>
 										<Calendar size={14} />
 										<span>{workout.date}</span>
 										<Clock size={14} />
@@ -98,11 +135,13 @@ const App = () => {
 									</div>
 								</div>
 								{workout.completed ? (
-									<CheckCircle className='text-green-500' size={24} />
+									<div className='bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 p-2 rounded-full'>
+										<CheckCircle size={20} />
+									</div>
 								) : (
 									<button
 										onClick={() => handleCompleteWorkout(workout.id)}
-										className='bg-green-500 text-white px-3 py-1 rounded-full text-sm hover:bg-green-600 transition-colors'
+										className='bg-green-600 text-white px-3 py-1 rounded-full text-sm hover:bg-green-700 transition-colors font-medium'
 									>
 										Выполнено
 									</button>
@@ -120,17 +159,19 @@ const App = () => {
 			<div className='flex justify-between items-center'>
 				<button
 					onClick={() => setCurrentPage('home')}
-					className='text-blue-500 font-medium'
+					className='text-blue-600 dark:text-blue-400 font-medium'
 				>
 					Назад
 				</button>
-				<h1 className='text-2xl font-bold'>Новая тренировка</h1>
+				<h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
+					Новая тренировка
+				</h1>
 				<div className='w-16'></div>
 			</div>
 
 			<div className='space-y-4'>
 				<div>
-					<label className='block text-sm font-medium text-gray-700 mb-1'>
+					<label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
 						Название
 					</label>
 					<input
@@ -140,12 +181,12 @@ const App = () => {
 							setNewWorkout({ ...newWorkout, name: e.target.value })
 						}
 						placeholder='Например: Грудь и трицепс'
-						className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+						className='w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent'
 					/>
 				</div>
 
 				<div>
-					<label className='block text-sm font-medium text-gray-700 mb-1'>
+					<label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
 						Продолжительность (мин)
 					</label>
 					<input
@@ -155,12 +196,12 @@ const App = () => {
 							setNewWorkout({ ...newWorkout, duration: e.target.value })
 						}
 						placeholder='60'
-						className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+						className='w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent'
 					/>
 				</div>
 
 				<div>
-					<label className='block text-sm font-medium text-gray-700 mb-1'>
+					<label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
 						Дата
 					</label>
 					<input
@@ -169,7 +210,7 @@ const App = () => {
 						onChange={e =>
 							setNewWorkout({ ...newWorkout, date: e.target.value })
 						}
-						className='w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+						className='w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent'
 					/>
 				</div>
 
@@ -178,7 +219,7 @@ const App = () => {
 					disabled={
 						!newWorkout.name || !newWorkout.duration || !newWorkout.date
 					}
-					className='w-full bg-blue-500 text-white py-3 rounded-lg font-medium disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors'
+					className='w-full bg-blue-600 text-white py-3 rounded-lg font-medium disabled:bg-gray-400 disabled:dark:bg-gray-700 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors shadow-lg'
 				>
 					Добавить тренировку
 				</button>
@@ -188,51 +229,73 @@ const App = () => {
 
 	const renderStats = () => (
 		<div className='space-y-6'>
-			<h1 className='text-2xl font-bold'>Статистика</h1>
+			<div className='flex justify-between items-center'>
+				<h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
+					Статистика
+				</h1>
+				<button
+					onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+					className='p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors'
+				>
+					{theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+				</button>
+			</div>
 
 			<div className='grid grid-cols-2 gap-4'>
-				<div className='bg-blue-50 rounded-lg p-4 text-center'>
-					<div className='text-3xl font-bold text-blue-600'>
+				<div className='bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center border border-blue-100 dark:border-blue-900/30'>
+					<div className='text-3xl font-bold text-blue-600 dark:text-blue-400'>
 						{totalWorkouts}
 					</div>
-					<div className='text-sm text-gray-600'>Всего тренировок</div>
+					<div className='text-sm text-gray-600 dark:text-gray-400'>
+						Всего тренировок
+					</div>
 				</div>
-				<div className='bg-green-50 rounded-lg p-4 text-center'>
-					<div className='text-3xl font-bold text-green-600'>
+				<div className='bg-green-50 dark:bg-green-900/20 rounded-xl p-4 text-center border border-green-100 dark:border-green-900/30'>
+					<div className='text-3xl font-bold text-green-600 dark:text-green-400'>
 						{completedWorkouts}
 					</div>
-					<div className='text-sm text-gray-600'>Выполнено</div>
+					<div className='text-sm text-gray-600 dark:text-gray-400'>
+						Выполнено
+					</div>
 				</div>
-				<div className='bg-purple-50 rounded-lg p-4 text-center'>
-					<div className='text-3xl font-bold text-purple-600'>
+				<div className='bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 text-center border border-purple-100 dark:border-purple-900/30'>
+					<div className='text-3xl font-bold text-purple-600 dark:text-purple-400'>
 						{Math.round(totalDuration / 60)}ч
 					</div>
-					<div className='text-sm text-gray-600'>Общее время</div>
+					<div className='text-sm text-gray-600 dark:text-gray-400'>
+						Общее время
+					</div>
 				</div>
-				<div className='bg-orange-50 rounded-lg p-4 text-center'>
-					<div className='text-3xl font-bold text-orange-600'>
+				<div className='bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 text-center border border-orange-100 dark:border-orange-900/30'>
+					<div className='text-3xl font-bold text-orange-600 dark:text-orange-400'>
 						{totalWorkouts > 0
 							? Math.round((completedWorkouts / totalWorkouts) * 100)
 							: 0}
 						%
 					</div>
-					<div className='text-sm text-gray-600'>Прогресс</div>
+					<div className='text-sm text-gray-600 dark:text-gray-400'>
+						Прогресс
+					</div>
 				</div>
 			</div>
 
-			<div className='bg-white rounded-lg p-4'>
+			<div className='bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700'>
 				<div className='flex items-center gap-2 mb-3'>
-					<TrendingUp className='text-blue-500' size={20} />
-					<h3 className='font-semibold'>Последние тренировки</h3>
+					<TrendingUp className='text-blue-600 dark:text-blue-400' size={20} />
+					<h3 className='font-semibold text-gray-900 dark:text-white'>
+						Последние тренировки
+					</h3>
 				</div>
 				<div className='space-y-2'>
 					{workouts.slice(0, 3).map(workout => (
 						<div
 							key={workout.id}
-							className='flex justify-between items-center py-2 border-b border-gray-100 last:border-0'
+							className='flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700 last:border-0'
 						>
-							<span className='text-sm'>{workout.name}</span>
-							<span className='text-sm text-gray-600'>
+							<span className='text-sm text-gray-700 dark:text-gray-300'>
+								{workout.name}
+							</span>
+							<span className='text-sm text-gray-600 dark:text-gray-400'>
 								{workout.duration} мин
 							</span>
 						</div>
@@ -244,48 +307,80 @@ const App = () => {
 
 	const renderAdmin = () => (
 		<div className='space-y-6'>
-			<h1 className='text-2xl font-bold'>Админка</h1>
+			<div className='flex justify-between items-center'>
+				<h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
+					Админка
+				</h1>
+				<button
+					onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+					className='p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors'
+				>
+					{theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+				</button>
+			</div>
 
-			<div className='bg-white rounded-lg p-4'>
+			<div className='bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700'>
 				<div className='flex items-center gap-3 mb-4'>
-					<Users className='text-purple-500' size={24} />
-					<h3 className='font-semibold'>Управление пользователями</h3>
+					<Users className='text-purple-600 dark:text-purple-400' size={24} />
+					<h3 className='font-semibold text-gray-900 dark:text-white'>
+						Управление пользователями
+					</h3>
 				</div>
 				<div className='space-y-3'>
 					<div className='flex justify-between items-center'>
-						<span>Активные пользователи</span>
-						<span className='font-semibold'>1,247</span>
+						<span className='text-gray-700 dark:text-gray-300'>
+							Активные пользователи
+						</span>
+						<span className='font-semibold text-gray-900 dark:text-white'>
+							1,247
+						</span>
 					</div>
 					<div className='flex justify-between items-center'>
-						<span>Новые за неделю</span>
-						<span className='font-semibold'>+89</span>
+						<span className='text-gray-700 dark:text-gray-300'>
+							Новые за неделю
+						</span>
+						<span className='font-semibold text-green-600 dark:text-green-400'>
+							+89
+						</span>
 					</div>
 					<div className='flex justify-between items-center'>
-						<span>Средняя активность</span>
-						<span className='font-semibold'>4.2 тр/нед</span>
+						<span className='text-gray-700 dark:text-gray-300'>
+							Средняя активность
+						</span>
+						<span className='font-semibold text-gray-900 dark:text-white'>
+							4.2 тр/нед
+						</span>
 					</div>
 				</div>
 			</div>
 
-			<div className='bg-white rounded-lg p-4'>
-				<h3 className='font-semibold mb-3'>Статистика приложения</h3>
+			<div className='bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700'>
+				<h3 className='font-semibold text-gray-900 dark:text-white mb-3'>
+					Статистика приложения
+				</h3>
 				<div className='space-y-2'>
 					<div className='flex justify-between'>
-						<span>Версия приложения</span>
-						<span>v1.2.3</span>
+						<span className='text-gray-700 dark:text-gray-300'>
+							Версия приложения
+						</span>
+						<span className='text-gray-900 dark:text-white'>v1.2.3</span>
 					</div>
 					<div className='flex justify-between'>
-						<span>Последнее обновление</span>
-						<span>11.12.2025</span>
+						<span className='text-gray-700 dark:text-gray-300'>
+							Последнее обновление
+						</span>
+						<span className='text-gray-900 dark:text-white'>11.12.2025</span>
 					</div>
 					<div className='flex justify-between'>
-						<span>Серверное время</span>
-						<span>14:30</span>
+						<span className='text-gray-700 dark:text-gray-300'>
+							Серверное время
+						</span>
+						<span className='text-gray-900 dark:text-white'>14:30</span>
 					</div>
 				</div>
 			</div>
 
-			<button className='w-full bg-red-500 text-white py-3 rounded-lg font-medium hover:bg-red-600 transition-colors'>
+			<button className='w-full bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 transition-colors shadow-lg'>
 				Очистить кэш приложения
 			</button>
 		</div>
@@ -308,20 +403,22 @@ const App = () => {
 
 	return (
 		<div
-			className='min-h-screen bg-gray-50 pb-20'
+			className='min-h-screen bg-gray-100 dark:bg-gray-900 pb-20 transition-colors duration-200'
 			style={{ height: '100vh', maxHeight: '100vh', overflowY: 'auto' }}
 		>
-			<div className='max-w-md mx-auto bg-gray-50 p-4 pb-24'>
+			<div className='max-w-md mx-auto bg-gray-100 dark:bg-gray-900 p-4 pb-24'>
 				{renderContent()}
 			</div>
 
 			{/* Bottom Navigation */}
-			<div className='fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-gray-200'>
+			<div className='fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700'>
 				<div className='flex justify-around items-center py-2'>
 					<button
 						onClick={() => setCurrentPage('home')}
 						className={`flex flex-col items-center p-2 ${
-							currentPage === 'home' ? 'text-blue-500' : 'text-gray-500'
+							currentPage === 'home'
+								? 'text-blue-600 dark:text-blue-400'
+								: 'text-gray-500 dark:text-gray-400'
 						}`}
 					>
 						<Home size={20} />
@@ -330,7 +427,9 @@ const App = () => {
 					<button
 						onClick={() => setCurrentPage('stats')}
 						className={`flex flex-col items-center p-2 ${
-							currentPage === 'stats' ? 'text-blue-500' : 'text-gray-500'
+							currentPage === 'stats'
+								? 'text-blue-600 dark:text-blue-400'
+								: 'text-gray-500 dark:text-gray-400'
 						}`}
 					>
 						<BarChart3 size={20} />
@@ -339,7 +438,9 @@ const App = () => {
 					<button
 						onClick={() => setCurrentPage('admin')}
 						className={`flex flex-col items-center p-2 ${
-							currentPage === 'admin' ? 'text-blue-500' : 'text-gray-500'
+							currentPage === 'admin'
+								? 'text-blue-600 dark:text-blue-400'
+								: 'text-gray-500 dark:text-gray-400'
 						}`}
 					>
 						<Settings size={20} />
