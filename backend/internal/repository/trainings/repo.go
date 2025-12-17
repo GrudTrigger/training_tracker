@@ -1,4 +1,4 @@
-package exercise
+package trainings
 
 import (
 	"github.com/GrudTrigger/training_tracker/backend/internal/repository"
@@ -9,8 +9,6 @@ type Repository struct {
 	conn *pgx.Conn
 }
 
-func NewExerciseRepository(conn *pgx.Conn) repository.ExerciseRepo {
-	return &Repository{
-		conn: conn,
-	}
+func NewRepository(conn *pgx.Conn) repository.TrainingsRepo {
+	return &Repository{conn: conn}
 }

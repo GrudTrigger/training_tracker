@@ -6,7 +6,7 @@ import (
 	model "github.com/GrudTrigger/training_tracker/backend/gen/exercises"
 )
 
-func (s *ExerciseService) Update(ctx context.Context, data *model.UpdatePayload) (*model.Exercises, error) {
+func (s *Service) Update(ctx context.Context, data *model.UpdatePayload) (*model.Exercises, error) {
 	res, err := s.repo.Update(ctx, data)
 	if err != nil {
 		return nil, err

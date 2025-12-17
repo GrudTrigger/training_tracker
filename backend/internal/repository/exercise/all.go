@@ -6,7 +6,7 @@ import (
 	model "github.com/GrudTrigger/training_tracker/backend/gen/exercises"
 )
 
-func (r *ExerciseRepository) All(ctx context.Context, data *model.AllPayload) ([]*model.Exercises, error) {
+func (r *Repository) All(ctx context.Context, data *model.AllPayload) ([]*model.Exercises, error) {
 	var res []*model.Exercises
 	rows, err := r.conn.Query(ctx, "SELECT * from exercises LIMIT $1 OFFSET $2", data.Limit, data.Offset)
 	if err != nil {

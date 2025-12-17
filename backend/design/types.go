@@ -26,10 +26,57 @@ var WorkoutModel = Type("WorkoutModel", func() {
 		Description("На фронте нужно будет преобразовывать из секунд в дату, так удобнее хранить в БД")
 	})
 
-	// Attribute("exercises", ArrayOf(ExerciseModel), "Упражнения выполненные за тренировку", func() {
-	// 	MinLength(1)
-	// })
+	Attribute("create_at", String, "Дата создания", func(){
+		Format(FormatDate)
+	})
 })
+
+var Training = Type("Training", func() {
+	Attribute("id", String, FormatUUID)
+	Attribute("title", String)
+	Attribute("date", String, func(){
+		Format(FormatDate)
+	})
+	Attribute("duration", Int)
+	Attribute("created_at", String, func(){
+		Format(FormatDateTime)
+	})
+	Required("id", "title", "date", "duration")
+})
+
+
+var ExerciseSetPayload = Type("ExerciseSetPayload", func() {
+	Attribute("reps", Int, func() {
+			Minimum(1)
+	})
+	Attribute("weight", Float64)
+	Required("reps")
+})
+
+var TrainingExercisePayload = Type("TrainingExercisePayload", func() {
+	Attribute("exercise_id", String, func() {
+			Format(FormatUUID)
+	})
+	Attribute("sets", ArrayOf(ExerciseSetPayload))
+	Required("exercise_id", "sets")
+})
+
+var CreateTrainingPayload = Type("CreateTrainingPayload", func() {
+	Attribute("title", String, func() {
+			MaxLength(50)
+	})
+	Attribute("date", String, func() {
+			Format(FormatDate)
+			Example("2025-12-25")
+	})
+	Attribute("duration", Int, func() {
+			Minimum(1)
+	})
+	Attribute("exercises", ArrayOf(TrainingExercisePayload))
+	Required("title", "date", "duration", "exercises")
+})
+
+//---------------------------
 
 var ExercisesModel = Type("ExercisesModel", func() {
 	Description("Список доступных упражнений")

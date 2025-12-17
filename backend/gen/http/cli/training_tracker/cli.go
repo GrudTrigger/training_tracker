@@ -14,6 +14,7 @@ import (
 	"os"
 
 	exercisesc "github.com/GrudTrigger/training_tracker/backend/gen/http/exercises/client"
+	trainingsc "github.com/GrudTrigger/training_tracker/backend/gen/http/trainings/client"
 	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
 )
@@ -24,12 +25,14 @@ import (
 func UsageCommands() []string {
 	return []string{
 		"exercises (create|all|update|delete)",
+		"trainings create",
 	}
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
 	return os.Args[0] + " " + "exercises create --body '{\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'" + "\n" +
+		os.Args[0] + " " + "trainings create --body '{\n      \"date\": \"2025-12-25\",\n      \"duration\": 6417442286446844713,\n      \"exercises\": [\n         {\n            \"exercise_id\": \"d322611a-8bec-422e-a03c-3ff523776002\",\n            \"sets\": [\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               },\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"d322611a-8bec-422e-a03c-3ff523776002\",\n            \"sets\": [\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               },\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               }\n            ]\n         }\n      ],\n      \"title\": \"r8x\"\n   }'" + "\n" +
 		""
 }
 
@@ -57,12 +60,20 @@ func ParseEndpoint(
 
 		exercisesDeleteFlags          = flag.NewFlagSet("delete", flag.ExitOnError)
 		exercisesDeleteExerciseIDFlag = exercisesDeleteFlags.String("exercise-id", "REQUIRED", "")
+
+		trainingsFlags = flag.NewFlagSet("trainings", flag.ContinueOnError)
+
+		trainingsCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
+		trainingsCreateBodyFlag = trainingsCreateFlags.String("body", "REQUIRED", "")
 	)
 	exercisesFlags.Usage = exercisesUsage
 	exercisesCreateFlags.Usage = exercisesCreateUsage
 	exercisesAllFlags.Usage = exercisesAllUsage
 	exercisesUpdateFlags.Usage = exercisesUpdateUsage
 	exercisesDeleteFlags.Usage = exercisesDeleteUsage
+
+	trainingsFlags.Usage = trainingsUsage
+	trainingsCreateFlags.Usage = trainingsCreateUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -81,6 +92,8 @@ func ParseEndpoint(
 		switch svcn {
 		case "exercises":
 			svcf = exercisesFlags
+		case "trainings":
+			svcf = trainingsFlags
 		default:
 			return nil, nil, fmt.Errorf("unknown service %q", svcn)
 		}
@@ -109,6 +122,13 @@ func ParseEndpoint(
 
 			case "delete":
 				epf = exercisesDeleteFlags
+
+			}
+
+		case "trainings":
+			switch epn {
+			case "create":
+				epf = trainingsCreateFlags
 
 			}
 
@@ -147,6 +167,13 @@ func ParseEndpoint(
 			case "delete":
 				endpoint = c.Delete()
 				data, err = exercisesc.BuildDeletePayload(*exercisesDeleteExerciseIDFlag)
+			}
+		case "trainings":
+			c := trainingsc.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "create":
+				endpoint = c.Create()
+				data, err = trainingsc.BuildCreatePayload(*trainingsCreateBodyFlag)
 			}
 		}
 	}
@@ -243,4 +270,33 @@ func exercisesDeleteUsage() {
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "exercises delete --exercise-id \"550e8400-e29b-41d4-a716-446655440000\"")
+}
+
+// trainingsUsage displays the usage of the trainings command and its
+// subcommands.
+func trainingsUsage() {
+	fmt.Fprintln(os.Stderr, `Сервис для CRUD операция с моделью Training(Тренировки)`)
+	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] trainings COMMAND [flags]\n\n", os.Args[0])
+	fmt.Fprintln(os.Stderr, "COMMAND:")
+	fmt.Fprintln(os.Stderr, `    create: Создание тренировки с упражнениями и подходами`)
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Additional help:")
+	fmt.Fprintf(os.Stderr, "    %s trainings COMMAND --help\n", os.Args[0])
+}
+func trainingsCreateUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] trainings create", os.Args[0])
+	fmt.Fprint(os.Stderr, " -body JSON")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Создание тренировки с упражнениями и подходами`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -body JSON: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "trainings create --body '{\n      \"date\": \"2025-12-25\",\n      \"duration\": 6417442286446844713,\n      \"exercises\": [\n         {\n            \"exercise_id\": \"d322611a-8bec-422e-a03c-3ff523776002\",\n            \"sets\": [\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               },\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"d322611a-8bec-422e-a03c-3ff523776002\",\n            \"sets\": [\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               },\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               }\n            ]\n         }\n      ],\n      \"title\": \"r8x\"\n   }'")
 }

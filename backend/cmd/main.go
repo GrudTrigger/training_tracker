@@ -7,11 +7,15 @@ import (
 	"net/http"
 
 	genexercise "github.com/GrudTrigger/training_tracker/backend/gen/exercises"
-	genhttp "github.com/GrudTrigger/training_tracker/backend/gen/http/exercises/server"
+	genhttpexervises "github.com/GrudTrigger/training_tracker/backend/gen/http/exercises/server"
+	genhttptrainings "github.com/GrudTrigger/training_tracker/backend/gen/http/trainings/server"
+	gentrainings "github.com/GrudTrigger/training_tracker/backend/gen/trainings"
 	"github.com/GrudTrigger/training_tracker/backend/internal/config"
 	"github.com/GrudTrigger/training_tracker/backend/internal/migrator"
 	repoExercise "github.com/GrudTrigger/training_tracker/backend/internal/repository/exercise"
+	repoTrainings "github.com/GrudTrigger/training_tracker/backend/internal/repository/trainings"
 	"github.com/GrudTrigger/training_tracker/backend/internal/service/exercise"
+	"github.com/GrudTrigger/training_tracker/backend/internal/service/trainings"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
 	goahttp "goa.design/goa/v3/http"
@@ -42,20 +46,35 @@ func main() {
 	if err != nil {
 		panic(fmt.Errorf("failed migrations: %w", err))
 	}
+
+	//-------Exersices--------
 	exerciseRepo := repoExercise.NewExerciseRepository(conn)
 	exerciseSvc := exercise.NewExerciseService(exerciseRepo)
-	endpoints := genexercise.NewEndpoints(exerciseSvc)
+	exerciseEndpoints := genexercise.NewEndpoints(exerciseSvc)
+
+	//-------Trainigs---------
+	trainingsRepo := repoTrainings.NewRepository(conn)
+	trainingsSvc := trainings.NewService(trainingsRepo, exerciseRepo)
+	trainingsEndpoints := gentrainings.NewEndpoints(trainingsSvc)
 
 	mux := goahttp.NewMuxer()
 
-	handler := genhttp.New(endpoints, mux, goahttp.RequestDecoder, goahttp.ResponseEncoder, nil, nil)
+	exercisesHandler := genhttpexervises.New(exerciseEndpoints, mux, goahttp.RequestDecoder, goahttp.ResponseEncoder, nil, nil)
 
-	genhttp.Mount(mux, handler)
+	genhttpexervises.Mount(mux, exercisesHandler)
+
+	trainingsHandler := genhttptrainings.New(trainingsEndpoints, mux,goahttp.RequestDecoder, goahttp.ResponseEncoder, nil, nil)
+
+	genhttptrainings.Mount(mux, trainingsHandler)
 
 	port := "8080"
 	server := &http.Server{Addr: ":" + port, Handler: mux}
 
-	for _, mount := range handler.Mounts {
+	for _, mount := range exercisesHandler.Mounts {
+		log.Printf("%q mounted on %s %s", mount.Method, mount.Verb, mount.Pattern)
+	}
+
+	for _, mount := range trainingsHandler.Mounts {
 		log.Printf("%q mounted on %s %s", mount.Method, mount.Verb, mount.Pattern)
 	}
 

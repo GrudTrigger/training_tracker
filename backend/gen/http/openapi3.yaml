@@ -112,10 +112,13 @@ paths:
                                     - id: 550e8400-e29b-41d4-a716-446655440000
                                       muscle_group: 1
                                       title: Жим лежа на скамье
+                                    - id: 550e8400-e29b-41d4-a716-446655440000
+                                      muscle_group: 1
+                                      title: Жим лежа на скамье
+                                    - id: 550e8400-e29b-41d4-a716-446655440000
+                                      muscle_group: 1
+                                      title: Жим лежа на скамье
                             example:
-                                - id: 550e8400-e29b-41d4-a716-446655440000
-                                  muscle_group: 1
-                                  title: Жим лежа на скамье
                                 - id: 550e8400-e29b-41d4-a716-446655440000
                                   muscle_group: 1
                                   title: Жим лежа на скамье
@@ -162,8 +165,130 @@ paths:
                         application/vnd.goa.error:
                             schema:
                                 $ref: '#/components/schemas/Error'
+    /trainings:
+        post:
+            tags:
+                - trainings
+            summary: Создание тренировки
+            description: Создание тренировки с упражнениями и подходами
+            operationId: trainings#create
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateTrainingPayload'
+                        example:
+                            date: "2025-12-25"
+                            duration: 6417442286446844713
+                            exercises:
+                                - exercise_id: d322611a-8bec-422e-a03c-3ff523776002
+                                  sets:
+                                    - reps: 8202675765988522562
+                                      weight: 0.9073708839255074
+                                    - reps: 8202675765988522562
+                                      weight: 0.9073708839255074
+                                - exercise_id: d322611a-8bec-422e-a03c-3ff523776002
+                                  sets:
+                                    - reps: 8202675765988522562
+                                      weight: 0.9073708839255074
+                                    - reps: 8202675765988522562
+                                      weight: 0.9073708839255074
+                            title: r8x
+            responses:
+                "201":
+                    description: Created response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Training'
+                            example:
+                                created_at: "1986-05-21T10:51:26Z"
+                                date: "1978-02-12"
+                                duration: 4541791234550504211
+                                id: Incidunt aliquid ab odit qui et molestiae.
+                                title: Perspiciatis numquam.
+                "400":
+                    description: 'bad_request: Bad Request response.'
+                    content:
+                        application/vnd.goa.error:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                "404":
+                    description: 'not_found: Упражнение не найдено'
+                    content:
+                        application/vnd.goa.error:
+                            schema:
+                                $ref: '#/components/schemas/Error'
 components:
     schemas:
+        CreateTrainingPayload:
+            type: object
+            properties:
+                date:
+                    type: string
+                    example: "2025-12-25"
+                    format: date
+                duration:
+                    type: integer
+                    example: 3413453463154647864
+                    format: int64
+                    minimum: 1
+                exercises:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/TrainingExercisePayload'
+                    example:
+                        - exercise_id: d1c19714-eef8-4310-9f94-107456eb525d
+                          sets:
+                            - reps: 4759131713011614080
+                              weight: 0.5872247866349914
+                            - reps: 4759131713011614080
+                              weight: 0.5872247866349914
+                        - exercise_id: d1c19714-eef8-4310-9f94-107456eb525d
+                          sets:
+                            - reps: 4759131713011614080
+                              weight: 0.5872247866349914
+                            - reps: 4759131713011614080
+                              weight: 0.5872247866349914
+                title:
+                    type: string
+                    example: f8h
+                    maxLength: 50
+            example:
+                date: "2025-12-25"
+                duration: 7231580145251194751
+                exercises:
+                    - exercise_id: d1c19714-eef8-4310-9f94-107456eb525d
+                      sets:
+                        - reps: 4759131713011614080
+                          weight: 0.5872247866349914
+                        - reps: 4759131713011614080
+                          weight: 0.5872247866349914
+                    - exercise_id: d1c19714-eef8-4310-9f94-107456eb525d
+                      sets:
+                        - reps: 4759131713011614080
+                          weight: 0.5872247866349914
+                        - reps: 4759131713011614080
+                          weight: 0.5872247866349914
+                    - exercise_id: d1c19714-eef8-4310-9f94-107456eb525d
+                      sets:
+                        - reps: 4759131713011614080
+                          weight: 0.5872247866349914
+                        - reps: 4759131713011614080
+                          weight: 0.5872247866349914
+                    - exercise_id: d1c19714-eef8-4310-9f94-107456eb525d
+                      sets:
+                        - reps: 4759131713011614080
+                          weight: 0.5872247866349914
+                        - reps: 4759131713011614080
+                          weight: 0.5872247866349914
+                title: bc5
+            required:
+                - title
+                - date
+                - duration
+                - exercises
         Error:
             type: object
             properties:
@@ -186,11 +311,11 @@ components:
                 temporary:
                     type: boolean
                     description: Is the error temporary?
-                    example: true
+                    example: false
                 timeout:
                     type: boolean
                     description: Is the error a timeout?
-                    example: true
+                    example: false
             description: Invalid input data provided
             example:
                 fault: false
@@ -229,6 +354,23 @@ components:
             required:
                 - title
                 - muscle_group
+        ExerciseSetPayload:
+            type: object
+            properties:
+                reps:
+                    type: integer
+                    example: 7741193587986731136
+                    format: int64
+                    minimum: 1
+                weight:
+                    type: number
+                    example: 0.3580867845965312
+                    format: double
+            example:
+                reps: 6214574414493060695
+                weight: 0.6344021993132443
+            required:
+                - reps
         Exercises:
             type: object
             properties:
@@ -279,9 +421,77 @@ components:
             example:
                 muscle_group: 1
                 title: Жим лежа на скамье
+        Training:
+            type: object
+            properties:
+                created_at:
+                    type: string
+                    example: "1992-08-13T17:48:09Z"
+                    format: date-time
+                date:
+                    type: string
+                    example: "1971-07-02"
+                    format: date
+                duration:
+                    type: integer
+                    example: 3548123190170457120
+                    format: int64
+                id:
+                    type: string
+                    description: uuid
+                    example: Excepturi sapiente.
+                title:
+                    type: string
+                    example: Molestiae dolores sunt eum natus.
+            example:
+                created_at: "2003-11-05T10:28:08Z"
+                date: "1973-04-30"
+                duration: 4271592293298278295
+                id: Perspiciatis dignissimos laboriosam officiis eum.
+                title: Sit laborum.
+            required:
+                - id
+                - title
+                - date
+                - duration
+        TrainingExercisePayload:
+            type: object
+            properties:
+                exercise_id:
+                    type: string
+                    example: 8a3e5121-e6d5-4447-8aac-09977c87d5a2
+                    format: uuid
+                sets:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ExerciseSetPayload'
+                    example:
+                        - reps: 4759131713011614080
+                          weight: 0.5872247866349914
+                        - reps: 4759131713011614080
+                          weight: 0.5872247866349914
+            example:
+                exercise_id: 3fbc6a4d-59d0-40ee-8dad-1b7f6b6cd26f
+                sets:
+                    - reps: 4759131713011614080
+                      weight: 0.5872247866349914
+                    - reps: 4759131713011614080
+                      weight: 0.5872247866349914
+                    - reps: 4759131713011614080
+                      weight: 0.5872247866349914
+                    - reps: 4759131713011614080
+                      weight: 0.5872247866349914
+            required:
+                - exercise_id
+                - sets
         WorkoutModel:
             type: object
             properties:
+                create_at:
+                    type: string
+                    description: Дата создания
+                    example: "2003-08-03"
+                    format: date
                 date:
                     type: string
                     description: Дата проведение тренировки
@@ -302,9 +512,12 @@ components:
                     maxLength: 50
             description: Модель тренировок
             example:
+                create_at: "1991-02-08"
                 date: "2025-12-08"
                 duration: "5440"
                 title: Тренировка верхней поверхности бедра
 tags:
     - name: exercises
       description: Сервис для CRUD операция с моделью Exercises(Упражнения)
+    - name: trainings
+      description: Сервис для CRUD операция с моделью Training(Тренировки)

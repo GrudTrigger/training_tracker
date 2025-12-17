@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (r *ExerciseRepository) Update(ctx context.Context, data *model.UpdatePayload) (*model.Exercises, error) {
+func (r *Repository) Update(ctx context.Context, data *model.UpdatePayload) (*model.Exercises, error) {
 	var e model.Exercises
 	row := r.conn.QueryRow(ctx, "SELECT * FROM exercises WHERE id=$1", data.ID)
 	err := row.Scan(&e.ID, &e.Title, &e.MuscleGroup)
