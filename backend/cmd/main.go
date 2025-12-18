@@ -18,6 +18,7 @@ import (
 	"github.com/GrudTrigger/training_tracker/backend/internal/service/trainings"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/rs/cors"
 	goahttp "goa.design/goa/v3/http"
 )
 
@@ -67,8 +68,27 @@ func main() {
 
 	genhttptrainings.Mount(mux, trainingsHandler)
 
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{
+			"http://localhost:5173",
+		},
+		AllowedMethods: []string{
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPut,
+			http.MethodPatch,
+			http.MethodDelete,
+			http.MethodOptions,
+		},
+		AllowedHeaders: []string{
+			"Authorization",
+			"Content-Type",
+		},
+		AllowCredentials: true,
+	})
+	handler := c.Handler(mux)
 	port := "8080"
-	server := &http.Server{Addr: ":" + port, Handler: mux}
+	server := &http.Server{Addr: ":" + port, Handler: handler}
 
 	for _, mount := range exercisesHandler.Mounts {
 		log.Printf("%q mounted on %s %s", mount.Method, mount.Verb, mount.Pattern)

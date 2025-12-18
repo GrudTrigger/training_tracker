@@ -63,6 +63,12 @@ const App = () => {
 		}
 	}, [theme])
 
+	useEffect(() => {
+		fetch('http://localhost:8080/trainings/all?limit=20&offset=0').then(
+			res => res.body
+		)
+	}, [])
+
 	const handleAddWorkout = () => {
 		if (newWorkout.name && newWorkout.duration && newWorkout.date) {
 			const workout = {
