@@ -8,6 +8,8 @@
 package client
 
 import (
+	"unicode/utf8"
+
 	trainings "github.com/GrudTrigger/training_tracker/backend/gen/trainings"
 	goa "goa.design/goa/v3/pkg"
 )
@@ -31,6 +33,10 @@ type CreateResponseBody struct {
 	Duration  *int    `form:"duration,omitempty" json:"duration,omitempty" xml:"duration,omitempty"`
 	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 }
+
+// AllResponseBody is the type of the "trainings" service "all" endpoint HTTP
+// response body.
+type AllResponseBody []*TrainingAllResponse
 
 // CreateBadRequestResponseBody is the type of the "trainings" service "create"
 // endpoint HTTP response body for the "bad_request" error.
@@ -68,6 +74,24 @@ type CreateNotFoundResponseBody struct {
 	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
+// DeleteNotFoundResponseBody is the type of the "trainings" service "delete"
+// endpoint HTTP response body for the "not_found" error.
+type DeleteNotFoundResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
 // TrainingExercisePayloadRequestBody is used to define fields on request body
 // types.
 type TrainingExercisePayloadRequestBody struct {
@@ -78,6 +102,38 @@ type TrainingExercisePayloadRequestBody struct {
 // ExerciseSetPayloadRequestBody is used to define fields on request body types.
 type ExerciseSetPayloadRequestBody struct {
 	Reps   int      `form:"reps" json:"reps" xml:"reps"`
+	Weight *float64 `form:"weight,omitempty" json:"weight,omitempty" xml:"weight,omitempty"`
+}
+
+// TrainingAllResponse is used to define fields on response body types.
+type TrainingAllResponse struct {
+	Exercises []*ExercisesWithTrainingResponse `form:"exercises,omitempty" json:"exercises,omitempty" xml:"exercises,omitempty"`
+	// uuid
+	ID        *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	Title     *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
+	Date      *string `form:"date,omitempty" json:"date,omitempty" xml:"date,omitempty"`
+	Duration  *int    `form:"duration,omitempty" json:"duration,omitempty" xml:"duration,omitempty"`
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+}
+
+// ExercisesWithTrainingResponse is used to define fields on response body
+// types.
+type ExercisesWithTrainingResponse struct {
+	Sets []*ExerciseSetResponse `form:"sets,omitempty" json:"sets,omitempty" xml:"sets,omitempty"`
+	// System-generated unique identifier
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Название упражнения
+	Title *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
+	// Группа мыщц указывается в виде числа, нужна для получения упражнений по
+	// группе мыщц
+	MuscleGroup *int32 `form:"muscle_group,omitempty" json:"muscle_group,omitempty" xml:"muscle_group,omitempty"`
+}
+
+// ExerciseSetResponse is used to define fields on response body types.
+type ExerciseSetResponse struct {
+	// System-generated unique identifier
+	ID     *string  `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	Reps   *int     `form:"reps,omitempty" json:"reps,omitempty" xml:"reps,omitempty"`
 	Weight *float64 `form:"weight,omitempty" json:"weight,omitempty" xml:"weight,omitempty"`
 }
 
@@ -135,6 +191,35 @@ func NewCreateBadRequest(body *CreateBadRequestResponseBody) *goa.ServiceError {
 
 // NewCreateNotFound builds a trainings service create endpoint not_found error.
 func NewCreateNotFound(body *CreateNotFoundResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
+
+	return v
+}
+
+// NewAllTrainingAllOK builds a "trainings" service "all" endpoint result from
+// a HTTP "OK" response.
+func NewAllTrainingAllOK(body []*TrainingAllResponse) []*trainings.TrainingAll {
+	v := make([]*trainings.TrainingAll, len(body))
+	for i, val := range body {
+		if val == nil {
+			v[i] = nil
+			continue
+		}
+		v[i] = unmarshalTrainingAllResponseToTrainingsTrainingAll(val)
+	}
+
+	return v
+}
+
+// NewDeleteNotFound builds a trainings service delete endpoint not_found error.
+func NewDeleteNotFound(body *DeleteNotFoundResponseBody) *goa.ServiceError {
 	v := &goa.ServiceError{
 		Name:      *body.Name,
 		ID:        *body.ID,
@@ -218,6 +303,30 @@ func ValidateCreateNotFoundResponseBody(body *CreateNotFoundResponseBody) (err e
 	return
 }
 
+// ValidateDeleteNotFoundResponseBody runs the validations defined on
+// delete_not_found_response_body
+func ValidateDeleteNotFoundResponseBody(body *DeleteNotFoundResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
 // ValidateTrainingExercisePayloadRequestBody runs the validations defined on
 // TrainingExercisePayloadRequestBody
 func ValidateTrainingExercisePayloadRequestBody(body *TrainingExercisePayloadRequestBody) (err error) {
@@ -240,6 +349,99 @@ func ValidateTrainingExercisePayloadRequestBody(body *TrainingExercisePayloadReq
 func ValidateExerciseSetPayloadRequestBody(body *ExerciseSetPayloadRequestBody) (err error) {
 	if body.Reps < 1 {
 		err = goa.MergeErrors(err, goa.InvalidRangeError("body.reps", body.Reps, 1, true))
+	}
+	return
+}
+
+// ValidateTrainingAllResponse runs the validations defined on
+// TrainingAllResponse
+func ValidateTrainingAllResponse(body *TrainingAllResponse) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Title == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("title", "body"))
+	}
+	if body.Date == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("date", "body"))
+	}
+	if body.Duration == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("duration", "body"))
+	}
+	for _, e := range body.Exercises {
+		if e != nil {
+			if err2 := ValidateExercisesWithTrainingResponse(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	if body.Date != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.date", *body.Date, goa.FormatDate))
+	}
+	if body.CreatedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.created_at", *body.CreatedAt, goa.FormatDateTime))
+	}
+	return
+}
+
+// ValidateExercisesWithTrainingResponse runs the validations defined on
+// ExercisesWithTrainingResponse
+func ValidateExercisesWithTrainingResponse(body *ExercisesWithTrainingResponse) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Title == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("title", "body"))
+	}
+	if body.MuscleGroup == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("muscle_group", "body"))
+	}
+	for _, e := range body.Sets {
+		if e != nil {
+			if err2 := ValidateExerciseSetResponse(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	if body.Title != nil {
+		if utf8.RuneCountInString(*body.Title) < 1 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.title", *body.Title, utf8.RuneCountInString(*body.Title), 1, true))
+		}
+	}
+	if body.Title != nil {
+		if utf8.RuneCountInString(*body.Title) > 50 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.title", *body.Title, utf8.RuneCountInString(*body.Title), 50, false))
+		}
+	}
+	if body.MuscleGroup != nil {
+		if *body.MuscleGroup < 0 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError("body.muscle_group", *body.MuscleGroup, 0, true))
+		}
+	}
+	if body.MuscleGroup != nil {
+		if *body.MuscleGroup > 10 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError("body.muscle_group", *body.MuscleGroup, 10, false))
+		}
+	}
+	return
+}
+
+// ValidateExerciseSetResponse runs the validations defined on
+// ExerciseSetResponse
+func ValidateExerciseSetResponse(body *ExerciseSetResponse) (err error) {
+	if body.Reps == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("reps", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	if body.Reps != nil {
+		if *body.Reps < 1 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError("body.reps", *body.Reps, 1, true))
+		}
 	}
 	return
 }

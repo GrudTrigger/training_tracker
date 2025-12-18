@@ -25,14 +25,14 @@ import (
 func UsageCommands() []string {
 	return []string{
 		"exercises (create|all|update|delete)",
-		"trainings create",
+		"trainings (create|all|delete)",
 	}
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
 	return os.Args[0] + " " + "exercises create --body '{\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'" + "\n" +
-		os.Args[0] + " " + "trainings create --body '{\n      \"date\": \"2025-12-25\",\n      \"duration\": 6417442286446844713,\n      \"exercises\": [\n         {\n            \"exercise_id\": \"d322611a-8bec-422e-a03c-3ff523776002\",\n            \"sets\": [\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               },\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"d322611a-8bec-422e-a03c-3ff523776002\",\n            \"sets\": [\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               },\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               }\n            ]\n         }\n      ],\n      \"title\": \"r8x\"\n   }'" + "\n" +
+		os.Args[0] + " " + "trainings create --body '{\n      \"date\": \"2025-12-25\",\n      \"duration\": 4541791234550504212,\n      \"exercises\": [\n         {\n            \"exercise_id\": \"eac346ec-8c0d-4378-81f2-0f2df404b9ff\",\n            \"sets\": [\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-8c0d-4378-81f2-0f2df404b9ff\",\n            \"sets\": [\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               }\n            ]\n         }\n      ],\n      \"title\": \"09h\"\n   }'" + "\n" +
 		""
 }
 
@@ -65,6 +65,13 @@ func ParseEndpoint(
 
 		trainingsCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
 		trainingsCreateBodyFlag = trainingsCreateFlags.String("body", "REQUIRED", "")
+
+		trainingsAllFlags      = flag.NewFlagSet("all", flag.ExitOnError)
+		trainingsAllLimitFlag  = trainingsAllFlags.String("limit", "1", "")
+		trainingsAllOffsetFlag = trainingsAllFlags.String("offset", "", "")
+
+		trainingsDeleteFlags    = flag.NewFlagSet("delete", flag.ExitOnError)
+		trainingsDeleteUUIDFlag = trainingsDeleteFlags.String("uuid", "REQUIRED", "")
 	)
 	exercisesFlags.Usage = exercisesUsage
 	exercisesCreateFlags.Usage = exercisesCreateUsage
@@ -74,6 +81,8 @@ func ParseEndpoint(
 
 	trainingsFlags.Usage = trainingsUsage
 	trainingsCreateFlags.Usage = trainingsCreateUsage
+	trainingsAllFlags.Usage = trainingsAllUsage
+	trainingsDeleteFlags.Usage = trainingsDeleteUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -130,6 +139,12 @@ func ParseEndpoint(
 			case "create":
 				epf = trainingsCreateFlags
 
+			case "all":
+				epf = trainingsAllFlags
+
+			case "delete":
+				epf = trainingsDeleteFlags
+
 			}
 
 		}
@@ -174,6 +189,12 @@ func ParseEndpoint(
 			case "create":
 				endpoint = c.Create()
 				data, err = trainingsc.BuildCreatePayload(*trainingsCreateBodyFlag)
+			case "all":
+				endpoint = c.All()
+				data, err = trainingsc.BuildAllPayload(*trainingsAllLimitFlag, *trainingsAllOffsetFlag)
+			case "delete":
+				endpoint = c.Delete()
+				data, err = trainingsc.BuildDeletePayload(*trainingsDeleteUUIDFlag)
 			}
 		}
 	}
@@ -279,6 +300,8 @@ func trainingsUsage() {
 	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] trainings COMMAND [flags]\n\n", os.Args[0])
 	fmt.Fprintln(os.Stderr, "COMMAND:")
 	fmt.Fprintln(os.Stderr, `    create: Создание тренировки с упражнениями и подходами`)
+	fmt.Fprintln(os.Stderr, `    all: Получение всех своих тренировок`)
+	fmt.Fprintln(os.Stderr, `    delete: Удаление тренировки`)
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Additional help:")
 	fmt.Fprintf(os.Stderr, "    %s trainings COMMAND --help\n", os.Args[0])
@@ -298,5 +321,43 @@ func trainingsCreateUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "trainings create --body '{\n      \"date\": \"2025-12-25\",\n      \"duration\": 6417442286446844713,\n      \"exercises\": [\n         {\n            \"exercise_id\": \"d322611a-8bec-422e-a03c-3ff523776002\",\n            \"sets\": [\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               },\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"d322611a-8bec-422e-a03c-3ff523776002\",\n            \"sets\": [\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               },\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               }\n            ]\n         }\n      ],\n      \"title\": \"r8x\"\n   }'")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "trainings create --body '{\n      \"date\": \"2025-12-25\",\n      \"duration\": 4541791234550504212,\n      \"exercises\": [\n         {\n            \"exercise_id\": \"eac346ec-8c0d-4378-81f2-0f2df404b9ff\",\n            \"sets\": [\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-8c0d-4378-81f2-0f2df404b9ff\",\n            \"sets\": [\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               }\n            ]\n         }\n      ],\n      \"title\": \"09h\"\n   }'")
+}
+
+func trainingsAllUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] trainings all", os.Args[0])
+	fmt.Fprint(os.Stderr, " -limit INT")
+	fmt.Fprint(os.Stderr, " -offset INT")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Получение всех своих тренировок`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -limit INT: `)
+	fmt.Fprintln(os.Stderr, `    -offset INT: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "trainings all --limit 20 --offset 0")
+}
+
+func trainingsDeleteUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] trainings delete", os.Args[0])
+	fmt.Fprint(os.Stderr, " -uuid STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Удаление тренировки`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -uuid STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "trainings delete --uuid \"550e8400-e29b-41d4-a716-446655440000\"")
 }

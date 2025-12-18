@@ -26,7 +26,7 @@ var WorkoutModel = Type("WorkoutModel", func() {
 		Description("На фронте нужно будет преобразовывать из секунд в дату, так удобнее хранить в БД")
 	})
 
-	Attribute("create_at", String, "Дата создания", func(){
+	Attribute("create_at", String, "Дата создания", func() {
 		Format(FormatDateTime)
 	})
 })
@@ -34,20 +34,19 @@ var WorkoutModel = Type("WorkoutModel", func() {
 var Training = Type("Training", func() {
 	Attribute("id", String, FormatUUID)
 	Attribute("title", String)
-	Attribute("date", String, func(){
+	Attribute("date", String, func() {
 		Format(FormatDate)
 	})
 	Attribute("duration", Int)
-	Attribute("created_at", String, func(){
+	Attribute("created_at", String, func() {
 		Format(FormatDateTime)
 	})
 	Required("id", "title", "date", "duration")
 })
 
-
 var ExerciseSetPayload = Type("ExerciseSetPayload", func() {
 	Attribute("reps", Int, func() {
-			Minimum(1)
+		Minimum(1)
 	})
 	Attribute("weight", Float64)
 	Required("reps")
@@ -55,7 +54,7 @@ var ExerciseSetPayload = Type("ExerciseSetPayload", func() {
 
 var TrainingExercisePayload = Type("TrainingExercisePayload", func() {
 	Attribute("exercise_id", String, func() {
-			Format(FormatUUID)
+		Format(FormatUUID)
 	})
 	Attribute("sets", ArrayOf(ExerciseSetPayload))
 	Required("exercise_id", "sets")
@@ -63,14 +62,14 @@ var TrainingExercisePayload = Type("TrainingExercisePayload", func() {
 
 var CreateTrainingPayload = Type("CreateTrainingPayload", func() {
 	Attribute("title", String, func() {
-			MaxLength(50)
+		MaxLength(50)
 	})
 	Attribute("date", String, func() {
-			Format(FormatDate)
-			Example("2025-12-25")
+		Format(FormatDate)
+		Example("2025-12-25")
 	})
 	Attribute("duration", Int, func() {
-			Minimum(1)
+		Minimum(1)
 	})
 	Attribute("exercises", ArrayOf(TrainingExercisePayload))
 	Required("title", "date", "duration", "exercises")
@@ -112,4 +111,29 @@ var Exercises = Type("Exercises", func() {
 
 	Extend(ExercisesModel)
 	Required("id", "title", "muscle_group")
+})
+
+var ExerciseSet = Type("ExerciseSet", func() {
+	Attribute("id", String, "Unique concert identifier", func() {
+		Format(FormatUUID)
+		Example("550e8400-e29b-41d4-a716-446655440000")
+		Description("System-generated unique identifier")
+	})
+	Attribute("reps", Int, func() {
+		Minimum(1)
+	})
+	Attribute("weight", Float64)
+	Required("reps")
+})
+
+var ExercisesWithTraining = Type("ExercisesWithTraining", func() {
+	Extend(Exercises)
+	Attribute("sets", ArrayOf(ExerciseSet))
+})
+
+var TrainingAll = Type("TrainingAll", func() {
+	Description("Модель Списка Тренировок с UUID")
+
+	Extend(Training)
+	Attribute("exercises", ArrayOf(ExercisesWithTraining))
 })

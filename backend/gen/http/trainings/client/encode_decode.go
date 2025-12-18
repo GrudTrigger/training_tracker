@@ -10,12 +10,14 @@ package client
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 
 	trainings "github.com/GrudTrigger/training_tracker/backend/gen/trainings"
 	goahttp "goa.design/goa/v3/http"
+	goa "goa.design/goa/v3/pkg"
 )
 
 // BuildCreateRequest instantiates a HTTP request object with method and path
@@ -121,6 +123,152 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 	}
 }
 
+// BuildAllRequest instantiates a HTTP request object with method and path set
+// to call the "trainings" service "all" endpoint
+func (c *Client) BuildAllRequest(ctx context.Context, v any) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: AllTrainingsPath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("trainings", "all", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeAllRequest returns an encoder for requests sent to the trainings all
+// server.
+func EncodeAllRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*trainings.AllPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("trainings", "all", "*trainings.AllPayload", v)
+		}
+		values := req.URL.Query()
+		values.Add("limit", fmt.Sprintf("%v", p.Limit))
+		values.Add("offset", fmt.Sprintf("%v", p.Offset))
+		req.URL.RawQuery = values.Encode()
+		return nil
+	}
+}
+
+// DecodeAllResponse returns a decoder for responses returned by the trainings
+// all endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+func DecodeAllResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body AllResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("trainings", "all", err)
+			}
+			for _, e := range body {
+				if e != nil {
+					if err2 := ValidateTrainingAllResponse(e); err2 != nil {
+						err = goa.MergeErrors(err, err2)
+					}
+				}
+			}
+			if err != nil {
+				return nil, goahttp.ErrValidationError("trainings", "all", err)
+			}
+			res := NewAllTrainingAllOK(body)
+			return res, nil
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("trainings", "all", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildDeleteRequest instantiates a HTTP request object with method and path
+// set to call the "trainings" service "delete" endpoint
+func (c *Client) BuildDeleteRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		uuid string
+	)
+	{
+		p, ok := v.(*trainings.DeletePayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("trainings", "delete", "*trainings.DeletePayload", v)
+		}
+		uuid = p.UUID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: DeleteTrainingsPath(uuid)}
+	req, err := http.NewRequest("DELETE", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("trainings", "delete", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// DecodeDeleteResponse returns a decoder for responses returned by the
+// trainings delete endpoint. restoreBody controls whether the response body
+// should be restored after having been read.
+// DecodeDeleteResponse may return the following errors:
+//   - "not_found" (type *goa.ServiceError): http.StatusNotFound
+//   - error: internal error
+func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusNoContent:
+			return nil, nil
+		case http.StatusNotFound:
+			var (
+				body DeleteNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("trainings", "delete", err)
+			}
+			err = ValidateDeleteNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("trainings", "delete", err)
+			}
+			return nil, NewDeleteNotFound(&body)
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("trainings", "delete", resp.StatusCode, string(body))
+		}
+	}
+}
+
 // marshalTrainingsTrainingExercisePayloadToTrainingExercisePayloadRequestBody
 // builds a value of type *TrainingExercisePayloadRequestBody from a value of
 // type *trainings.TrainingExercisePayload.
@@ -185,6 +333,71 @@ func marshalTrainingExercisePayloadRequestBodyToTrainingsTrainingExercisePayload
 func marshalExerciseSetPayloadRequestBodyToTrainingsExerciseSetPayload(v *ExerciseSetPayloadRequestBody) *trainings.ExerciseSetPayload {
 	res := &trainings.ExerciseSetPayload{
 		Reps:   v.Reps,
+		Weight: v.Weight,
+	}
+
+	return res
+}
+
+// unmarshalTrainingAllResponseToTrainingsTrainingAll builds a value of type
+// *trainings.TrainingAll from a value of type *TrainingAllResponse.
+func unmarshalTrainingAllResponseToTrainingsTrainingAll(v *TrainingAllResponse) *trainings.TrainingAll {
+	res := &trainings.TrainingAll{
+		ID:        *v.ID,
+		Title:     *v.Title,
+		Date:      *v.Date,
+		Duration:  *v.Duration,
+		CreatedAt: v.CreatedAt,
+	}
+	if v.Exercises != nil {
+		res.Exercises = make([]*trainings.ExercisesWithTraining, len(v.Exercises))
+		for i, val := range v.Exercises {
+			if val == nil {
+				res.Exercises[i] = nil
+				continue
+			}
+			res.Exercises[i] = unmarshalExercisesWithTrainingResponseToTrainingsExercisesWithTraining(val)
+		}
+	}
+
+	return res
+}
+
+// unmarshalExercisesWithTrainingResponseToTrainingsExercisesWithTraining
+// builds a value of type *trainings.ExercisesWithTraining from a value of type
+// *ExercisesWithTrainingResponse.
+func unmarshalExercisesWithTrainingResponseToTrainingsExercisesWithTraining(v *ExercisesWithTrainingResponse) *trainings.ExercisesWithTraining {
+	if v == nil {
+		return nil
+	}
+	res := &trainings.ExercisesWithTraining{
+		ID:          *v.ID,
+		Title:       *v.Title,
+		MuscleGroup: *v.MuscleGroup,
+	}
+	if v.Sets != nil {
+		res.Sets = make([]*trainings.ExerciseSet, len(v.Sets))
+		for i, val := range v.Sets {
+			if val == nil {
+				res.Sets[i] = nil
+				continue
+			}
+			res.Sets[i] = unmarshalExerciseSetResponseToTrainingsExerciseSet(val)
+		}
+	}
+
+	return res
+}
+
+// unmarshalExerciseSetResponseToTrainingsExerciseSet builds a value of type
+// *trainings.ExerciseSet from a value of type *ExerciseSetResponse.
+func unmarshalExerciseSetResponseToTrainingsExerciseSet(v *ExerciseSetResponse) *trainings.ExerciseSet {
+	if v == nil {
+		return nil
+	}
+	res := &trainings.ExerciseSet{
+		ID:     v.ID,
+		Reps:   *v.Reps,
 		Weight: v.Weight,
 	}
 

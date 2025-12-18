@@ -63,7 +63,7 @@ func main() {
 
 	genhttpexervises.Mount(mux, exercisesHandler)
 
-	trainingsHandler := genhttptrainings.New(trainingsEndpoints, mux,goahttp.RequestDecoder, goahttp.ResponseEncoder, nil, nil)
+	trainingsHandler := genhttptrainings.New(trainingsEndpoints, mux, goahttp.RequestDecoder, goahttp.ResponseEncoder, nil, nil)
 
 	genhttptrainings.Mount(mux, trainingsHandler)
 

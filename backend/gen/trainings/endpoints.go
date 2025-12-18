@@ -16,18 +16,24 @@ import (
 // Endpoints wraps the "trainings" service endpoints.
 type Endpoints struct {
 	Create goa.Endpoint
+	All    goa.Endpoint
+	Delete goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "trainings" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
 		Create: NewCreateEndpoint(s),
+		All:    NewAllEndpoint(s),
+		Delete: NewDeleteEndpoint(s),
 	}
 }
 
 // Use applies the given middleware to all the "trainings" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.Create = m(e.Create)
+	e.All = m(e.All)
+	e.Delete = m(e.Delete)
 }
 
 // NewCreateEndpoint returns an endpoint function that calls the method
@@ -36,5 +42,23 @@ func NewCreateEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*CreateTrainingPayload)
 		return s.Create(ctx, p)
+	}
+}
+
+// NewAllEndpoint returns an endpoint function that calls the method "all" of
+// service "trainings".
+func NewAllEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*AllPayload)
+		return s.All(ctx, p)
+	}
+}
+
+// NewDeleteEndpoint returns an endpoint function that calls the method
+// "delete" of service "trainings".
+func NewDeleteEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*DeletePayload)
+		return nil, s.Delete(ctx, p)
 	}
 }

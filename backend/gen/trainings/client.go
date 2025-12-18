@@ -16,12 +16,16 @@ import (
 // Client is the "trainings" service client.
 type Client struct {
 	CreateEndpoint goa.Endpoint
+	AllEndpoint    goa.Endpoint
+	DeleteEndpoint goa.Endpoint
 }
 
 // NewClient initializes a "trainings" service client given the endpoints.
-func NewClient(create goa.Endpoint) *Client {
+func NewClient(create, all, delete_ goa.Endpoint) *Client {
 	return &Client{
 		CreateEndpoint: create,
+		AllEndpoint:    all,
+		DeleteEndpoint: delete_,
 	}
 }
 
@@ -37,4 +41,26 @@ func (c *Client) Create(ctx context.Context, p *CreateTrainingPayload) (res *Tra
 		return
 	}
 	return ires.(*Training), nil
+}
+
+// All calls the "all" endpoint of the "trainings" service.
+// All may return the following errors:
+//   - "bad_request" (type *goa.ServiceError)
+//   - error: internal error
+func (c *Client) All(ctx context.Context, p *AllPayload) (res []*TrainingAll, err error) {
+	var ires any
+	ires, err = c.AllEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.([]*TrainingAll), nil
+}
+
+// Delete calls the "delete" endpoint of the "trainings" service.
+// Delete may return the following errors:
+//   - "not_found" (type *goa.ServiceError): Тренировка не найдена
+//   - error: internal error
+func (c *Client) Delete(ctx context.Context, p *DeletePayload) (err error) {
+	_, err = c.DeleteEndpoint(ctx, p)
+	return
 }

@@ -12,6 +12,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strconv"
 
 	trainings "github.com/GrudTrigger/training_tracker/backend/gen/trainings"
 	goahttp "goa.design/goa/v3/http"
@@ -101,6 +102,124 @@ func EncodeCreateError(encoder func(context.Context, http.ResponseWriter) goahtt
 	}
 }
 
+// EncodeAllResponse returns an encoder for responses returned by the trainings
+// all endpoint.
+func EncodeAllResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+	return func(ctx context.Context, w http.ResponseWriter, v any) error {
+		res, _ := v.([]*trainings.TrainingAll)
+		enc := encoder(ctx, w)
+		body := NewAllResponseBody(res)
+		w.WriteHeader(http.StatusOK)
+		return enc.Encode(body)
+	}
+}
+
+// DecodeAllRequest returns a decoder for requests sent to the trainings all
+// endpoint.
+func DecodeAllRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*trainings.AllPayload, error) {
+	return func(r *http.Request) (*trainings.AllPayload, error) {
+		var (
+			limit  int
+			offset int
+			err    error
+		)
+		qp := r.URL.Query()
+		{
+			limitRaw := qp.Get("limit")
+			if limitRaw == "" {
+				limit = 1
+			} else {
+				v, err2 := strconv.ParseInt(limitRaw, 10, strconv.IntSize)
+				if err2 != nil {
+					err = goa.MergeErrors(err, goa.InvalidFieldTypeError("limit", limitRaw, "integer"))
+				}
+				limit = int(v)
+			}
+		}
+		if limit < 1 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 1, true))
+		}
+		{
+			offsetRaw := qp.Get("offset")
+			if offsetRaw != "" {
+				v, err2 := strconv.ParseInt(offsetRaw, 10, strconv.IntSize)
+				if err2 != nil {
+					err = goa.MergeErrors(err, goa.InvalidFieldTypeError("offset", offsetRaw, "integer"))
+				}
+				offset = int(v)
+			}
+		}
+		if offset < 0 {
+			err = goa.MergeErrors(err, goa.InvalidRangeError("offset", offset, 0, true))
+		}
+		if err != nil {
+			return nil, err
+		}
+		payload := NewAllPayload(limit, offset)
+
+		return payload, nil
+	}
+}
+
+// EncodeDeleteResponse returns an encoder for responses returned by the
+// trainings delete endpoint.
+func EncodeDeleteResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+	return func(ctx context.Context, w http.ResponseWriter, v any) error {
+		w.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+}
+
+// DecodeDeleteRequest returns a decoder for requests sent to the trainings
+// delete endpoint.
+func DecodeDeleteRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*trainings.DeletePayload, error) {
+	return func(r *http.Request) (*trainings.DeletePayload, error) {
+		var (
+			uuid string
+			err  error
+
+			params = mux.Vars(r)
+		)
+		uuid = params["uuid"]
+		err = goa.MergeErrors(err, goa.ValidateFormat("uuid", uuid, goa.FormatUUID))
+		if err != nil {
+			return nil, err
+		}
+		payload := NewDeletePayload(uuid)
+
+		return payload, nil
+	}
+}
+
+// EncodeDeleteError returns an encoder for errors returned by the delete
+// trainings endpoint.
+func EncodeDeleteError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "not_found":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewDeleteNotFoundResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusNotFound)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
+	}
+}
+
 // unmarshalTrainingExercisePayloadRequestBodyToTrainingsTrainingExercisePayload
 // builds a value of type *trainings.TrainingExercisePayload from a value of
 // type *TrainingExercisePayloadRequestBody.
@@ -126,6 +245,71 @@ func unmarshalTrainingExercisePayloadRequestBodyToTrainingsTrainingExercisePaylo
 func unmarshalExerciseSetPayloadRequestBodyToTrainingsExerciseSetPayload(v *ExerciseSetPayloadRequestBody) *trainings.ExerciseSetPayload {
 	res := &trainings.ExerciseSetPayload{
 		Reps:   *v.Reps,
+		Weight: v.Weight,
+	}
+
+	return res
+}
+
+// marshalTrainingsTrainingAllToTrainingAllResponse builds a value of type
+// *TrainingAllResponse from a value of type *trainings.TrainingAll.
+func marshalTrainingsTrainingAllToTrainingAllResponse(v *trainings.TrainingAll) *TrainingAllResponse {
+	res := &TrainingAllResponse{
+		ID:        v.ID,
+		Title:     v.Title,
+		Date:      v.Date,
+		Duration:  v.Duration,
+		CreatedAt: v.CreatedAt,
+	}
+	if v.Exercises != nil {
+		res.Exercises = make([]*ExercisesWithTrainingResponse, len(v.Exercises))
+		for i, val := range v.Exercises {
+			if val == nil {
+				res.Exercises[i] = nil
+				continue
+			}
+			res.Exercises[i] = marshalTrainingsExercisesWithTrainingToExercisesWithTrainingResponse(val)
+		}
+	}
+
+	return res
+}
+
+// marshalTrainingsExercisesWithTrainingToExercisesWithTrainingResponse builds
+// a value of type *ExercisesWithTrainingResponse from a value of type
+// *trainings.ExercisesWithTraining.
+func marshalTrainingsExercisesWithTrainingToExercisesWithTrainingResponse(v *trainings.ExercisesWithTraining) *ExercisesWithTrainingResponse {
+	if v == nil {
+		return nil
+	}
+	res := &ExercisesWithTrainingResponse{
+		ID:          v.ID,
+		Title:       v.Title,
+		MuscleGroup: v.MuscleGroup,
+	}
+	if v.Sets != nil {
+		res.Sets = make([]*ExerciseSetResponse, len(v.Sets))
+		for i, val := range v.Sets {
+			if val == nil {
+				res.Sets[i] = nil
+				continue
+			}
+			res.Sets[i] = marshalTrainingsExerciseSetToExerciseSetResponse(val)
+		}
+	}
+
+	return res
+}
+
+// marshalTrainingsExerciseSetToExerciseSetResponse builds a value of type
+// *ExerciseSetResponse from a value of type *trainings.ExerciseSet.
+func marshalTrainingsExerciseSetToExerciseSetResponse(v *trainings.ExerciseSet) *ExerciseSetResponse {
+	if v == nil {
+		return nil
+	}
+	res := &ExerciseSetResponse{
+		ID:     v.ID,
+		Reps:   v.Reps,
 		Weight: v.Weight,
 	}
 

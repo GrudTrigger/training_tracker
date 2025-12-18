@@ -10,6 +10,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"unicode/utf8"
 
 	trainings "github.com/GrudTrigger/training_tracker/backend/gen/trainings"
@@ -24,7 +25,7 @@ func BuildCreatePayload(trainingsCreateBody string) (*trainings.CreateTrainingPa
 	{
 		err = json.Unmarshal([]byte(trainingsCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"date\": \"2025-12-25\",\n      \"duration\": 6417442286446844713,\n      \"exercises\": [\n         {\n            \"exercise_id\": \"d322611a-8bec-422e-a03c-3ff523776002\",\n            \"sets\": [\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               },\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"d322611a-8bec-422e-a03c-3ff523776002\",\n            \"sets\": [\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               },\n               {\n                  \"reps\": 8202675765988522562,\n                  \"weight\": 0.9073708839255074\n               }\n            ]\n         }\n      ],\n      \"title\": \"r8x\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"date\": \"2025-12-25\",\n      \"duration\": 4541791234550504212,\n      \"exercises\": [\n         {\n            \"exercise_id\": \"eac346ec-8c0d-4378-81f2-0f2df404b9ff\",\n            \"sets\": [\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-8c0d-4378-81f2-0f2df404b9ff\",\n            \"sets\": [\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               }\n            ]\n         }\n      ],\n      \"title\": \"09h\"\n   }'")
 		}
 		if body.Exercises == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("exercises", "body"))
@@ -64,6 +65,69 @@ func BuildCreatePayload(trainingsCreateBody string) (*trainings.CreateTrainingPa
 	} else {
 		v.Exercises = []*trainings.TrainingExercisePayload{}
 	}
+
+	return v, nil
+}
+
+// BuildAllPayload builds the payload for the trainings all endpoint from CLI
+// flags.
+func BuildAllPayload(trainingsAllLimit string, trainingsAllOffset string) (*trainings.AllPayload, error) {
+	var err error
+	var limit int
+	{
+		if trainingsAllLimit != "" {
+			var v int64
+			v, err = strconv.ParseInt(trainingsAllLimit, 10, strconv.IntSize)
+			limit = int(v)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for limit, must be INT")
+			}
+			if limit < 1 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 1, true))
+			}
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	var offset int
+	{
+		if trainingsAllOffset != "" {
+			var v int64
+			v, err = strconv.ParseInt(trainingsAllOffset, 10, strconv.IntSize)
+			offset = int(v)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for offset, must be INT")
+			}
+			if offset < 0 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("offset", offset, 0, true))
+			}
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	v := &trainings.AllPayload{}
+	v.Limit = limit
+	v.Offset = offset
+
+	return v, nil
+}
+
+// BuildDeletePayload builds the payload for the trainings delete endpoint from
+// CLI flags.
+func BuildDeletePayload(trainingsDeleteUUID string) (*trainings.DeletePayload, error) {
+	var err error
+	var uuid string
+	{
+		uuid = trainingsDeleteUUID
+		err = goa.MergeErrors(err, goa.ValidateFormat("uuid", uuid, goa.FormatUUID))
+		if err != nil {
+			return nil, err
+		}
+	}
+	v := &trainings.DeletePayload{}
+	v.UUID = uuid
 
 	return v, nil
 }

@@ -6,7 +6,7 @@ import (
 	t "github.com/GrudTrigger/training_tracker/backend/gen/trainings"
 )
 
-func(s *Service) Create(ctx context.Context, data *t.CreateTrainingPayload) (*t.Training, error) {
+func (s *Service) Create(ctx context.Context, data *t.CreateTrainingPayload) (*t.Training, error) {
 	// Проверяем валидность переданных упражнений
 	for _, e := range data.Exercises {
 		_, err := s.repoExercise.FindById(ctx, e.ExerciseID)

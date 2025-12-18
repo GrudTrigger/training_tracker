@@ -112,13 +112,13 @@ paths:
                                     - id: 550e8400-e29b-41d4-a716-446655440000
                                       muscle_group: 1
                                       title: Жим лежа на скамье
-                                    - id: 550e8400-e29b-41d4-a716-446655440000
-                                      muscle_group: 1
-                                      title: Жим лежа на скамье
-                                    - id: 550e8400-e29b-41d4-a716-446655440000
-                                      muscle_group: 1
-                                      title: Жим лежа на скамье
                             example:
+                                - id: 550e8400-e29b-41d4-a716-446655440000
+                                  muscle_group: 1
+                                  title: Жим лежа на скамье
+                                - id: 550e8400-e29b-41d4-a716-446655440000
+                                  muscle_group: 1
+                                  title: Жим лежа на скамье
                                 - id: 550e8400-e29b-41d4-a716-446655440000
                                   muscle_group: 1
                                   title: Жим лежа на скамье
@@ -180,21 +180,25 @@ paths:
                             $ref: '#/components/schemas/CreateTrainingPayload'
                         example:
                             date: "2025-12-25"
-                            duration: 6417442286446844713
+                            duration: 4541791234550504212
                             exercises:
-                                - exercise_id: d322611a-8bec-422e-a03c-3ff523776002
+                                - exercise_id: eac346ec-8c0d-4378-81f2-0f2df404b9ff
                                   sets:
-                                    - reps: 8202675765988522562
-                                      weight: 0.9073708839255074
-                                    - reps: 8202675765988522562
-                                      weight: 0.9073708839255074
-                                - exercise_id: d322611a-8bec-422e-a03c-3ff523776002
+                                    - reps: 46900354374985834
+                                      weight: 0.520894057493718
+                                    - reps: 46900354374985834
+                                      weight: 0.520894057493718
+                                    - reps: 46900354374985834
+                                      weight: 0.520894057493718
+                                - exercise_id: eac346ec-8c0d-4378-81f2-0f2df404b9ff
                                   sets:
-                                    - reps: 8202675765988522562
-                                      weight: 0.9073708839255074
-                                    - reps: 8202675765988522562
-                                      weight: 0.9073708839255074
-                            title: r8x
+                                    - reps: 46900354374985834
+                                      weight: 0.520894057493718
+                                    - reps: 46900354374985834
+                                      weight: 0.520894057493718
+                                    - reps: 46900354374985834
+                                      weight: 0.520894057493718
+                            title: 09h
             responses:
                 "201":
                     description: Created response.
@@ -203,11 +207,11 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Training'
                             example:
-                                created_at: "1986-05-21T10:51:26Z"
-                                date: "1978-02-12"
-                                duration: 4541791234550504211
-                                id: Incidunt aliquid ab odit qui et molestiae.
-                                title: Perspiciatis numquam.
+                                created_at: "1983-07-10T03:03:55Z"
+                                date: "1977-11-29"
+                                duration: 1180415307606265183
+                                id: Provident culpa debitis nam dolores rerum.
+                                title: Alias sunt ullam blanditiis voluptates ab.
                 "400":
                     description: 'bad_request: Bad Request response.'
                     content:
@@ -220,6 +224,424 @@ paths:
                         application/vnd.goa.error:
                             schema:
                                 $ref: '#/components/schemas/Error'
+    /trainings/{uuid}:
+        delete:
+            tags:
+                - trainings
+            summary: Удаление тренировки по uuid
+            description: Удаление тренировки
+            operationId: trainings#delete
+            parameters:
+                - name: uuid
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    example: 550e8400-e29b-41d4-a716-446655440000
+                    format: uuid
+                  example: 550e8400-e29b-41d4-a716-446655440000
+            responses:
+                "204":
+                    description: No Content response.
+                "404":
+                    description: 'not_found: Тренировка не найдена'
+                    content:
+                        application/vnd.goa.error:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /trainings/all:
+        get:
+            tags:
+                - trainings
+            summary: Получение всех тренировок
+            description: Получение всех своих тренировок
+            operationId: trainings#all
+            parameters:
+                - name: limit
+                  in: query
+                  description: limit
+                  allowEmptyValue: true
+                  schema:
+                    type: integer
+                    description: limit
+                    default: 1
+                    example: 20
+                    format: int64
+                    minimum: 1
+                  example: 20
+                - name: offset
+                  in: query
+                  description: offset
+                  allowEmptyValue: true
+                  schema:
+                    type: integer
+                    description: offset
+                    default: 0
+                    example: 0
+                    format: int64
+                    minimum: 0
+                  example: 0
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/TrainingAll'
+                                example:
+                                    - created_at: "1983-05-02T19:21:02Z"
+                                      date: "2001-08-14"
+                                      duration: 4027368490662904660
+                                      exercises:
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          muscle_group: 1
+                                          sets:
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                          title: Жим лежа на скамье
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          muscle_group: 1
+                                          sets:
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                          title: Жим лежа на скамье
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          muscle_group: 1
+                                          sets:
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                          title: Жим лежа на скамье
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          muscle_group: 1
+                                          sets:
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                          title: Жим лежа на скамье
+                                      id: Minima quis est ipsa.
+                                      title: Dolor consequatur adipisci consectetur et libero sit.
+                                    - created_at: "1983-05-02T19:21:02Z"
+                                      date: "2001-08-14"
+                                      duration: 4027368490662904660
+                                      exercises:
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          muscle_group: 1
+                                          sets:
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                          title: Жим лежа на скамье
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          muscle_group: 1
+                                          sets:
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                          title: Жим лежа на скамье
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          muscle_group: 1
+                                          sets:
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                          title: Жим лежа на скамье
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          muscle_group: 1
+                                          sets:
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                          title: Жим лежа на скамье
+                                      id: Minima quis est ipsa.
+                                      title: Dolor consequatur adipisci consectetur et libero sit.
+                                    - created_at: "1983-05-02T19:21:02Z"
+                                      date: "2001-08-14"
+                                      duration: 4027368490662904660
+                                      exercises:
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          muscle_group: 1
+                                          sets:
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                          title: Жим лежа на скамье
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          muscle_group: 1
+                                          sets:
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                          title: Жим лежа на скамье
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          muscle_group: 1
+                                          sets:
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                          title: Жим лежа на скамье
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          muscle_group: 1
+                                          sets:
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                            - id: 550e8400-e29b-41d4-a716-446655440000
+                                              reps: 3638342103790886134
+                                              weight: 0.4144092443135357
+                                          title: Жим лежа на скамье
+                                      id: Minima quis est ipsa.
+                                      title: Dolor consequatur adipisci consectetur et libero sit.
+                            example:
+                                - created_at: "1983-05-02T19:21:02Z"
+                                  date: "2001-08-14"
+                                  duration: 4027368490662904660
+                                  exercises:
+                                    - id: 550e8400-e29b-41d4-a716-446655440000
+                                      muscle_group: 1
+                                      sets:
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                      title: Жим лежа на скамье
+                                    - id: 550e8400-e29b-41d4-a716-446655440000
+                                      muscle_group: 1
+                                      sets:
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                      title: Жим лежа на скамье
+                                    - id: 550e8400-e29b-41d4-a716-446655440000
+                                      muscle_group: 1
+                                      sets:
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                      title: Жим лежа на скамье
+                                    - id: 550e8400-e29b-41d4-a716-446655440000
+                                      muscle_group: 1
+                                      sets:
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                      title: Жим лежа на скамье
+                                  id: Minima quis est ipsa.
+                                  title: Dolor consequatur adipisci consectetur et libero sit.
+                                - created_at: "1983-05-02T19:21:02Z"
+                                  date: "2001-08-14"
+                                  duration: 4027368490662904660
+                                  exercises:
+                                    - id: 550e8400-e29b-41d4-a716-446655440000
+                                      muscle_group: 1
+                                      sets:
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                      title: Жим лежа на скамье
+                                    - id: 550e8400-e29b-41d4-a716-446655440000
+                                      muscle_group: 1
+                                      sets:
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                      title: Жим лежа на скамье
+                                    - id: 550e8400-e29b-41d4-a716-446655440000
+                                      muscle_group: 1
+                                      sets:
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                      title: Жим лежа на скамье
+                                    - id: 550e8400-e29b-41d4-a716-446655440000
+                                      muscle_group: 1
+                                      sets:
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                        - id: 550e8400-e29b-41d4-a716-446655440000
+                                          reps: 3638342103790886134
+                                          weight: 0.4144092443135357
+                                      title: Жим лежа на скамье
+                                  id: Minima quis est ipsa.
+                                  title: Dolor consequatur adipisci consectetur et libero sit.
 components:
     schemas:
         CreateTrainingPayload:
@@ -231,7 +653,7 @@ components:
                     format: date
                 duration:
                     type: integer
-                    example: 3413453463154647864
+                    example: 2891370647940389076
                     format: int64
                     minimum: 1
                 exercises:
@@ -251,13 +673,19 @@ components:
                               weight: 0.5872247866349914
                             - reps: 4759131713011614080
                               weight: 0.5872247866349914
+                        - exercise_id: d1c19714-eef8-4310-9f94-107456eb525d
+                          sets:
+                            - reps: 4759131713011614080
+                              weight: 0.5872247866349914
+                            - reps: 4759131713011614080
+                              weight: 0.5872247866349914
                 title:
                     type: string
-                    example: f8h
+                    example: s4r
                     maxLength: 50
             example:
                 date: "2025-12-25"
-                duration: 7231580145251194751
+                duration: 2418209077351885894
                 exercises:
                     - exercise_id: d1c19714-eef8-4310-9f94-107456eb525d
                       sets:
@@ -283,7 +711,7 @@ components:
                           weight: 0.5872247866349914
                         - reps: 4759131713011614080
                           weight: 0.5872247866349914
-                title: bc5
+                title: imo
             required:
                 - title
                 - date
@@ -295,7 +723,7 @@ components:
                 fault:
                     type: boolean
                     description: Is the error a server-side fault?
-                    example: false
+                    example: true
                 id:
                     type: string
                     description: ID is a unique identifier for this particular occurrence of the problem.
@@ -311,11 +739,11 @@ components:
                 temporary:
                     type: boolean
                     description: Is the error temporary?
-                    example: false
+                    example: true
                 timeout:
                     type: boolean
                     description: Is the error a timeout?
-                    example: false
+                    example: true
             description: Invalid input data provided
             example:
                 fault: false
@@ -354,21 +782,44 @@ components:
             required:
                 - title
                 - muscle_group
+        ExerciseSet:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: System-generated unique identifier
+                    example: 550e8400-e29b-41d4-a716-446655440000
+                    format: uuid
+                reps:
+                    type: integer
+                    example: 2785550563036259740
+                    format: int64
+                    minimum: 1
+                weight:
+                    type: number
+                    example: 0.7141549933143667
+                    format: double
+            example:
+                id: 550e8400-e29b-41d4-a716-446655440000
+                reps: 4116269601109840067
+                weight: 0.8219071098111758
+            required:
+                - reps
         ExerciseSetPayload:
             type: object
             properties:
                 reps:
                     type: integer
-                    example: 7741193587986731136
+                    example: 7983404767343784660
                     format: int64
                     minimum: 1
                 weight:
                     type: number
-                    example: 0.3580867845965312
+                    example: 0.6051904398301082
                     format: double
             example:
-                reps: 6214574414493060695
-                weight: 0.6344021993132443
+                reps: 6876843171684181327
+                weight: 0.28549116821604686
             required:
                 - reps
         Exercises:
@@ -421,34 +872,204 @@ components:
             example:
                 muscle_group: 1
                 title: Жим лежа на скамье
+        ExercisesWithTraining:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: System-generated unique identifier
+                    example: 550e8400-e29b-41d4-a716-446655440000
+                    format: uuid
+                muscle_group:
+                    type: integer
+                    description: Группа мыщц указывается в виде числа, нужна для получения упражнений по группе мыщц
+                    example: 1
+                    format: int32
+                    minimum: 0
+                    maximum: 10
+                sets:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ExerciseSet'
+                    example:
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          reps: 9208414693283396710
+                          weight: 0.32873104718627366
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          reps: 9208414693283396710
+                          weight: 0.32873104718627366
+                title:
+                    type: string
+                    description: Название упражнения
+                    example: Жим лежа на скамье
+                    minLength: 1
+                    maxLength: 50
+            example:
+                id: 550e8400-e29b-41d4-a716-446655440000
+                muscle_group: 1
+                sets:
+                    - id: 550e8400-e29b-41d4-a716-446655440000
+                      reps: 9208414693283396710
+                      weight: 0.32873104718627366
+                    - id: 550e8400-e29b-41d4-a716-446655440000
+                      reps: 9208414693283396710
+                      weight: 0.32873104718627366
+                    - id: 550e8400-e29b-41d4-a716-446655440000
+                      reps: 9208414693283396710
+                      weight: 0.32873104718627366
+                title: Жим лежа на скамье
+            required:
+                - id
+                - title
+                - muscle_group
         Training:
             type: object
             properties:
                 created_at:
                     type: string
-                    example: "1992-08-13T17:48:09Z"
+                    example: "2002-07-14T04:06:34Z"
                     format: date-time
                 date:
                     type: string
-                    example: "1971-07-02"
+                    example: "2012-08-05"
                     format: date
                 duration:
                     type: integer
-                    example: 3548123190170457120
+                    example: 8141567412938905515
                     format: int64
                 id:
                     type: string
                     description: uuid
-                    example: Excepturi sapiente.
+                    example: Dicta iure ut.
                 title:
                     type: string
-                    example: Molestiae dolores sunt eum natus.
+                    example: Qui tempora.
             example:
-                created_at: "2003-11-05T10:28:08Z"
-                date: "1973-04-30"
-                duration: 4271592293298278295
-                id: Perspiciatis dignissimos laboriosam officiis eum.
-                title: Sit laborum.
+                created_at: "1991-01-01T15:11:32Z"
+                date: "2005-12-07"
+                duration: 9182443964653466284
+                id: Similique aperiam incidunt repellendus minima sed rerum.
+                title: Veniam hic rem cumque sint.
+            required:
+                - id
+                - title
+                - date
+                - duration
+        TrainingAll:
+            type: object
+            properties:
+                created_at:
+                    type: string
+                    example: "2001-10-13T03:29:03Z"
+                    format: date-time
+                date:
+                    type: string
+                    example: "2015-06-28"
+                    format: date
+                duration:
+                    type: integer
+                    example: 1587200070710703466
+                    format: int64
+                exercises:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ExercisesWithTraining'
+                    example:
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          muscle_group: 1
+                          sets:
+                            - id: 550e8400-e29b-41d4-a716-446655440000
+                              reps: 9208414693283396710
+                              weight: 0.32873104718627366
+                            - id: 550e8400-e29b-41d4-a716-446655440000
+                              reps: 9208414693283396710
+                              weight: 0.32873104718627366
+                            - id: 550e8400-e29b-41d4-a716-446655440000
+                              reps: 9208414693283396710
+                              weight: 0.32873104718627366
+                            - id: 550e8400-e29b-41d4-a716-446655440000
+                              reps: 9208414693283396710
+                              weight: 0.32873104718627366
+                          title: Жим лежа на скамье
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          muscle_group: 1
+                          sets:
+                            - id: 550e8400-e29b-41d4-a716-446655440000
+                              reps: 9208414693283396710
+                              weight: 0.32873104718627366
+                            - id: 550e8400-e29b-41d4-a716-446655440000
+                              reps: 9208414693283396710
+                              weight: 0.32873104718627366
+                            - id: 550e8400-e29b-41d4-a716-446655440000
+                              reps: 9208414693283396710
+                              weight: 0.32873104718627366
+                            - id: 550e8400-e29b-41d4-a716-446655440000
+                              reps: 9208414693283396710
+                              weight: 0.32873104718627366
+                          title: Жим лежа на скамье
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          muscle_group: 1
+                          sets:
+                            - id: 550e8400-e29b-41d4-a716-446655440000
+                              reps: 9208414693283396710
+                              weight: 0.32873104718627366
+                            - id: 550e8400-e29b-41d4-a716-446655440000
+                              reps: 9208414693283396710
+                              weight: 0.32873104718627366
+                            - id: 550e8400-e29b-41d4-a716-446655440000
+                              reps: 9208414693283396710
+                              weight: 0.32873104718627366
+                            - id: 550e8400-e29b-41d4-a716-446655440000
+                              reps: 9208414693283396710
+                              weight: 0.32873104718627366
+                          title: Жим лежа на скамье
+                id:
+                    type: string
+                    description: uuid
+                    example: Corporis vel omnis nisi.
+                title:
+                    type: string
+                    example: Quidem recusandae sapiente est dolorem.
+            description: Модель Списка Тренировок с UUID
+            example:
+                created_at: "1992-06-01T17:11:59Z"
+                date: "1970-02-14"
+                duration: 2267797079030435567
+                exercises:
+                    - id: 550e8400-e29b-41d4-a716-446655440000
+                      muscle_group: 1
+                      sets:
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          reps: 9208414693283396710
+                          weight: 0.32873104718627366
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          reps: 9208414693283396710
+                          weight: 0.32873104718627366
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          reps: 9208414693283396710
+                          weight: 0.32873104718627366
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          reps: 9208414693283396710
+                          weight: 0.32873104718627366
+                      title: Жим лежа на скамье
+                    - id: 550e8400-e29b-41d4-a716-446655440000
+                      muscle_group: 1
+                      sets:
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          reps: 9208414693283396710
+                          weight: 0.32873104718627366
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          reps: 9208414693283396710
+                          weight: 0.32873104718627366
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          reps: 9208414693283396710
+                          weight: 0.32873104718627366
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          reps: 9208414693283396710
+                          weight: 0.32873104718627366
+                      title: Жим лежа на скамье
+                id: Recusandae vero nesciunt repudiandae repellat.
+                title: Omnis atque quo ullam.
             required:
                 - id
                 - title
@@ -459,7 +1080,7 @@ components:
             properties:
                 exercise_id:
                     type: string
-                    example: 8a3e5121-e6d5-4447-8aac-09977c87d5a2
+                    example: 344f22fd-786c-4fb2-a4e5-07110e261729
                     format: uuid
                 sets:
                     type: array
@@ -470,11 +1091,11 @@ components:
                           weight: 0.5872247866349914
                         - reps: 4759131713011614080
                           weight: 0.5872247866349914
+                        - reps: 4759131713011614080
+                          weight: 0.5872247866349914
             example:
-                exercise_id: 3fbc6a4d-59d0-40ee-8dad-1b7f6b6cd26f
+                exercise_id: 71979ef4-6a86-43a0-8533-467ac3564bba
                 sets:
-                    - reps: 4759131713011614080
-                      weight: 0.5872247866349914
                     - reps: 4759131713011614080
                       weight: 0.5872247866349914
                     - reps: 4759131713011614080
@@ -490,8 +1111,8 @@ components:
                 create_at:
                     type: string
                     description: Дата создания
-                    example: "2003-08-03"
-                    format: date
+                    example: "2010-11-27T18:12:47Z"
+                    format: date-time
                 date:
                     type: string
                     description: Дата проведение тренировки
@@ -512,7 +1133,7 @@ components:
                     maxLength: 50
             description: Модель тренировок
             example:
-                create_at: "1991-02-08"
+                create_at: "2003-03-25T11:33:45Z"
                 date: "2025-12-08"
                 duration: "5440"
                 title: Тренировка верхней поверхности бедра

@@ -17,6 +17,10 @@ import (
 type Service interface {
 	// Создание тренировки с упражнениями и подходами
 	Create(context.Context, *CreateTrainingPayload) (res *Training, err error)
+	// Получение всех своих тренировок
+	All(context.Context, *AllPayload) (res []*TrainingAll, err error)
+	// Удаление тренировки
+	Delete(context.Context, *DeletePayload) (err error)
 }
 
 // APIName is the name of the API as defined in the design.
@@ -33,7 +37,15 @@ const ServiceName = "trainings"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [1]string{"create"}
+var MethodNames = [3]string{"create", "all", "delete"}
+
+// AllPayload is the payload type of the trainings service all method.
+type AllPayload struct {
+	// Количество запрашиваемых элементов за один offset
+	Limit int
+	// Сколько делать шаг для пагинации
+	Offset int
+}
 
 // CreateTrainingPayload is the payload type of the trainings service create
 // method.
@@ -44,13 +56,47 @@ type CreateTrainingPayload struct {
 	Exercises []*TrainingExercisePayload
 }
 
+// DeletePayload is the payload type of the trainings service delete method.
+type DeletePayload struct {
+	UUID string
+}
+
+type ExerciseSet struct {
+	// System-generated unique identifier
+	ID     *string
+	Reps   int
+	Weight *float64
+}
+
 type ExerciseSetPayload struct {
 	Reps   int
 	Weight *float64
 }
 
+type ExercisesWithTraining struct {
+	Sets []*ExerciseSet
+	// System-generated unique identifier
+	ID string
+	// Название упражнения
+	Title string
+	// Группа мыщц указывается в виде числа, нужна для получения упражнений по
+	// группе мыщц
+	MuscleGroup int32
+}
+
 // Training is the result type of the trainings service create method.
 type Training struct {
+	// uuid
+	ID        string
+	Title     string
+	Date      string
+	Duration  int
+	CreatedAt *string
+}
+
+// Модель Списка Тренировок с UUID
+type TrainingAll struct {
+	Exercises []*ExercisesWithTraining
 	// uuid
 	ID        string
 	Title     string

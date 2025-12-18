@@ -34,6 +34,10 @@ type CreateResponseBody struct {
 	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 }
 
+// AllResponseBody is the type of the "trainings" service "all" endpoint HTTP
+// response body.
+type AllResponseBody []*TrainingAllResponse
+
 // CreateBadRequestResponseBody is the type of the "trainings" service "create"
 // endpoint HTTP response body for the "bad_request" error.
 type CreateBadRequestResponseBody struct {
@@ -70,6 +74,56 @@ type CreateNotFoundResponseBody struct {
 	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
+// DeleteNotFoundResponseBody is the type of the "trainings" service "delete"
+// endpoint HTTP response body for the "not_found" error.
+type DeleteNotFoundResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// TrainingAllResponse is used to define fields on response body types.
+type TrainingAllResponse struct {
+	Exercises []*ExercisesWithTrainingResponse `form:"exercises,omitempty" json:"exercises,omitempty" xml:"exercises,omitempty"`
+	// uuid
+	ID        string  `form:"id" json:"id" xml:"id"`
+	Title     string  `form:"title" json:"title" xml:"title"`
+	Date      string  `form:"date" json:"date" xml:"date"`
+	Duration  int     `form:"duration" json:"duration" xml:"duration"`
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+}
+
+// ExercisesWithTrainingResponse is used to define fields on response body
+// types.
+type ExercisesWithTrainingResponse struct {
+	Sets []*ExerciseSetResponse `form:"sets,omitempty" json:"sets,omitempty" xml:"sets,omitempty"`
+	// System-generated unique identifier
+	ID string `form:"id" json:"id" xml:"id"`
+	// Название упражнения
+	Title string `form:"title" json:"title" xml:"title"`
+	// Группа мыщц указывается в виде числа, нужна для получения упражнений по
+	// группе мыщц
+	MuscleGroup int32 `form:"muscle_group" json:"muscle_group" xml:"muscle_group"`
+}
+
+// ExerciseSetResponse is used to define fields on response body types.
+type ExerciseSetResponse struct {
+	// System-generated unique identifier
+	ID     *string  `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	Reps   int      `form:"reps" json:"reps" xml:"reps"`
+	Weight *float64 `form:"weight,omitempty" json:"weight,omitempty" xml:"weight,omitempty"`
+}
+
 // TrainingExercisePayloadRequestBody is used to define fields on request body
 // types.
 type TrainingExercisePayloadRequestBody struct {
@@ -92,6 +146,20 @@ func NewCreateResponseBody(res *trainings.Training) *CreateResponseBody {
 		Date:      res.Date,
 		Duration:  res.Duration,
 		CreatedAt: res.CreatedAt,
+	}
+	return body
+}
+
+// NewAllResponseBody builds the HTTP response body from the result of the
+// "all" endpoint of the "trainings" service.
+func NewAllResponseBody(res []*trainings.TrainingAll) AllResponseBody {
+	body := make([]*TrainingAllResponse, len(res))
+	for i, val := range res {
+		if val == nil {
+			body[i] = nil
+			continue
+		}
+		body[i] = marshalTrainingsTrainingAllToTrainingAllResponse(val)
 	}
 	return body
 }
@@ -124,6 +192,20 @@ func NewCreateNotFoundResponseBody(res *goa.ServiceError) *CreateNotFoundRespons
 	return body
 }
 
+// NewDeleteNotFoundResponseBody builds the HTTP response body from the result
+// of the "delete" endpoint of the "trainings" service.
+func NewDeleteNotFoundResponseBody(res *goa.ServiceError) *DeleteNotFoundResponseBody {
+	body := &DeleteNotFoundResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
 // NewCreateTrainingPayload builds a trainings service create endpoint payload.
 func NewCreateTrainingPayload(body *CreateRequestBody) *trainings.CreateTrainingPayload {
 	v := &trainings.CreateTrainingPayload{
@@ -139,6 +221,23 @@ func NewCreateTrainingPayload(body *CreateRequestBody) *trainings.CreateTraining
 		}
 		v.Exercises[i] = unmarshalTrainingExercisePayloadRequestBodyToTrainingsTrainingExercisePayload(val)
 	}
+
+	return v
+}
+
+// NewAllPayload builds a trainings service all endpoint payload.
+func NewAllPayload(limit int, offset int) *trainings.AllPayload {
+	v := &trainings.AllPayload{}
+	v.Limit = limit
+	v.Offset = offset
+
+	return v
+}
+
+// NewDeletePayload builds a trainings service delete endpoint payload.
+func NewDeletePayload(uuid string) *trainings.DeletePayload {
+	v := &trainings.DeletePayload{}
+	v.UUID = uuid
 
 	return v
 }

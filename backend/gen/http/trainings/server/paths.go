@@ -7,7 +7,21 @@
 
 package server
 
+import (
+	"fmt"
+)
+
 // CreateTrainingsPath returns the URL path to the trainings service create HTTP endpoint.
 func CreateTrainingsPath() string {
 	return "/trainings"
+}
+
+// AllTrainingsPath returns the URL path to the trainings service all HTTP endpoint.
+func AllTrainingsPath() string {
+	return "/trainings/all"
+}
+
+// DeleteTrainingsPath returns the URL path to the trainings service delete HTTP endpoint.
+func DeleteTrainingsPath(uuid string) string {
+	return fmt.Sprintf("/trainings/%v", uuid)
 }
