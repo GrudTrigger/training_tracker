@@ -41,7 +41,6 @@ func (r *Repository) GetByID(ctx context.Context, id *t.GetByIDPayload) (*t.Trai
 		&reps,
 		&weight,
 	)
-
 	if err != nil {
 		return nil, err
 	}

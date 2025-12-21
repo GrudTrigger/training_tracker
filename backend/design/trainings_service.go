@@ -79,7 +79,6 @@ var _ = Service("trainings", func() {
 			Response(StatusOK)
 			Response("not_found", StatusNotFound)
 		})
-
 	})
 
 	Method("delete", func() {
