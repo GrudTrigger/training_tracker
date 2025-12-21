@@ -60,6 +60,28 @@ var _ = Service("trainings", func() {
 		})
 	})
 
+	Method("get-by-id", func() {
+		Description("Получение тренировки по id")
+		Meta("openapi:summary", "Получение тренировки по id")
+
+		Payload(func() {
+			Attribute("uuid", String, func() {
+				Format(FormatUUID)
+				Example("550e8400-e29b-41d4-a716-446655440000")
+			})
+			Required("uuid")
+		})
+		Error("not_found", ErrorResult, "Тренировка не найдена")
+		Result(TrainingAll)
+
+		HTTP(func() {
+			DELETE("trainings/{uuid}")
+			Response(StatusOK)
+			Response("not_found", StatusNotFound)
+		})
+
+	})
+
 	Method("delete", func() {
 		Description("Удаление тренировки")
 		Meta("openapi:summary", "Удаление тренировки по uuid")

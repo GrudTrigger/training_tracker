@@ -36,18 +36,18 @@ func (r *Repository) Create(ctx context.Context, data *t.CreateTrainingPayload) 
 
 	for _, e := range data.Exercises {
 		var trainingExercisesUUID string
-		err := tx.QueryRow(ctx, "INSERT INTO training_exercises(training_id, exercise_id) VALUES($1, $2) RETURNING id", training.ID, e.ExerciseID).Scan(&trainingExercisesUUID)
+		err = tx.QueryRow(ctx, "INSERT INTO training_exercises(training_id, exercise_id) VALUES($1, $2) RETURNING id", training.ID, e.ExerciseID).Scan(&trainingExercisesUUID)
 		if err != nil {
 			return nil, err
 		}
 		for _, s := range e.Sets {
-			_, err := tx.Exec(ctx, "INSERT INTO exercise_sets(training_exercise_id, reps, weight) VALUES($1, $2, $3)", trainingExercisesUUID, s.Reps, s.Weight)
+			_, err = tx.Exec(ctx, "INSERT INTO exercise_sets(training_exercise_id, reps, weight) VALUES($1, $2, $3)", trainingExercisesUUID, s.Reps, s.Weight)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
-	if err := tx.Commit(ctx); err != nil {
+	if err = tx.Commit(ctx); err != nil {
 		return nil, fmt.Errorf("commiting transaction: %w", err)
 	}
 

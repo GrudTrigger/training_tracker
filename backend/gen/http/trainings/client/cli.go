@@ -114,6 +114,24 @@ func BuildAllPayload(trainingsAllLimit string, trainingsAllOffset string) (*trai
 	return v, nil
 }
 
+// BuildGetByIDPayload builds the payload for the trainings get-by-id endpoint
+// from CLI flags.
+func BuildGetByIDPayload(trainingsGetByIDUUID string) (*trainings.GetByIDPayload, error) {
+	var err error
+	var uuid string
+	{
+		uuid = trainingsGetByIDUUID
+		err = goa.MergeErrors(err, goa.ValidateFormat("uuid", uuid, goa.FormatUUID))
+		if err != nil {
+			return nil, err
+		}
+	}
+	v := &trainings.GetByIDPayload{}
+	v.UUID = uuid
+
+	return v, nil
+}
+
 // BuildDeletePayload builds the payload for the trainings delete endpoint from
 // CLI flags.
 func BuildDeletePayload(trainingsDeleteUUID string) (*trainings.DeletePayload, error) {

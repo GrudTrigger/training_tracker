@@ -18,10 +18,11 @@ import (
 
 // Server lists the trainings service endpoint HTTP handlers.
 type Server struct {
-	Mounts []*MountPoint
-	Create http.Handler
-	All    http.Handler
-	Delete http.Handler
+	Mounts  []*MountPoint
+	Create  http.Handler
+	All     http.Handler
+	GetByID http.Handler
+	Delete  http.Handler
 }
 
 // MountPoint holds information about the mounted endpoints.
@@ -53,11 +54,13 @@ func New(
 		Mounts: []*MountPoint{
 			{"Create", "POST", "/trainings"},
 			{"All", "GET", "/trainings/all"},
+			{"GetByID", "DELETE", "/trainings/{uuid}"},
 			{"Delete", "DELETE", "/trainings/{uuid}"},
 		},
-		Create: NewCreateHandler(e.Create, mux, decoder, encoder, errhandler, formatter),
-		All:    NewAllHandler(e.All, mux, decoder, encoder, errhandler, formatter),
-		Delete: NewDeleteHandler(e.Delete, mux, decoder, encoder, errhandler, formatter),
+		Create:  NewCreateHandler(e.Create, mux, decoder, encoder, errhandler, formatter),
+		All:     NewAllHandler(e.All, mux, decoder, encoder, errhandler, formatter),
+		GetByID: NewGetByIDHandler(e.GetByID, mux, decoder, encoder, errhandler, formatter),
+		Delete:  NewDeleteHandler(e.Delete, mux, decoder, encoder, errhandler, formatter),
 	}
 }
 
@@ -68,6 +71,7 @@ func (s *Server) Service() string { return "trainings" }
 func (s *Server) Use(m func(http.Handler) http.Handler) {
 	s.Create = m(s.Create)
 	s.All = m(s.All)
+	s.GetByID = m(s.GetByID)
 	s.Delete = m(s.Delete)
 }
 
@@ -78,6 +82,7 @@ func (s *Server) MethodNames() []string { return trainings.MethodNames[:] }
 func Mount(mux goahttp.Muxer, h *Server) {
 	MountCreateHandler(mux, h.Create)
 	MountAllHandler(mux, h.All)
+	MountGetByIDHandler(mux, h.GetByID)
 	MountDeleteHandler(mux, h.Delete)
 }
 
@@ -169,6 +174,59 @@ func NewAllHandler(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
 		ctx = context.WithValue(ctx, goa.MethodKey, "all")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "trainings")
+		payload, err := decodeRequest(r)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil && errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			if errhandler != nil {
+				errhandler(ctx, w, err)
+			}
+		}
+	})
+}
+
+// MountGetByIDHandler configures the mux to serve the "trainings" service
+// "get-by-id" endpoint.
+func MountGetByIDHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("DELETE", "/trainings/{uuid}", f)
+}
+
+// NewGetByIDHandler creates a HTTP handler which loads the HTTP request and
+// calls the "trainings" service "get-by-id" endpoint.
+func NewGetByIDHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(ctx context.Context, err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		decodeRequest  = DecodeGetByIDRequest(mux, decoder)
+		encodeResponse = EncodeGetByIDResponse(encoder)
+		encodeError    = EncodeGetByIDError(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "get-by-id")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "trainings")
 		payload, err := decodeRequest(r)
 		if err != nil {

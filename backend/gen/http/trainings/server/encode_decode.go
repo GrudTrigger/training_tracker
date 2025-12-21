@@ -161,6 +161,68 @@ func DecodeAllRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Dec
 	}
 }
 
+// EncodeGetByIDResponse returns an encoder for responses returned by the
+// trainings get-by-id endpoint.
+func EncodeGetByIDResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+	return func(ctx context.Context, w http.ResponseWriter, v any) error {
+		res, _ := v.(*trainings.TrainingAll)
+		enc := encoder(ctx, w)
+		body := NewGetByIDResponseBody(res)
+		w.WriteHeader(http.StatusOK)
+		return enc.Encode(body)
+	}
+}
+
+// DecodeGetByIDRequest returns a decoder for requests sent to the trainings
+// get-by-id endpoint.
+func DecodeGetByIDRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*trainings.GetByIDPayload, error) {
+	return func(r *http.Request) (*trainings.GetByIDPayload, error) {
+		var (
+			uuid string
+			err  error
+
+			params = mux.Vars(r)
+		)
+		uuid = params["uuid"]
+		err = goa.MergeErrors(err, goa.ValidateFormat("uuid", uuid, goa.FormatUUID))
+		if err != nil {
+			return nil, err
+		}
+		payload := NewGetByIDPayload(uuid)
+
+		return payload, nil
+	}
+}
+
+// EncodeGetByIDError returns an encoder for errors returned by the get-by-id
+// trainings endpoint.
+func EncodeGetByIDError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "not_found":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewGetByIDNotFoundResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusNotFound)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
+	}
+}
+
 // EncodeDeleteResponse returns an encoder for responses returned by the
 // trainings delete endpoint.
 func EncodeDeleteResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
@@ -308,6 +370,47 @@ func marshalTrainingsExerciseSetToExerciseSetResponse(v *trainings.ExerciseSet) 
 		return nil
 	}
 	res := &ExerciseSetResponse{
+		ID:     v.ID,
+		Reps:   v.Reps,
+		Weight: v.Weight,
+	}
+
+	return res
+}
+
+// marshalTrainingsExercisesWithTrainingToExercisesWithTrainingResponseBody
+// builds a value of type *ExercisesWithTrainingResponseBody from a value of
+// type *trainings.ExercisesWithTraining.
+func marshalTrainingsExercisesWithTrainingToExercisesWithTrainingResponseBody(v *trainings.ExercisesWithTraining) *ExercisesWithTrainingResponseBody {
+	if v == nil {
+		return nil
+	}
+	res := &ExercisesWithTrainingResponseBody{
+		ID:          v.ID,
+		Title:       v.Title,
+		MuscleGroup: v.MuscleGroup,
+	}
+	if v.Sets != nil {
+		res.Sets = make([]*ExerciseSetResponseBody, len(v.Sets))
+		for i, val := range v.Sets {
+			if val == nil {
+				res.Sets[i] = nil
+				continue
+			}
+			res.Sets[i] = marshalTrainingsExerciseSetToExerciseSetResponseBody(val)
+		}
+	}
+
+	return res
+}
+
+// marshalTrainingsExerciseSetToExerciseSetResponseBody builds a value of type
+// *ExerciseSetResponseBody from a value of type *trainings.ExerciseSet.
+func marshalTrainingsExerciseSetToExerciseSetResponseBody(v *trainings.ExerciseSet) *ExerciseSetResponseBody {
+	if v == nil {
+		return nil
+	}
+	res := &ExerciseSetResponseBody{
 		ID:     v.ID,
 		Reps:   v.Reps,
 		Weight: v.Weight,

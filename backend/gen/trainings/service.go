@@ -19,6 +19,8 @@ type Service interface {
 	Create(context.Context, *CreateTrainingPayload) (res *Training, err error)
 	// Получение всех своих тренировок
 	All(context.Context, *AllPayload) (res []*TrainingAll, err error)
+	// Получение тренировки по id
+	GetByID(context.Context, *GetByIDPayload) (res *TrainingAll, err error)
 	// Удаление тренировки
 	Delete(context.Context, *DeletePayload) (err error)
 }
@@ -37,7 +39,7 @@ const ServiceName = "trainings"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [3]string{"create", "all", "delete"}
+var MethodNames = [4]string{"create", "all", "get-by-id", "delete"}
 
 // AllPayload is the payload type of the trainings service all method.
 type AllPayload struct {
@@ -84,6 +86,11 @@ type ExercisesWithTraining struct {
 	MuscleGroup int32
 }
 
+// GetByIDPayload is the payload type of the trainings service get-by-id method.
+type GetByIDPayload struct {
+	UUID string
+}
+
 // Training is the result type of the trainings service create method.
 type Training struct {
 	// uuid
@@ -94,7 +101,7 @@ type Training struct {
 	CreatedAt *string
 }
 
-// Модель Списка Тренировок с UUID
+// TrainingAll is the result type of the trainings service get-by-id method.
 type TrainingAll struct {
 	Exercises []*ExercisesWithTraining
 	// uuid

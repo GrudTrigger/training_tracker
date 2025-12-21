@@ -15,17 +15,19 @@ import (
 
 // Client is the "trainings" service client.
 type Client struct {
-	CreateEndpoint goa.Endpoint
-	AllEndpoint    goa.Endpoint
-	DeleteEndpoint goa.Endpoint
+	CreateEndpoint  goa.Endpoint
+	AllEndpoint     goa.Endpoint
+	GetByIDEndpoint goa.Endpoint
+	DeleteEndpoint  goa.Endpoint
 }
 
 // NewClient initializes a "trainings" service client given the endpoints.
-func NewClient(create, all, delete_ goa.Endpoint) *Client {
+func NewClient(create, all, getByID, delete_ goa.Endpoint) *Client {
 	return &Client{
-		CreateEndpoint: create,
-		AllEndpoint:    all,
-		DeleteEndpoint: delete_,
+		CreateEndpoint:  create,
+		AllEndpoint:     all,
+		GetByIDEndpoint: getByID,
+		DeleteEndpoint:  delete_,
 	}
 }
 
@@ -54,6 +56,19 @@ func (c *Client) All(ctx context.Context, p *AllPayload) (res []*TrainingAll, er
 		return
 	}
 	return ires.([]*TrainingAll), nil
+}
+
+// GetByID calls the "get-by-id" endpoint of the "trainings" service.
+// GetByID may return the following errors:
+//   - "not_found" (type *goa.ServiceError): Тренировка не найдена
+//   - error: internal error
+func (c *Client) GetByID(ctx context.Context, p *GetByIDPayload) (res *TrainingAll, err error) {
+	var ires any
+	ires, err = c.GetByIDEndpoint(ctx, p)
+	if err != nil {
+		return
+	}
+	return ires.(*TrainingAll), nil
 }
 
 // Delete calls the "delete" endpoint of the "trainings" service.

@@ -200,6 +200,88 @@ func DecodeAllResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 	}
 }
 
+// BuildGetByIDRequest instantiates a HTTP request object with method and path
+// set to call the "trainings" service "get-by-id" endpoint
+func (c *Client) BuildGetByIDRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		uuid string
+	)
+	{
+		p, ok := v.(*trainings.GetByIDPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("trainings", "get-by-id", "*trainings.GetByIDPayload", v)
+		}
+		uuid = p.UUID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: GetByIDTrainingsPath(uuid)}
+	req, err := http.NewRequest("DELETE", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("trainings", "get-by-id", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// DecodeGetByIDResponse returns a decoder for responses returned by the
+// trainings get-by-id endpoint. restoreBody controls whether the response body
+// should be restored after having been read.
+// DecodeGetByIDResponse may return the following errors:
+//   - "not_found" (type *goa.ServiceError): http.StatusNotFound
+//   - error: internal error
+func DecodeGetByIDResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body GetByIDResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("trainings", "get-by-id", err)
+			}
+			err = ValidateGetByIDResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("trainings", "get-by-id", err)
+			}
+			res := NewGetByIDTrainingAllOK(&body)
+			return res, nil
+		case http.StatusNotFound:
+			var (
+				body GetByIDNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("trainings", "get-by-id", err)
+			}
+			err = ValidateGetByIDNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("trainings", "get-by-id", err)
+			}
+			return nil, NewGetByIDNotFound(&body)
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("trainings", "get-by-id", resp.StatusCode, string(body))
+		}
+	}
+}
+
 // BuildDeleteRequest instantiates a HTTP request object with method and path
 // set to call the "trainings" service "delete" endpoint
 func (c *Client) BuildDeleteRequest(ctx context.Context, v any) (*http.Request, error) {
@@ -392,6 +474,47 @@ func unmarshalExercisesWithTrainingResponseToTrainingsExercisesWithTraining(v *E
 // unmarshalExerciseSetResponseToTrainingsExerciseSet builds a value of type
 // *trainings.ExerciseSet from a value of type *ExerciseSetResponse.
 func unmarshalExerciseSetResponseToTrainingsExerciseSet(v *ExerciseSetResponse) *trainings.ExerciseSet {
+	if v == nil {
+		return nil
+	}
+	res := &trainings.ExerciseSet{
+		ID:     v.ID,
+		Reps:   *v.Reps,
+		Weight: v.Weight,
+	}
+
+	return res
+}
+
+// unmarshalExercisesWithTrainingResponseBodyToTrainingsExercisesWithTraining
+// builds a value of type *trainings.ExercisesWithTraining from a value of type
+// *ExercisesWithTrainingResponseBody.
+func unmarshalExercisesWithTrainingResponseBodyToTrainingsExercisesWithTraining(v *ExercisesWithTrainingResponseBody) *trainings.ExercisesWithTraining {
+	if v == nil {
+		return nil
+	}
+	res := &trainings.ExercisesWithTraining{
+		ID:          *v.ID,
+		Title:       *v.Title,
+		MuscleGroup: *v.MuscleGroup,
+	}
+	if v.Sets != nil {
+		res.Sets = make([]*trainings.ExerciseSet, len(v.Sets))
+		for i, val := range v.Sets {
+			if val == nil {
+				res.Sets[i] = nil
+				continue
+			}
+			res.Sets[i] = unmarshalExerciseSetResponseBodyToTrainingsExerciseSet(val)
+		}
+	}
+
+	return res
+}
+
+// unmarshalExerciseSetResponseBodyToTrainingsExerciseSet builds a value of
+// type *trainings.ExerciseSet from a value of type *ExerciseSetResponseBody.
+func unmarshalExerciseSetResponseBodyToTrainingsExerciseSet(v *ExerciseSetResponseBody) *trainings.ExerciseSet {
 	if v == nil {
 		return nil
 	}

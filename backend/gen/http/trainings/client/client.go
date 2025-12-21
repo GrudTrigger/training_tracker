@@ -23,6 +23,10 @@ type Client struct {
 	// All Doer is the HTTP client used to make requests to the all endpoint.
 	AllDoer goahttp.Doer
 
+	// GetByID Doer is the HTTP client used to make requests to the get-by-id
+	// endpoint.
+	GetByIDDoer goahttp.Doer
+
 	// Delete Doer is the HTTP client used to make requests to the delete endpoint.
 	DeleteDoer goahttp.Doer
 
@@ -48,6 +52,7 @@ func NewClient(
 	return &Client{
 		CreateDoer:          doer,
 		AllDoer:             doer,
+		GetByIDDoer:         doer,
 		DeleteDoer:          doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
@@ -100,6 +105,25 @@ func (c *Client) All() goa.Endpoint {
 		resp, err := c.AllDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("trainings", "all", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// GetByID returns an endpoint that makes HTTP requests to the trainings
+// service get-by-id server.
+func (c *Client) GetByID() goa.Endpoint {
+	var (
+		decodeResponse = DecodeGetByIDResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildGetByIDRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.GetByIDDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("trainings", "get-by-id", err)
 		}
 		return decodeResponse(resp)
 	}

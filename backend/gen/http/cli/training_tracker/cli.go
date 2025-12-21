@@ -25,7 +25,7 @@ import (
 func UsageCommands() []string {
 	return []string{
 		"exercises (create|all|update|delete)",
-		"trainings (create|all|delete)",
+		"trainings (create|all|get-by-id|delete)",
 	}
 }
 
@@ -70,6 +70,9 @@ func ParseEndpoint(
 		trainingsAllLimitFlag  = trainingsAllFlags.String("limit", "1", "")
 		trainingsAllOffsetFlag = trainingsAllFlags.String("offset", "", "")
 
+		trainingsGetByIDFlags    = flag.NewFlagSet("get-by-id", flag.ExitOnError)
+		trainingsGetByIDUUIDFlag = trainingsGetByIDFlags.String("uuid", "REQUIRED", "")
+
 		trainingsDeleteFlags    = flag.NewFlagSet("delete", flag.ExitOnError)
 		trainingsDeleteUUIDFlag = trainingsDeleteFlags.String("uuid", "REQUIRED", "")
 	)
@@ -82,6 +85,7 @@ func ParseEndpoint(
 	trainingsFlags.Usage = trainingsUsage
 	trainingsCreateFlags.Usage = trainingsCreateUsage
 	trainingsAllFlags.Usage = trainingsAllUsage
+	trainingsGetByIDFlags.Usage = trainingsGetByIDUsage
 	trainingsDeleteFlags.Usage = trainingsDeleteUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
@@ -142,6 +146,9 @@ func ParseEndpoint(
 			case "all":
 				epf = trainingsAllFlags
 
+			case "get-by-id":
+				epf = trainingsGetByIDFlags
+
 			case "delete":
 				epf = trainingsDeleteFlags
 
@@ -192,6 +199,9 @@ func ParseEndpoint(
 			case "all":
 				endpoint = c.All()
 				data, err = trainingsc.BuildAllPayload(*trainingsAllLimitFlag, *trainingsAllOffsetFlag)
+			case "get-by-id":
+				endpoint = c.GetByID()
+				data, err = trainingsc.BuildGetByIDPayload(*trainingsGetByIDUUIDFlag)
 			case "delete":
 				endpoint = c.Delete()
 				data, err = trainingsc.BuildDeletePayload(*trainingsDeleteUUIDFlag)
@@ -301,6 +311,7 @@ func trainingsUsage() {
 	fmt.Fprintln(os.Stderr, "COMMAND:")
 	fmt.Fprintln(os.Stderr, `    create: Создание тренировки с упражнениями и подходами`)
 	fmt.Fprintln(os.Stderr, `    all: Получение всех своих тренировок`)
+	fmt.Fprintln(os.Stderr, `    get-by-id: Получение тренировки по id`)
 	fmt.Fprintln(os.Stderr, `    delete: Удаление тренировки`)
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Additional help:")
@@ -342,6 +353,24 @@ func trainingsAllUsage() {
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "trainings all --limit 20 --offset 0")
+}
+
+func trainingsGetByIDUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] trainings get-by-id", os.Args[0])
+	fmt.Fprint(os.Stderr, " -uuid STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Получение тренировки по id`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -uuid STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "trainings get-by-id --uuid \"550e8400-e29b-41d4-a716-446655440000\"")
 }
 
 func trainingsDeleteUsage() {

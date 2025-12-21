@@ -21,6 +21,11 @@ func AllTrainingsPath() string {
 	return "/trainings/all"
 }
 
+// GetByIDTrainingsPath returns the URL path to the trainings service get-by-id HTTP endpoint.
+func GetByIDTrainingsPath(uuid string) string {
+	return fmt.Sprintf("/trainings/%v", uuid)
+}
+
 // DeleteTrainingsPath returns the URL path to the trainings service delete HTTP endpoint.
 func DeleteTrainingsPath(uuid string) string {
 	return fmt.Sprintf("/trainings/%v", uuid)

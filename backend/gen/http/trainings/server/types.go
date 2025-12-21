@@ -38,6 +38,18 @@ type CreateResponseBody struct {
 // response body.
 type AllResponseBody []*TrainingAllResponse
 
+// GetByIDResponseBody is the type of the "trainings" service "get-by-id"
+// endpoint HTTP response body.
+type GetByIDResponseBody struct {
+	Exercises []*ExercisesWithTrainingResponseBody `form:"exercises,omitempty" json:"exercises,omitempty" xml:"exercises,omitempty"`
+	// uuid
+	ID        string  `form:"id" json:"id" xml:"id"`
+	Title     string  `form:"title" json:"title" xml:"title"`
+	Date      string  `form:"date" json:"date" xml:"date"`
+	Duration  int     `form:"duration" json:"duration" xml:"duration"`
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+}
+
 // CreateBadRequestResponseBody is the type of the "trainings" service "create"
 // endpoint HTTP response body for the "bad_request" error.
 type CreateBadRequestResponseBody struct {
@@ -59,6 +71,24 @@ type CreateBadRequestResponseBody struct {
 // CreateNotFoundResponseBody is the type of the "trainings" service "create"
 // endpoint HTTP response body for the "not_found" error.
 type CreateNotFoundResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// GetByIDNotFoundResponseBody is the type of the "trainings" service
+// "get-by-id" endpoint HTTP response body for the "not_found" error.
+type GetByIDNotFoundResponseBody struct {
 	// Name is the name of this class of errors.
 	Name string `form:"name" json:"name" xml:"name"`
 	// ID is a unique identifier for this particular occurrence of the problem.
@@ -124,6 +154,27 @@ type ExerciseSetResponse struct {
 	Weight *float64 `form:"weight,omitempty" json:"weight,omitempty" xml:"weight,omitempty"`
 }
 
+// ExercisesWithTrainingResponseBody is used to define fields on response body
+// types.
+type ExercisesWithTrainingResponseBody struct {
+	Sets []*ExerciseSetResponseBody `form:"sets,omitempty" json:"sets,omitempty" xml:"sets,omitempty"`
+	// System-generated unique identifier
+	ID string `form:"id" json:"id" xml:"id"`
+	// Название упражнения
+	Title string `form:"title" json:"title" xml:"title"`
+	// Группа мыщц указывается в виде числа, нужна для получения упражнений по
+	// группе мыщц
+	MuscleGroup int32 `form:"muscle_group" json:"muscle_group" xml:"muscle_group"`
+}
+
+// ExerciseSetResponseBody is used to define fields on response body types.
+type ExerciseSetResponseBody struct {
+	// System-generated unique identifier
+	ID     *string  `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	Reps   int      `form:"reps" json:"reps" xml:"reps"`
+	Weight *float64 `form:"weight,omitempty" json:"weight,omitempty" xml:"weight,omitempty"`
+}
+
 // TrainingExercisePayloadRequestBody is used to define fields on request body
 // types.
 type TrainingExercisePayloadRequestBody struct {
@@ -164,6 +215,29 @@ func NewAllResponseBody(res []*trainings.TrainingAll) AllResponseBody {
 	return body
 }
 
+// NewGetByIDResponseBody builds the HTTP response body from the result of the
+// "get-by-id" endpoint of the "trainings" service.
+func NewGetByIDResponseBody(res *trainings.TrainingAll) *GetByIDResponseBody {
+	body := &GetByIDResponseBody{
+		ID:        res.ID,
+		Title:     res.Title,
+		Date:      res.Date,
+		Duration:  res.Duration,
+		CreatedAt: res.CreatedAt,
+	}
+	if res.Exercises != nil {
+		body.Exercises = make([]*ExercisesWithTrainingResponseBody, len(res.Exercises))
+		for i, val := range res.Exercises {
+			if val == nil {
+				body.Exercises[i] = nil
+				continue
+			}
+			body.Exercises[i] = marshalTrainingsExercisesWithTrainingToExercisesWithTrainingResponseBody(val)
+		}
+	}
+	return body
+}
+
 // NewCreateBadRequestResponseBody builds the HTTP response body from the
 // result of the "create" endpoint of the "trainings" service.
 func NewCreateBadRequestResponseBody(res *goa.ServiceError) *CreateBadRequestResponseBody {
@@ -182,6 +256,20 @@ func NewCreateBadRequestResponseBody(res *goa.ServiceError) *CreateBadRequestRes
 // of the "create" endpoint of the "trainings" service.
 func NewCreateNotFoundResponseBody(res *goa.ServiceError) *CreateNotFoundResponseBody {
 	body := &CreateNotFoundResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
+// NewGetByIDNotFoundResponseBody builds the HTTP response body from the result
+// of the "get-by-id" endpoint of the "trainings" service.
+func NewGetByIDNotFoundResponseBody(res *goa.ServiceError) *GetByIDNotFoundResponseBody {
+	body := &GetByIDNotFoundResponseBody{
 		Name:      res.Name,
 		ID:        res.ID,
 		Message:   res.Message,
@@ -230,6 +318,14 @@ func NewAllPayload(limit int, offset int) *trainings.AllPayload {
 	v := &trainings.AllPayload{}
 	v.Limit = limit
 	v.Offset = offset
+
+	return v
+}
+
+// NewGetByIDPayload builds a trainings service get-by-id endpoint payload.
+func NewGetByIDPayload(uuid string) *trainings.GetByIDPayload {
+	v := &trainings.GetByIDPayload{}
+	v.UUID = uuid
 
 	return v
 }

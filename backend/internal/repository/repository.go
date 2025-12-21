@@ -19,4 +19,5 @@ type TrainingsRepo interface {
 	Create(context.Context, *t.CreateTrainingPayload) (*t.Training, error)
 	All(context.Context, *t.AllPayload) (res []*t.TrainingAll, err error)
 	Delete(context.Context, *t.DeletePayload) (err error)
+	GetByID(context.Context, *t.GetByIDPayload) (res *t.TrainingAll, err error)
 }

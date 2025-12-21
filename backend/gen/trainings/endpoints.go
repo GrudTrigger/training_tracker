@@ -15,17 +15,19 @@ import (
 
 // Endpoints wraps the "trainings" service endpoints.
 type Endpoints struct {
-	Create goa.Endpoint
-	All    goa.Endpoint
-	Delete goa.Endpoint
+	Create  goa.Endpoint
+	All     goa.Endpoint
+	GetByID goa.Endpoint
+	Delete  goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "trainings" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
-		Create: NewCreateEndpoint(s),
-		All:    NewAllEndpoint(s),
-		Delete: NewDeleteEndpoint(s),
+		Create:  NewCreateEndpoint(s),
+		All:     NewAllEndpoint(s),
+		GetByID: NewGetByIDEndpoint(s),
+		Delete:  NewDeleteEndpoint(s),
 	}
 }
 
@@ -33,6 +35,7 @@ func NewEndpoints(s Service) *Endpoints {
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.Create = m(e.Create)
 	e.All = m(e.All)
+	e.GetByID = m(e.GetByID)
 	e.Delete = m(e.Delete)
 }
 
@@ -51,6 +54,15 @@ func NewAllEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*AllPayload)
 		return s.All(ctx, p)
+	}
+}
+
+// NewGetByIDEndpoint returns an endpoint function that calls the method
+// "get-by-id" of service "trainings".
+func NewGetByIDEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*GetByIDPayload)
+		return s.GetByID(ctx, p)
 	}
 }
 
