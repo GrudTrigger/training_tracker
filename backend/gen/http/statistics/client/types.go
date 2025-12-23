@@ -29,10 +29,10 @@ type GetTrainingsStatisticdResponseBody struct {
 // "get-trainings-statisticd" endpoint result from a HTTP "OK" response.
 func NewGetTrainingsStatisticdTrainingsStatisticsOK(body *GetTrainingsStatisticdResponseBody) *statistics.TrainingsStatistics {
 	v := &statistics.TrainingsStatistics{
-		TrainingsCount:  body.TrainingsCount,
-		SetsCount:       body.SetsCount,
-		RepsCount:       body.RepsCount,
-		AverageDuration: body.AverageDuration,
+		TrainingsCount:  *body.TrainingsCount,
+		SetsCount:       *body.SetsCount,
+		RepsCount:       *body.RepsCount,
+		AverageDuration: *body.AverageDuration,
 	}
 
 	return v
@@ -41,6 +41,18 @@ func NewGetTrainingsStatisticdTrainingsStatisticsOK(body *GetTrainingsStatisticd
 // ValidateGetTrainingsStatisticdResponseBody runs the validations defined on
 // Get-Trainings-StatisticdResponseBody
 func ValidateGetTrainingsStatisticdResponseBody(body *GetTrainingsStatisticdResponseBody) (err error) {
+	if body.TrainingsCount == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("trainings_count", "body"))
+	}
+	if body.SetsCount == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("sets_count", "body"))
+	}
+	if body.RepsCount == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("reps_count", "body"))
+	}
+	if body.AverageDuration == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("average_duration", "body"))
+	}
 	if body.TrainingsCount != nil {
 		if *body.TrainingsCount < 0 {
 			err = goa.MergeErrors(err, goa.InvalidRangeError("body.trainings_count", *body.TrainingsCount, 0, true))

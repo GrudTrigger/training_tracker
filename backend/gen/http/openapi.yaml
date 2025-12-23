@@ -145,6 +145,11 @@ paths:
                     description: OK response.
                     schema:
                         $ref: '#/definitions/TrainingsStatistics'
+                        required:
+                            - trainings_count
+                            - sets_count
+                            - reps_count
+                            - average_duration
             schemes:
                 - http
     /trainings:
@@ -1072,3 +1077,8 @@ definitions:
             reps_count: 3350963743522045054
             sets_count: 5700368801408974581
             trainings_count: 6740958404291742444
+        required:
+            - trainings_count
+            - sets_count
+            - reps_count
+            - average_duration

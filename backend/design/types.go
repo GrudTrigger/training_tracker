@@ -152,4 +152,5 @@ var TrainingsStatistics = Type("TrainingsStatistics", func(){
 	Attribute("average_duration", Int, "Средяя продолжительность тренировок", func(){
 		Minimum(0)
 	})
+	Required("trainings_count", "sets_count", "reps_count", "average_duration")
 })

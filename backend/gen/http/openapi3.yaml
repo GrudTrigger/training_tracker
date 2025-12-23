@@ -1171,6 +1171,11 @@ components:
                 reps_count: 1629009566429459410
                 sets_count: 7864675930682548529
                 trainings_count: 5636570392175755656
+            required:
+                - trainings_count
+                - sets_count
+                - reps_count
+                - average_duration
         WorkoutModel:
             type: object
             properties:

@@ -15,13 +15,13 @@ import (
 // "get-trainings-statisticd" endpoint HTTP response body.
 type GetTrainingsStatisticdResponseBody struct {
 	// Всего тренировок
-	TrainingsCount *int `form:"trainings_count,omitempty" json:"trainings_count,omitempty" xml:"trainings_count,omitempty"`
+	TrainingsCount int `form:"trainings_count" json:"trainings_count" xml:"trainings_count"`
 	// Всего подходов
-	SetsCount *int `form:"sets_count,omitempty" json:"sets_count,omitempty" xml:"sets_count,omitempty"`
+	SetsCount int `form:"sets_count" json:"sets_count" xml:"sets_count"`
 	// Всего повторений
-	RepsCount *int `form:"reps_count,omitempty" json:"reps_count,omitempty" xml:"reps_count,omitempty"`
+	RepsCount int `form:"reps_count" json:"reps_count" xml:"reps_count"`
 	// Средяя продолжительность тренировок
-	AverageDuration *int `form:"average_duration,omitempty" json:"average_duration,omitempty" xml:"average_duration,omitempty"`
+	AverageDuration int `form:"average_duration" json:"average_duration" xml:"average_duration"`
 }
 
 // NewGetTrainingsStatisticdResponseBody builds the HTTP response body from the

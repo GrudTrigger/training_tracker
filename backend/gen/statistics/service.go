@@ -37,11 +37,11 @@ var MethodNames = [1]string{"get-trainings-statisticd"}
 // get-trainings-statisticd method.
 type TrainingsStatistics struct {
 	// Всего тренировок
-	TrainingsCount *int
+	TrainingsCount int
 	// Всего подходов
-	SetsCount *int
+	SetsCount int
 	// Всего повторений
-	RepsCount *int
+	RepsCount int
 	// Средяя продолжительность тренировок
-	AverageDuration *int
+	AverageDuration int
 }
