@@ -8,13 +8,16 @@ import (
 
 	genexercise "github.com/GrudTrigger/training_tracker/backend/gen/exercises"
 	genhttpexervises "github.com/GrudTrigger/training_tracker/backend/gen/http/exercises/server"
+	genhttpstatistics "github.com/GrudTrigger/training_tracker/backend/gen/http/statistics/server"
 	genhttptrainings "github.com/GrudTrigger/training_tracker/backend/gen/http/trainings/server"
+	genstatistics "github.com/GrudTrigger/training_tracker/backend/gen/statistics"
 	gentrainings "github.com/GrudTrigger/training_tracker/backend/gen/trainings"
 	"github.com/GrudTrigger/training_tracker/backend/internal/config"
 	"github.com/GrudTrigger/training_tracker/backend/internal/migrator"
 	repoExercise "github.com/GrudTrigger/training_tracker/backend/internal/repository/exercise"
 	repoTrainings "github.com/GrudTrigger/training_tracker/backend/internal/repository/trainings"
 	"github.com/GrudTrigger/training_tracker/backend/internal/service/exercise"
+	"github.com/GrudTrigger/training_tracker/backend/internal/service/statistics"
 	"github.com/GrudTrigger/training_tracker/backend/internal/service/trainings"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
@@ -58,6 +61,10 @@ func main() {
 	trainingsSvc := trainings.NewService(trainingsRepo, exerciseRepo)
 	trainingsEndpoints := gentrainings.NewEndpoints(trainingsSvc)
 
+	//-------Statistics---------
+	statisticsSvc := statistics.NewService(trainingsRepo)
+	statisticsEndpoints := genstatistics.NewEndpoints(statisticsSvc)
+
 	mux := goahttp.NewMuxer()
 
 	exercisesHandler := genhttpexervises.New(exerciseEndpoints, mux, goahttp.RequestDecoder, goahttp.ResponseEncoder, nil, nil)
@@ -67,6 +74,10 @@ func main() {
 	trainingsHandler := genhttptrainings.New(trainingsEndpoints, mux, goahttp.RequestDecoder, goahttp.ResponseEncoder, nil, nil)
 
 	genhttptrainings.Mount(mux, trainingsHandler)
+
+	statisticsHandler := genhttpstatistics.New(statisticsEndpoints, mux, goahttp.RequestDecoder, goahttp.ResponseEncoder, nil, nil)
+
+	genhttpstatistics.Mount(mux, statisticsHandler)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{
@@ -95,6 +106,10 @@ func main() {
 	}
 
 	for _, mount := range trainingsHandler.Mounts {
+		log.Printf("%q mounted on %s %s", mount.Method, mount.Verb, mount.Pattern)
+	}
+
+	for _, mount := range statisticsHandler.Mounts {
 		log.Printf("%q mounted on %s %s", mount.Method, mount.Verb, mount.Pattern)
 	}
 

@@ -11,9 +11,9 @@ import (
 	statistics "github.com/GrudTrigger/training_tracker/backend/gen/statistics"
 )
 
-// GetTrainingsStatisticdResponseBody is the type of the "statistics" service
-// "get-trainings-statisticd" endpoint HTTP response body.
-type GetTrainingsStatisticdResponseBody struct {
+// GetTrainingsStatisticsResponseBody is the type of the "statistics" service
+// "get-trainings-statistics" endpoint HTTP response body.
+type GetTrainingsStatisticsResponseBody struct {
 	// Всего тренировок
 	TrainingsCount int `form:"trainings_count" json:"trainings_count" xml:"trainings_count"`
 	// Всего подходов
@@ -24,11 +24,11 @@ type GetTrainingsStatisticdResponseBody struct {
 	AverageDuration int `form:"average_duration" json:"average_duration" xml:"average_duration"`
 }
 
-// NewGetTrainingsStatisticdResponseBody builds the HTTP response body from the
-// result of the "get-trainings-statisticd" endpoint of the "statistics"
+// NewGetTrainingsStatisticsResponseBody builds the HTTP response body from the
+// result of the "get-trainings-statistics" endpoint of the "statistics"
 // service.
-func NewGetTrainingsStatisticdResponseBody(res *statistics.TrainingsStatistics) *GetTrainingsStatisticdResponseBody {
-	body := &GetTrainingsStatisticdResponseBody{
+func NewGetTrainingsStatisticsResponseBody(res *statistics.TrainingsStatistics) *GetTrainingsStatisticsResponseBody {
+	body := &GetTrainingsStatisticsResponseBody{
 		TrainingsCount:  res.TrainingsCount,
 		SetsCount:       res.SetsCount,
 		RepsCount:       res.RepsCount,

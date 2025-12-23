@@ -15,25 +15,25 @@ import (
 
 // Endpoints wraps the "statistics" service endpoints.
 type Endpoints struct {
-	GetTrainingsStatisticd goa.Endpoint
+	GetTrainingsStatistics goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "statistics" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
-		GetTrainingsStatisticd: NewGetTrainingsStatisticdEndpoint(s),
+		GetTrainingsStatistics: NewGetTrainingsStatisticsEndpoint(s),
 	}
 }
 
 // Use applies the given middleware to all the "statistics" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
-	e.GetTrainingsStatisticd = m(e.GetTrainingsStatisticd)
+	e.GetTrainingsStatistics = m(e.GetTrainingsStatistics)
 }
 
-// NewGetTrainingsStatisticdEndpoint returns an endpoint function that calls
-// the method "get-trainings-statisticd" of service "statistics".
-func NewGetTrainingsStatisticdEndpoint(s Service) goa.Endpoint {
+// NewGetTrainingsStatisticsEndpoint returns an endpoint function that calls
+// the method "get-trainings-statistics" of service "statistics".
+func NewGetTrainingsStatisticsEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		return s.GetTrainingsStatisticd(ctx)
+		return s.GetTrainingsStatistics(ctx)
 	}
 }

@@ -15,13 +15,13 @@ import (
 	goahttp "goa.design/goa/v3/http"
 )
 
-// EncodeGetTrainingsStatisticdResponse returns an encoder for responses
-// returned by the statistics get-trainings-statisticd endpoint.
-func EncodeGetTrainingsStatisticdResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
+// EncodeGetTrainingsStatisticsResponse returns an encoder for responses
+// returned by the statistics get-trainings-statistics endpoint.
+func EncodeGetTrainingsStatisticsResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
 		res, _ := v.(*statistics.TrainingsStatistics)
 		enc := encoder(ctx, w)
-		body := NewGetTrainingsStatisticdResponseBody(res)
+		body := NewGetTrainingsStatisticsResponseBody(res)
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
 	}

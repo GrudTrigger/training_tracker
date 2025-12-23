@@ -27,7 +27,7 @@ func UsageCommands() []string {
 	return []string{
 		"exercises (create|all|update|delete)",
 		"trainings (create|all|get-by-id|delete)",
-		"statistics get-trainings-statisticd",
+		"statistics get-trainings-statistics",
 	}
 }
 
@@ -35,7 +35,7 @@ func UsageCommands() []string {
 func UsageExamples() string {
 	return os.Args[0] + " " + "exercises create --body '{\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'" + "\n" +
 		os.Args[0] + " " + "trainings create --body '{\n      \"date\": \"2025-12-25\",\n      \"duration\": 3422303554000800197,\n      \"exercises\": [\n         {\n            \"exercise_id\": \"eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2\",\n            \"sets\": [\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2\",\n            \"sets\": [\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2\",\n            \"sets\": [\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2\",\n            \"sets\": [\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               }\n            ]\n         }\n      ],\n      \"title\": \"l95\"\n   }'" + "\n" +
-		os.Args[0] + " " + "statistics get-trainings-statisticd" + "\n" +
+		os.Args[0] + " " + "statistics get-trainings-statistics" + "\n" +
 		""
 }
 
@@ -81,7 +81,7 @@ func ParseEndpoint(
 
 		statisticsFlags = flag.NewFlagSet("statistics", flag.ContinueOnError)
 
-		statisticsGetTrainingsStatisticdFlags = flag.NewFlagSet("get-trainings-statisticd", flag.ExitOnError)
+		statisticsGetTrainingsStatisticsFlags = flag.NewFlagSet("get-trainings-statistics", flag.ExitOnError)
 	)
 	exercisesFlags.Usage = exercisesUsage
 	exercisesCreateFlags.Usage = exercisesCreateUsage
@@ -96,7 +96,7 @@ func ParseEndpoint(
 	trainingsDeleteFlags.Usage = trainingsDeleteUsage
 
 	statisticsFlags.Usage = statisticsUsage
-	statisticsGetTrainingsStatisticdFlags.Usage = statisticsGetTrainingsStatisticdUsage
+	statisticsGetTrainingsStatisticsFlags.Usage = statisticsGetTrainingsStatisticsUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -168,8 +168,8 @@ func ParseEndpoint(
 
 		case "statistics":
 			switch epn {
-			case "get-trainings-statisticd":
-				epf = statisticsGetTrainingsStatisticdFlags
+			case "get-trainings-statistics":
+				epf = statisticsGetTrainingsStatisticsFlags
 
 			}
 
@@ -228,8 +228,8 @@ func ParseEndpoint(
 		case "statistics":
 			c := statisticsc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
-			case "get-trainings-statisticd":
-				endpoint = c.GetTrainingsStatisticd()
+			case "get-trainings-statistics":
+				endpoint = c.GetTrainingsStatistics()
 			}
 		}
 	}
@@ -422,14 +422,14 @@ func statisticsUsage() {
 	fmt.Fprintln(os.Stderr, `Получение статистики по тренировкам`)
 	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] statistics COMMAND [flags]\n\n", os.Args[0])
 	fmt.Fprintln(os.Stderr, "COMMAND:")
-	fmt.Fprintln(os.Stderr, `    get-trainings-statisticd: Получение статисики`)
+	fmt.Fprintln(os.Stderr, `    get-trainings-statistics: Получение статисики`)
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Additional help:")
 	fmt.Fprintf(os.Stderr, "    %s statistics COMMAND --help\n", os.Args[0])
 }
-func statisticsGetTrainingsStatisticdUsage() {
+func statisticsGetTrainingsStatisticsUsage() {
 	// Header with flags
-	fmt.Fprintf(os.Stderr, "%s [flags] statistics get-trainings-statisticd", os.Args[0])
+	fmt.Fprintf(os.Stderr, "%s [flags] statistics get-trainings-statistics", os.Args[0])
 	fmt.Fprintln(os.Stderr)
 
 	// Description
@@ -440,5 +440,5 @@ func statisticsGetTrainingsStatisticdUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "statistics get-trainings-statisticd")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "statistics get-trainings-statistics")
 }

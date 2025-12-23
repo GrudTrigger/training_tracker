@@ -19,7 +19,7 @@ import (
 // Server lists the statistics service endpoint HTTP handlers.
 type Server struct {
 	Mounts                 []*MountPoint
-	GetTrainingsStatisticd http.Handler
+	GetTrainingsStatistics http.Handler
 }
 
 // MountPoint holds information about the mounted endpoints.
@@ -49,9 +49,9 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"GetTrainingsStatisticd", "GET", "/statistics"},
+			{"GetTrainingsStatistics", "GET", "/statistics"},
 		},
-		GetTrainingsStatisticd: NewGetTrainingsStatisticdHandler(e.GetTrainingsStatisticd, mux, decoder, encoder, errhandler, formatter),
+		GetTrainingsStatistics: NewGetTrainingsStatisticsHandler(e.GetTrainingsStatistics, mux, decoder, encoder, errhandler, formatter),
 	}
 }
 
@@ -60,7 +60,7 @@ func (s *Server) Service() string { return "statistics" }
 
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
-	s.GetTrainingsStatisticd = m(s.GetTrainingsStatisticd)
+	s.GetTrainingsStatistics = m(s.GetTrainingsStatistics)
 }
 
 // MethodNames returns the methods served.
@@ -68,7 +68,7 @@ func (s *Server) MethodNames() []string { return statistics.MethodNames[:] }
 
 // Mount configures the mux to serve the statistics endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
-	MountGetTrainingsStatisticdHandler(mux, h.GetTrainingsStatisticd)
+	MountGetTrainingsStatisticsHandler(mux, h.GetTrainingsStatistics)
 }
 
 // Mount configures the mux to serve the statistics endpoints.
@@ -76,9 +76,9 @@ func (s *Server) Mount(mux goahttp.Muxer) {
 	Mount(mux, s)
 }
 
-// MountGetTrainingsStatisticdHandler configures the mux to serve the
-// "statistics" service "get-trainings-statisticd" endpoint.
-func MountGetTrainingsStatisticdHandler(mux goahttp.Muxer, h http.Handler) {
+// MountGetTrainingsStatisticsHandler configures the mux to serve the
+// "statistics" service "get-trainings-statistics" endpoint.
+func MountGetTrainingsStatisticsHandler(mux goahttp.Muxer, h http.Handler) {
 	f, ok := h.(http.HandlerFunc)
 	if !ok {
 		f = func(w http.ResponseWriter, r *http.Request) {
@@ -88,10 +88,10 @@ func MountGetTrainingsStatisticdHandler(mux goahttp.Muxer, h http.Handler) {
 	mux.Handle("GET", "/statistics", f)
 }
 
-// NewGetTrainingsStatisticdHandler creates a HTTP handler which loads the HTTP
-// request and calls the "statistics" service "get-trainings-statisticd"
+// NewGetTrainingsStatisticsHandler creates a HTTP handler which loads the HTTP
+// request and calls the "statistics" service "get-trainings-statistics"
 // endpoint.
-func NewGetTrainingsStatisticdHandler(
+func NewGetTrainingsStatisticsHandler(
 	endpoint goa.Endpoint,
 	mux goahttp.Muxer,
 	decoder func(*http.Request) goahttp.Decoder,
@@ -100,12 +100,12 @@ func NewGetTrainingsStatisticdHandler(
 	formatter func(ctx context.Context, err error) goahttp.Statuser,
 ) http.Handler {
 	var (
-		encodeResponse = EncodeGetTrainingsStatisticdResponse(encoder)
+		encodeResponse = EncodeGetTrainingsStatisticsResponse(encoder)
 		encodeError    = goahttp.ErrorEncoder(encoder, formatter)
 	)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "get-trainings-statisticd")
+		ctx = context.WithValue(ctx, goa.MethodKey, "get-trainings-statistics")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "statistics")
 		var err error
 		res, err := endpoint(ctx, nil)

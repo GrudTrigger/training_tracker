@@ -7,7 +7,7 @@
 
 package server
 
-// GetTrainingsStatisticdStatisticsPath returns the URL path to the statistics service get-trainings-statisticd HTTP endpoint.
-func GetTrainingsStatisticdStatisticsPath() string {
+// GetTrainingsStatisticsStatisticsPath returns the URL path to the statistics service get-trainings-statistics HTTP endpoint.
+func GetTrainingsStatisticsStatisticsPath() string {
 	return "/statistics"
 }

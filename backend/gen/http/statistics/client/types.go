@@ -12,9 +12,9 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// GetTrainingsStatisticdResponseBody is the type of the "statistics" service
-// "get-trainings-statisticd" endpoint HTTP response body.
-type GetTrainingsStatisticdResponseBody struct {
+// GetTrainingsStatisticsResponseBody is the type of the "statistics" service
+// "get-trainings-statistics" endpoint HTTP response body.
+type GetTrainingsStatisticsResponseBody struct {
 	// Всего тренировок
 	TrainingsCount *int `form:"trainings_count,omitempty" json:"trainings_count,omitempty" xml:"trainings_count,omitempty"`
 	// Всего подходов
@@ -25,9 +25,9 @@ type GetTrainingsStatisticdResponseBody struct {
 	AverageDuration *int `form:"average_duration,omitempty" json:"average_duration,omitempty" xml:"average_duration,omitempty"`
 }
 
-// NewGetTrainingsStatisticdTrainingsStatisticsOK builds a "statistics" service
-// "get-trainings-statisticd" endpoint result from a HTTP "OK" response.
-func NewGetTrainingsStatisticdTrainingsStatisticsOK(body *GetTrainingsStatisticdResponseBody) *statistics.TrainingsStatistics {
+// NewGetTrainingsStatisticsTrainingsStatisticsOK builds a "statistics" service
+// "get-trainings-statistics" endpoint result from a HTTP "OK" response.
+func NewGetTrainingsStatisticsTrainingsStatisticsOK(body *GetTrainingsStatisticsResponseBody) *statistics.TrainingsStatistics {
 	v := &statistics.TrainingsStatistics{
 		TrainingsCount:  *body.TrainingsCount,
 		SetsCount:       *body.SetsCount,
@@ -38,9 +38,9 @@ func NewGetTrainingsStatisticdTrainingsStatisticsOK(body *GetTrainingsStatisticd
 	return v
 }
 
-// ValidateGetTrainingsStatisticdResponseBody runs the validations defined on
-// Get-Trainings-StatisticdResponseBody
-func ValidateGetTrainingsStatisticdResponseBody(body *GetTrainingsStatisticdResponseBody) (err error) {
+// ValidateGetTrainingsStatisticsResponseBody runs the validations defined on
+// Get-Trainings-StatisticsResponseBody
+func ValidateGetTrainingsStatisticsResponseBody(body *GetTrainingsStatisticsResponseBody) (err error) {
 	if body.TrainingsCount == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("trainings_count", "body"))
 	}

@@ -15,21 +15,21 @@ import (
 
 // Client is the "statistics" service client.
 type Client struct {
-	GetTrainingsStatisticdEndpoint goa.Endpoint
+	GetTrainingsStatisticsEndpoint goa.Endpoint
 }
 
 // NewClient initializes a "statistics" service client given the endpoints.
-func NewClient(getTrainingsStatisticd goa.Endpoint) *Client {
+func NewClient(getTrainingsStatistics goa.Endpoint) *Client {
 	return &Client{
-		GetTrainingsStatisticdEndpoint: getTrainingsStatisticd,
+		GetTrainingsStatisticsEndpoint: getTrainingsStatistics,
 	}
 }
 
-// GetTrainingsStatisticd calls the "get-trainings-statisticd" endpoint of the
+// GetTrainingsStatistics calls the "get-trainings-statistics" endpoint of the
 // "statistics" service.
-func (c *Client) GetTrainingsStatisticd(ctx context.Context) (res *TrainingsStatistics, err error) {
+func (c *Client) GetTrainingsStatistics(ctx context.Context) (res *TrainingsStatistics, err error) {
 	var ires any
-	ires, err = c.GetTrainingsStatisticdEndpoint(ctx, nil)
+	ires, err = c.GetTrainingsStatisticsEndpoint(ctx, nil)
 	if err != nil {
 		return
 	}

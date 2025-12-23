@@ -139,7 +139,7 @@ paths:
                 - statistics
             summary: Получение статисики
             description: Получение статисики
-            operationId: statistics#get-trainings-statisticd
+            operationId: statistics#get-trainings-statistics
             responses:
                 "200":
                     description: OK response.

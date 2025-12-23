@@ -17,9 +17,9 @@ import (
 
 // Client lists the statistics service endpoint HTTP clients.
 type Client struct {
-	// GetTrainingsStatisticd Doer is the HTTP client used to make requests to the
-	// get-trainings-statisticd endpoint.
-	GetTrainingsStatisticdDoer goahttp.Doer
+	// GetTrainingsStatistics Doer is the HTTP client used to make requests to the
+	// get-trainings-statistics endpoint.
+	GetTrainingsStatisticsDoer goahttp.Doer
 
 	// RestoreResponseBody controls whether the response bodies are reset after
 	// decoding so they can be read again.
@@ -41,7 +41,7 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		GetTrainingsStatisticdDoer: doer,
+		GetTrainingsStatisticsDoer: doer,
 		RestoreResponseBody:        restoreBody,
 		scheme:                     scheme,
 		host:                       host,
@@ -50,20 +50,20 @@ func NewClient(
 	}
 }
 
-// GetTrainingsStatisticd returns an endpoint that makes HTTP requests to the
-// statistics service get-trainings-statisticd server.
-func (c *Client) GetTrainingsStatisticd() goa.Endpoint {
+// GetTrainingsStatistics returns an endpoint that makes HTTP requests to the
+// statistics service get-trainings-statistics server.
+func (c *Client) GetTrainingsStatistics() goa.Endpoint {
 	var (
-		decodeResponse = DecodeGetTrainingsStatisticdResponse(c.decoder, c.RestoreResponseBody)
+		decodeResponse = DecodeGetTrainingsStatisticsResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildGetTrainingsStatisticdRequest(ctx, v)
+		req, err := c.BuildGetTrainingsStatisticsRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.GetTrainingsStatisticdDoer.Do(req)
+		resp, err := c.GetTrainingsStatisticsDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("statistics", "get-trainings-statisticd", err)
+			return nil, goahttp.ErrRequestError("statistics", "get-trainings-statistics", err)
 		}
 		return decodeResponse(resp)
 	}
