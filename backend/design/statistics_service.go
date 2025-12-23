@@ -7,9 +7,15 @@ import (
 var _ = Service("statistics", func(){
 	Description("Получение статистики по тренировкам")
 
-	Method("get-all-exercise", func(){
-		Description("Получение всех подходов")
-		Meta("openapi:summary", "Получение всех подходов")
+	Method("get-trainings-statisticd", func(){
+		Description("Получение статисики")
+		Meta("openapi:summary", "Получение статисики")
 		
-	})
+		Result(TrainingsStatistics)
+
+		HTTP(func(){
+			GET("statistics")
+			Response(StatusOK)
+		})
+	})	
 })

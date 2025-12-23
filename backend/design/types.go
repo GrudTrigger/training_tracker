@@ -137,3 +137,19 @@ var TrainingAll = Type("TrainingAll", func() {
 	Extend(Training)
 	Attribute("exercises", ArrayOf(ExercisesWithTraining))
 })
+
+var TrainingsStatistics = Type("TrainingsStatistics", func(){
+	Description("Модель статистики")
+	Attribute("trainings_count", Int, "Всего тренировок", func(){
+		Minimum(0)
+	})
+	Attribute("sets_count", Int, "Всего подходов", func(){
+		Minimum(0)
+	})
+	Attribute("reps_count", Int, "Всего повторений", func(){
+		Minimum(0)
+	})
+	Attribute("average_duration", Int, "Средяя продолжительность тренировок", func(){
+		Minimum(0)
+	})
+})

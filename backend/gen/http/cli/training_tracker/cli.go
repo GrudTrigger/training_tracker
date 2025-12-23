@@ -14,6 +14,7 @@ import (
 	"os"
 
 	exercisesc "github.com/GrudTrigger/training_tracker/backend/gen/http/exercises/client"
+	statisticsc "github.com/GrudTrigger/training_tracker/backend/gen/http/statistics/client"
 	trainingsc "github.com/GrudTrigger/training_tracker/backend/gen/http/trainings/client"
 	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
@@ -26,13 +27,15 @@ func UsageCommands() []string {
 	return []string{
 		"exercises (create|all|update|delete)",
 		"trainings (create|all|get-by-id|delete)",
+		"statistics get-trainings-statisticd",
 	}
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
 	return os.Args[0] + " " + "exercises create --body '{\n      \"muscle_group\": 1,\n      \"title\": \"Жим лежа на скамье\"\n   }'" + "\n" +
-		os.Args[0] + " " + "trainings create --body '{\n      \"date\": \"2025-12-25\",\n      \"duration\": 4541791234550504212,\n      \"exercises\": [\n         {\n            \"exercise_id\": \"eac346ec-8c0d-4378-81f2-0f2df404b9ff\",\n            \"sets\": [\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-8c0d-4378-81f2-0f2df404b9ff\",\n            \"sets\": [\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               }\n            ]\n         }\n      ],\n      \"title\": \"09h\"\n   }'" + "\n" +
+		os.Args[0] + " " + "trainings create --body '{\n      \"date\": \"2025-12-25\",\n      \"duration\": 3422303554000800197,\n      \"exercises\": [\n         {\n            \"exercise_id\": \"eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2\",\n            \"sets\": [\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2\",\n            \"sets\": [\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2\",\n            \"sets\": [\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2\",\n            \"sets\": [\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               }\n            ]\n         }\n      ],\n      \"title\": \"l95\"\n   }'" + "\n" +
+		os.Args[0] + " " + "statistics get-trainings-statisticd" + "\n" +
 		""
 }
 
@@ -75,6 +78,10 @@ func ParseEndpoint(
 
 		trainingsDeleteFlags    = flag.NewFlagSet("delete", flag.ExitOnError)
 		trainingsDeleteUUIDFlag = trainingsDeleteFlags.String("uuid", "REQUIRED", "")
+
+		statisticsFlags = flag.NewFlagSet("statistics", flag.ContinueOnError)
+
+		statisticsGetTrainingsStatisticdFlags = flag.NewFlagSet("get-trainings-statisticd", flag.ExitOnError)
 	)
 	exercisesFlags.Usage = exercisesUsage
 	exercisesCreateFlags.Usage = exercisesCreateUsage
@@ -87,6 +94,9 @@ func ParseEndpoint(
 	trainingsAllFlags.Usage = trainingsAllUsage
 	trainingsGetByIDFlags.Usage = trainingsGetByIDUsage
 	trainingsDeleteFlags.Usage = trainingsDeleteUsage
+
+	statisticsFlags.Usage = statisticsUsage
+	statisticsGetTrainingsStatisticdFlags.Usage = statisticsGetTrainingsStatisticdUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -107,6 +117,8 @@ func ParseEndpoint(
 			svcf = exercisesFlags
 		case "trainings":
 			svcf = trainingsFlags
+		case "statistics":
+			svcf = statisticsFlags
 		default:
 			return nil, nil, fmt.Errorf("unknown service %q", svcn)
 		}
@@ -151,6 +163,13 @@ func ParseEndpoint(
 
 			case "delete":
 				epf = trainingsDeleteFlags
+
+			}
+
+		case "statistics":
+			switch epn {
+			case "get-trainings-statisticd":
+				epf = statisticsGetTrainingsStatisticdFlags
 
 			}
 
@@ -205,6 +224,12 @@ func ParseEndpoint(
 			case "delete":
 				endpoint = c.Delete()
 				data, err = trainingsc.BuildDeletePayload(*trainingsDeleteUUIDFlag)
+			}
+		case "statistics":
+			c := statisticsc.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "get-trainings-statisticd":
+				endpoint = c.GetTrainingsStatisticd()
 			}
 		}
 	}
@@ -332,7 +357,7 @@ func trainingsCreateUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "trainings create --body '{\n      \"date\": \"2025-12-25\",\n      \"duration\": 4541791234550504212,\n      \"exercises\": [\n         {\n            \"exercise_id\": \"eac346ec-8c0d-4378-81f2-0f2df404b9ff\",\n            \"sets\": [\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-8c0d-4378-81f2-0f2df404b9ff\",\n            \"sets\": [\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               },\n               {\n                  \"reps\": 46900354374985834,\n                  \"weight\": 0.520894057493718\n               }\n            ]\n         }\n      ],\n      \"title\": \"09h\"\n   }'")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "trainings create --body '{\n      \"date\": \"2025-12-25\",\n      \"duration\": 3422303554000800197,\n      \"exercises\": [\n         {\n            \"exercise_id\": \"eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2\",\n            \"sets\": [\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2\",\n            \"sets\": [\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2\",\n            \"sets\": [\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2\",\n            \"sets\": [\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               }\n            ]\n         }\n      ],\n      \"title\": \"l95\"\n   }'")
 }
 
 func trainingsAllUsage() {
@@ -389,4 +414,31 @@ func trainingsDeleteUsage() {
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "trainings delete --uuid \"550e8400-e29b-41d4-a716-446655440000\"")
+}
+
+// statisticsUsage displays the usage of the statistics command and its
+// subcommands.
+func statisticsUsage() {
+	fmt.Fprintln(os.Stderr, `Получение статистики по тренировкам`)
+	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] statistics COMMAND [flags]\n\n", os.Args[0])
+	fmt.Fprintln(os.Stderr, "COMMAND:")
+	fmt.Fprintln(os.Stderr, `    get-trainings-statisticd: Получение статисики`)
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Additional help:")
+	fmt.Fprintf(os.Stderr, "    %s statistics COMMAND --help\n", os.Args[0])
+}
+func statisticsGetTrainingsStatisticdUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] statistics get-trainings-statisticd", os.Args[0])
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `Получение статисики`)
+
+	// Flags list
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "statistics get-trainings-statisticd")
 }
