@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
 
 	genexercise "github.com/GrudTrigger/training_tracker/backend/gen/exercises"
 	genhttpexervises "github.com/GrudTrigger/training_tracker/backend/gen/http/exercises/server"
@@ -28,6 +30,9 @@ import (
 const envPath = "../.env" // TODO: после заменить на /.env потому что при билде будет лежать в корне с .envß
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	slog.SetDefault(logger)
+
 	err := config.Load(envPath)
 	if err != nil {
 		log.Fatal(err)
@@ -101,20 +106,9 @@ func main() {
 	port := "8080"
 	server := &http.Server{Addr: ":" + port, Handler: handler}
 
-	for _, mount := range exercisesHandler.Mounts {
-		log.Printf("%q mounted on %s %s", mount.Method, mount.Verb, mount.Pattern)
-	}
+	slog.Info("Starting server on :8080")
 
-	for _, mount := range trainingsHandler.Mounts {
-		log.Printf("%q mounted on %s %s", mount.Method, mount.Verb, mount.Pattern)
-	}
-
-	for _, mount := range statisticsHandler.Mounts {
-		log.Printf("%q mounted on %s %s", mount.Method, mount.Verb, mount.Pattern)
-	}
-
-	log.Printf("Starting concerts service on :%s", port)
-	if err := server.ListenAndServe(); err != nil {
+	if err = server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }

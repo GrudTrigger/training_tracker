@@ -8,11 +8,11 @@ var _ = Service("statistics", func() {
 	Description("Получение статистики по тренировкам")
 
 	Method("get-trainings-statistics", func() {
-		Description("Получение статисики")
+		Description("Получение статистики")
 		Meta("openapi:summary", "Получение статисики")
 
 		Result(TrainingsStatistics)
-
+		Error("bad_request", ErrorResult)
 		HTTP(func() {
 			GET("statistics")
 			Response(StatusOK)

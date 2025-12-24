@@ -27,6 +27,9 @@ func NewClient(getTrainingsStatistics goa.Endpoint) *Client {
 
 // GetTrainingsStatistics calls the "get-trainings-statistics" endpoint of the
 // "statistics" service.
+// GetTrainingsStatistics may return the following errors:
+//   - "bad_request" (type *goa.ServiceError)
+//   - error: internal error
 func (c *Client) GetTrainingsStatistics(ctx context.Context) (res *TrainingsStatistics, err error) {
 	var ires any
 	ires, err = c.GetTrainingsStatisticsEndpoint(ctx, nil)

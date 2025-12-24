@@ -9,6 +9,8 @@ package statistics
 
 import (
 	"context"
+
+	goa "goa.design/goa/v3/pkg"
 )
 
 // Получение статистики по тренировкам
@@ -44,4 +46,9 @@ type TrainingsStatistics struct {
 	RepsCount int
 	// Средяя продолжительность тренировок
 	AverageDuration int
+}
+
+// MakeBadRequest builds a goa.ServiceError from an error.
+func MakeBadRequest(err error) *goa.ServiceError {
+	return goa.NewServiceError(err, "bad_request", false, false, false)
 }

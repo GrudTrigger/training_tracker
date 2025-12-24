@@ -7,5 +7,9 @@ import (
 )
 
 func (s *Service) GetTrainingsStatistics(ctx context.Context) (*statistics.TrainingsStatistics, error) {
-	return nil, nil
+	res, err := s.repoTrainings.GetStatistics(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }

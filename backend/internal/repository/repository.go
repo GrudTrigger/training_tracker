@@ -4,6 +4,7 @@ import (
 	"context"
 
 	e "github.com/GrudTrigger/training_tracker/backend/gen/exercises"
+	"github.com/GrudTrigger/training_tracker/backend/gen/statistics"
 	t "github.com/GrudTrigger/training_tracker/backend/gen/trainings"
 )
 
@@ -17,7 +18,8 @@ type ExerciseRepo interface {
 
 type TrainingsRepo interface {
 	Create(context.Context, *t.CreateTrainingPayload) (*t.Training, error)
-	All(context.Context, *t.AllPayload) (res []*t.TrainingAll, err error)
-	Delete(context.Context, *t.DeletePayload) (err error)
-	GetByID(context.Context, *t.GetByIDPayload) (res *t.TrainingAll, err error)
+	All(context.Context, *t.AllPayload) ([]*t.TrainingAll, error)
+	Delete(context.Context, *t.DeletePayload) error
+	GetByID(context.Context, *t.GetByIDPayload) (*t.TrainingAll, error)
+	GetStatistics(context.Context) (*statistics.TrainingsStatistics, error)
 }
