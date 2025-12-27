@@ -138,7 +138,7 @@ paths:
             tags:
                 - statistics
             summary: Получение статисики
-            description: Получение статисики
+            description: Получение статистики
             operationId: statistics#get-trainings-statistics
             responses:
                 "200":
@@ -254,7 +254,7 @@ definitions:
                 format: date
             duration:
                 type: integer
-                example: 8928126091843863398
+                example: 1500694371003930356
                 format: int64
                 minimum: 1
             exercises:
@@ -262,55 +262,80 @@ definitions:
                 items:
                     $ref: '#/definitions/TrainingExercisePayload'
                 example:
-                    - exercise_id: eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2
+                    - exercise_id: c276349f-d400-4af4-ab65-850445154157
                       sets:
-                        - reps: 5931942138589796971
-                          weight: 0.7840723453135222
-                        - reps: 5931942138589796971
-                          weight: 0.7840723453135222
-                        - reps: 5931942138589796971
-                          weight: 0.7840723453135222
-                    - exercise_id: eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2
+                        - reps: 8927779836196431132
+                          weight: 0.8463924368564205
+                        - reps: 8927779836196431132
+                          weight: 0.8463924368564205
+                        - reps: 8927779836196431132
+                          weight: 0.8463924368564205
+                        - reps: 8927779836196431132
+                          weight: 0.8463924368564205
+                    - exercise_id: c276349f-d400-4af4-ab65-850445154157
                       sets:
-                        - reps: 5931942138589796971
-                          weight: 0.7840723453135222
-                        - reps: 5931942138589796971
-                          weight: 0.7840723453135222
-                        - reps: 5931942138589796971
-                          weight: 0.7840723453135222
-                    - exercise_id: eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2
+                        - reps: 8927779836196431132
+                          weight: 0.8463924368564205
+                        - reps: 8927779836196431132
+                          weight: 0.8463924368564205
+                        - reps: 8927779836196431132
+                          weight: 0.8463924368564205
+                        - reps: 8927779836196431132
+                          weight: 0.8463924368564205
+                    - exercise_id: c276349f-d400-4af4-ab65-850445154157
                       sets:
-                        - reps: 5931942138589796971
-                          weight: 0.7840723453135222
-                        - reps: 5931942138589796971
-                          weight: 0.7840723453135222
-                        - reps: 5931942138589796971
-                          weight: 0.7840723453135222
+                        - reps: 8927779836196431132
+                          weight: 0.8463924368564205
+                        - reps: 8927779836196431132
+                          weight: 0.8463924368564205
+                        - reps: 8927779836196431132
+                          weight: 0.8463924368564205
+                        - reps: 8927779836196431132
+                          weight: 0.8463924368564205
+                    - exercise_id: c276349f-d400-4af4-ab65-850445154157
+                      sets:
+                        - reps: 8927779836196431132
+                          weight: 0.8463924368564205
+                        - reps: 8927779836196431132
+                          weight: 0.8463924368564205
+                        - reps: 8927779836196431132
+                          weight: 0.8463924368564205
+                        - reps: 8927779836196431132
+                          weight: 0.8463924368564205
+            note:
+                type: string
+                example: "5"
+                minLength: 1
             title:
                 type: string
-                example: 57e
+                example: n10
                 maxLength: 50
         example:
             date: "2025-12-25"
-            duration: 161516953309679719
+            duration: 3825223895911100829
             exercises:
-                - exercise_id: eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2
+                - exercise_id: c276349f-d400-4af4-ab65-850445154157
                   sets:
-                    - reps: 5931942138589796971
-                      weight: 0.7840723453135222
-                    - reps: 5931942138589796971
-                      weight: 0.7840723453135222
-                    - reps: 5931942138589796971
-                      weight: 0.7840723453135222
-                - exercise_id: eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2
+                    - reps: 8927779836196431132
+                      weight: 0.8463924368564205
+                    - reps: 8927779836196431132
+                      weight: 0.8463924368564205
+                    - reps: 8927779836196431132
+                      weight: 0.8463924368564205
+                    - reps: 8927779836196431132
+                      weight: 0.8463924368564205
+                - exercise_id: c276349f-d400-4af4-ab65-850445154157
                   sets:
-                    - reps: 5931942138589796971
-                      weight: 0.7840723453135222
-                    - reps: 5931942138589796971
-                      weight: 0.7840723453135222
-                    - reps: 5931942138589796971
-                      weight: 0.7840723453135222
-            title: jma
+                    - reps: 8927779836196431132
+                      weight: 0.8463924368564205
+                    - reps: 8927779836196431132
+                      weight: 0.8463924368564205
+                    - reps: 8927779836196431132
+                      weight: 0.8463924368564205
+                    - reps: 8927779836196431132
+                      weight: 0.8463924368564205
+            note: 1d
+            title: 4vo
         required:
             - title
             - date
@@ -350,17 +375,17 @@ definitions:
                 format: uuid
             reps:
                 type: integer
-                example: 2671033721007192046
+                example: 9002401734564372152
                 format: int64
                 minimum: 1
             weight:
                 type: number
-                example: 0.578014769603538
+                example: 0.8698621482432554
                 format: double
         example:
             id: 550e8400-e29b-41d4-a716-446655440000
-            reps: 1911659920764696851
-            weight: 0.4230942321773802
+            reps: 1062827858058161889
+            weight: 0.42557872422137927
         required:
             - reps
     ExerciseSetPayload:
@@ -369,16 +394,16 @@ definitions:
         properties:
             reps:
                 type: integer
-                example: 7907453814365358215
+                example: 6152711824191926856
                 format: int64
                 minimum: 1
             weight:
                 type: number
-                example: 0.5641809724492246
+                example: 0.3473881271133976
                 format: double
         example:
-            reps: 4893995477969996146
-            weight: 0.8579902336081505
+            reps: 8052940848921575102
+            weight: 0.662103266681407
         required:
             - reps
     Exercises:
@@ -418,7 +443,7 @@ definitions:
             fault:
                 type: boolean
                 description: Is the error a server-side fault?
-                example: true
+                example: false
             id:
                 type: string
                 description: ID is a unique identifier for this particular occurrence of the problem.
@@ -434,7 +459,7 @@ definitions:
             temporary:
                 type: boolean
                 description: Is the error temporary?
-                example: false
+                example: true
             timeout:
                 type: boolean
                 description: Is the error a timeout?
@@ -481,14 +506,14 @@ definitions:
             timeout:
                 type: boolean
                 description: Is the error a timeout?
-                example: false
+                example: true
         description: Упражнение не найдено (default view)
         example:
             fault: false
             id: 123abc
             message: parameter 'p' must be an integer
             name: bad_request
-            temporary: false
+            temporary: true
             timeout: false
         required:
             - name
@@ -504,7 +529,7 @@ definitions:
             fault:
                 type: boolean
                 description: Is the error a server-side fault?
-                example: true
+                example: false
             id:
                 type: string
                 description: ID is a unique identifier for this particular occurrence of the problem.
@@ -524,7 +549,7 @@ definitions:
             timeout:
                 type: boolean
                 description: Is the error a timeout?
-                example: true
+                example: false
         description: Invalid update date exercise (default view)
         example:
             fault: false
@@ -532,7 +557,7 @@ definitions:
             message: parameter 'p' must be an integer
             name: bad_request
             temporary: false
-            timeout: false
+            timeout: true
         required:
             - name
             - id
@@ -563,11 +588,11 @@ definitions:
             temporary:
                 type: boolean
                 description: Is the error temporary?
-                example: true
+                example: false
             timeout:
                 type: boolean
                 description: Is the error a timeout?
-                example: false
+                example: true
         description: Упражнение не найдено, проверьте UUID (default view)
         example:
             fault: false
@@ -634,11 +659,14 @@ definitions:
                     $ref: '#/definitions/ExerciseSet'
                 example:
                     - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
+                      reps: 2249449973678618108
+                      weight: 0.044203910228770654
                     - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
+                      reps: 2249449973678618108
+                      weight: 0.044203910228770654
+                    - id: 550e8400-e29b-41d4-a716-446655440000
+                      reps: 2249449973678618108
+                      weight: 0.044203910228770654
             title:
                 type: string
                 description: Название упражнения
@@ -650,17 +678,17 @@ definitions:
             muscle_group: 1
             sets:
                 - id: 550e8400-e29b-41d4-a716-446655440000
-                  reps: 3638342103790886134
-                  weight: 0.4144092443135357
+                  reps: 2249449973678618108
+                  weight: 0.044203910228770654
                 - id: 550e8400-e29b-41d4-a716-446655440000
-                  reps: 3638342103790886134
-                  weight: 0.4144092443135357
+                  reps: 2249449973678618108
+                  weight: 0.044203910228770654
                 - id: 550e8400-e29b-41d4-a716-446655440000
-                  reps: 3638342103790886134
-                  weight: 0.4144092443135357
+                  reps: 2249449973678618108
+                  weight: 0.044203910228770654
                 - id: 550e8400-e29b-41d4-a716-446655440000
-                  reps: 3638342103790886134
-                  weight: 0.4144092443135357
+                  reps: 2249449973678618108
+                  weight: 0.044203910228770654
             title: Жим лежа на скамье
         required:
             - id
@@ -672,29 +700,33 @@ definitions:
         properties:
             created_at:
                 type: string
-                example: "1998-11-25T19:42:09Z"
+                example: "1987-01-04T22:04:22Z"
                 format: date-time
             date:
                 type: string
-                example: "1994-09-11"
+                example: "2005-02-26"
                 format: date
             duration:
                 type: integer
-                example: 8607747091762670853
+                example: 6258216262276336405
                 format: int64
             id:
                 type: string
                 description: uuid
-                example: Aut fuga officiis in.
+                example: Amet ut et.
+            note:
+                type: string
+                example: Quisquam cupiditate temporibus tenetur molestias autem.
             title:
                 type: string
-                example: Ad ut.
+                example: Ut provident quaerat consectetur adipisci et voluptas.
         example:
-            created_at: "1996-09-25T11:35:44Z"
-            date: "1992-12-28"
-            duration: 1064673525303844192
-            id: Ex reprehenderit aperiam ad facilis ipsa et.
-            title: Quasi aut debitis.
+            created_at: "1975-03-10T04:04:39Z"
+            date: "1974-08-25"
+            duration: 3591713428665173068
+            id: Blanditiis est et.
+            note: Nihil in nesciunt.
+            title: Nostrum laborum ducimus in molestiae ea.
         required:
             - id
             - title
@@ -706,15 +738,15 @@ definitions:
         properties:
             created_at:
                 type: string
-                example: "2001-06-24T01:54:30Z"
+                example: "2005-04-09T09:27:48Z"
                 format: date-time
             date:
                 type: string
-                example: "1972-11-28"
+                example: "2000-10-15"
                 format: date
             duration:
                 type: integer
-                example: 7048995025227005262
+                example: 8077106967393279449
                 format: int64
             exercises:
                 type: array
@@ -725,113 +757,112 @@ definitions:
                       muscle_group: 1
                       sets:
                         - id: 550e8400-e29b-41d4-a716-446655440000
-                          reps: 3638342103790886134
-                          weight: 0.4144092443135357
+                          reps: 2249449973678618108
+                          weight: 0.044203910228770654
                         - id: 550e8400-e29b-41d4-a716-446655440000
-                          reps: 3638342103790886134
-                          weight: 0.4144092443135357
+                          reps: 2249449973678618108
+                          weight: 0.044203910228770654
                         - id: 550e8400-e29b-41d4-a716-446655440000
-                          reps: 3638342103790886134
-                          weight: 0.4144092443135357
-                        - id: 550e8400-e29b-41d4-a716-446655440000
-                          reps: 3638342103790886134
-                          weight: 0.4144092443135357
+                          reps: 2249449973678618108
+                          weight: 0.044203910228770654
                       title: Жим лежа на скамье
                     - id: 550e8400-e29b-41d4-a716-446655440000
                       muscle_group: 1
                       sets:
                         - id: 550e8400-e29b-41d4-a716-446655440000
-                          reps: 3638342103790886134
-                          weight: 0.4144092443135357
+                          reps: 2249449973678618108
+                          weight: 0.044203910228770654
                         - id: 550e8400-e29b-41d4-a716-446655440000
-                          reps: 3638342103790886134
-                          weight: 0.4144092443135357
+                          reps: 2249449973678618108
+                          weight: 0.044203910228770654
                         - id: 550e8400-e29b-41d4-a716-446655440000
-                          reps: 3638342103790886134
-                          weight: 0.4144092443135357
+                          reps: 2249449973678618108
+                          weight: 0.044203910228770654
+                      title: Жим лежа на скамье
+                    - id: 550e8400-e29b-41d4-a716-446655440000
+                      muscle_group: 1
+                      sets:
                         - id: 550e8400-e29b-41d4-a716-446655440000
-                          reps: 3638342103790886134
-                          weight: 0.4144092443135357
+                          reps: 2249449973678618108
+                          weight: 0.044203910228770654
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          reps: 2249449973678618108
+                          weight: 0.044203910228770654
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          reps: 2249449973678618108
+                          weight: 0.044203910228770654
+                      title: Жим лежа на скамье
+                    - id: 550e8400-e29b-41d4-a716-446655440000
+                      muscle_group: 1
+                      sets:
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          reps: 2249449973678618108
+                          weight: 0.044203910228770654
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          reps: 2249449973678618108
+                          weight: 0.044203910228770654
+                        - id: 550e8400-e29b-41d4-a716-446655440000
+                          reps: 2249449973678618108
+                          weight: 0.044203910228770654
                       title: Жим лежа на скамье
             id:
                 type: string
                 description: uuid
-                example: Ad molestias consequatur sit.
+                example: Ad ex ipsa voluptas labore delectus.
+            note:
+                type: string
+                example: Eius a voluptatem ipsum nulla.
             title:
                 type: string
-                example: Ducimus at velit pariatur.
+                example: Illum quia eveniet incidunt odit.
         description: Модель Списка Тренировок с UUID
         example:
-            created_at: "1978-04-05T12:02:16Z"
-            date: "1983-09-20"
-            duration: 3064660646219791586
+            created_at: "1977-01-10T18:17:21Z"
+            date: "1982-04-06"
+            duration: 3972728579262585681
             exercises:
                 - id: 550e8400-e29b-41d4-a716-446655440000
                   muscle_group: 1
                   sets:
                     - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
+                      reps: 2249449973678618108
+                      weight: 0.044203910228770654
                     - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
+                      reps: 2249449973678618108
+                      weight: 0.044203910228770654
                     - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
-                    - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
+                      reps: 2249449973678618108
+                      weight: 0.044203910228770654
                   title: Жим лежа на скамье
                 - id: 550e8400-e29b-41d4-a716-446655440000
                   muscle_group: 1
                   sets:
                     - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
+                      reps: 2249449973678618108
+                      weight: 0.044203910228770654
                     - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
+                      reps: 2249449973678618108
+                      weight: 0.044203910228770654
                     - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
-                    - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
+                      reps: 2249449973678618108
+                      weight: 0.044203910228770654
                   title: Жим лежа на скамье
                 - id: 550e8400-e29b-41d4-a716-446655440000
                   muscle_group: 1
                   sets:
                     - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
+                      reps: 2249449973678618108
+                      weight: 0.044203910228770654
                     - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
+                      reps: 2249449973678618108
+                      weight: 0.044203910228770654
                     - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
-                    - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
+                      reps: 2249449973678618108
+                      weight: 0.044203910228770654
                   title: Жим лежа на скамье
-                - id: 550e8400-e29b-41d4-a716-446655440000
-                  muscle_group: 1
-                  sets:
-                    - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
-                    - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
-                    - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
-                    - id: 550e8400-e29b-41d4-a716-446655440000
-                      reps: 3638342103790886134
-                      weight: 0.4144092443135357
-                  title: Жим лежа на скамье
-            id: Totam iste eius a.
-            title: Ipsum nulla nesciunt et.
+            id: Fugiat ea.
+            note: Numquam et consequatur.
+            title: Rem ipsum quia repellendus eum hic.
         required:
             - id
             - title
@@ -843,32 +874,28 @@ definitions:
         properties:
             exercise_id:
                 type: string
-                example: afa53a2d-332f-40d5-b899-05cc22e11382
+                example: 29de6e95-9511-4c32-a1bc-070eff846489
                 format: uuid
             sets:
                 type: array
                 items:
                     $ref: '#/definitions/ExerciseSetPayload'
                 example:
-                    - reps: 5931942138589796971
-                      weight: 0.7840723453135222
-                    - reps: 5931942138589796971
-                      weight: 0.7840723453135222
-                    - reps: 5931942138589796971
-                      weight: 0.7840723453135222
-                    - reps: 5931942138589796971
-                      weight: 0.7840723453135222
+                    - reps: 8927779836196431132
+                      weight: 0.8463924368564205
+                    - reps: 8927779836196431132
+                      weight: 0.8463924368564205
+                    - reps: 8927779836196431132
+                      weight: 0.8463924368564205
+                    - reps: 8927779836196431132
+                      weight: 0.8463924368564205
         example:
-            exercise_id: e6f7d04f-c8e5-4e84-b8d6-5a1788582e99
+            exercise_id: 9f3a23da-44cd-4645-87f1-4ec4a8f022fb
             sets:
-                - reps: 5931942138589796971
-                  weight: 0.7840723453135222
-                - reps: 5931942138589796971
-                  weight: 0.7840723453135222
-                - reps: 5931942138589796971
-                  weight: 0.7840723453135222
-                - reps: 5931942138589796971
-                  weight: 0.7840723453135222
+                - reps: 8927779836196431132
+                  weight: 0.8463924368564205
+                - reps: 8927779836196431132
+                  weight: 0.8463924368564205
         required:
             - exercise_id
             - sets
@@ -895,7 +922,7 @@ definitions:
             temporary:
                 type: boolean
                 description: Is the error temporary?
-                example: true
+                example: false
             timeout:
                 type: boolean
                 description: Is the error a timeout?
@@ -981,7 +1008,7 @@ definitions:
             temporary:
                 type: boolean
                 description: Is the error temporary?
-                example: false
+                example: true
             timeout:
                 type: boolean
                 description: Is the error a timeout?
@@ -992,7 +1019,7 @@ definitions:
             id: 123abc
             message: parameter 'p' must be an integer
             name: bad_request
-            temporary: false
+            temporary: true
             timeout: true
         required:
             - name
@@ -1008,7 +1035,7 @@ definitions:
             fault:
                 type: boolean
                 description: Is the error a server-side fault?
-                example: true
+                example: false
             id:
                 type: string
                 description: ID is a unique identifier for this particular occurrence of the problem.
@@ -1024,19 +1051,19 @@ definitions:
             temporary:
                 type: boolean
                 description: Is the error temporary?
-                example: true
+                example: false
             timeout:
                 type: boolean
                 description: Is the error a timeout?
-                example: false
+                example: true
         description: Тренировка не найдена (default view)
         example:
             fault: false
             id: 123abc
             message: parameter 'p' must be an integer
             name: bad_request
-            temporary: true
-            timeout: false
+            temporary: false
+            timeout: true
         required:
             - name
             - id
@@ -1051,32 +1078,32 @@ definitions:
             average_duration:
                 type: integer
                 description: Средяя продолжительность тренировок
-                example: 8730270250575140447
+                example: 3305327338408176374
                 format: int64
                 minimum: 0
             reps_count:
                 type: integer
                 description: Всего повторений
-                example: 6647168011715941416
+                example: 1222024416118122956
                 format: int64
                 minimum: 0
             sets_count:
                 type: integer
                 description: Всего подходов
-                example: 1707947820517759871
+                example: 1072231764087317640
                 format: int64
                 minimum: 0
             trainings_count:
                 type: integer
                 description: Всего тренировок
-                example: 367535738755031136
+                example: 5593832602890598807
                 format: int64
                 minimum: 0
         example:
-            average_duration: 2161852099103833969
-            reps_count: 3350963743522045054
-            sets_count: 5700368801408974581
-            trainings_count: 6740958404291742444
+            average_duration: 4010317400256074591
+            reps_count: 8140315319035502359
+            sets_count: 4244251584659528439
+            trainings_count: 1478949024945521960
         required:
             - trainings_count
             - sets_count

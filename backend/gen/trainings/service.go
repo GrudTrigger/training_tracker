@@ -55,6 +55,7 @@ type CreateTrainingPayload struct {
 	Title     string
 	Date      string
 	Duration  int
+	Note      *string
 	Exercises []*TrainingExercisePayload
 }
 
@@ -98,6 +99,7 @@ type Training struct {
 	Title     string
 	Date      string
 	Duration  int
+	Note      *string
 	CreatedAt *string
 }
 
@@ -109,6 +111,7 @@ type TrainingAll struct {
 	Title     string
 	Date      string
 	Duration  int
+	Note      *string
 	CreatedAt *string
 }
 

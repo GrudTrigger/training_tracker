@@ -20,6 +20,7 @@ type CreateRequestBody struct {
 	Title     string                                `form:"title" json:"title" xml:"title"`
 	Date      string                                `form:"date" json:"date" xml:"date"`
 	Duration  int                                   `form:"duration" json:"duration" xml:"duration"`
+	Note      *string                               `form:"note,omitempty" json:"note,omitempty" xml:"note,omitempty"`
 	Exercises []*TrainingExercisePayloadRequestBody `form:"exercises" json:"exercises" xml:"exercises"`
 }
 
@@ -31,6 +32,7 @@ type CreateResponseBody struct {
 	Title     *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
 	Date      *string `form:"date,omitempty" json:"date,omitempty" xml:"date,omitempty"`
 	Duration  *int    `form:"duration,omitempty" json:"duration,omitempty" xml:"duration,omitempty"`
+	Note      *string `form:"note,omitempty" json:"note,omitempty" xml:"note,omitempty"`
 	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 }
 
@@ -47,6 +49,7 @@ type GetByIDResponseBody struct {
 	Title     *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
 	Date      *string `form:"date,omitempty" json:"date,omitempty" xml:"date,omitempty"`
 	Duration  *int    `form:"duration,omitempty" json:"duration,omitempty" xml:"duration,omitempty"`
+	Note      *string `form:"note,omitempty" json:"note,omitempty" xml:"note,omitempty"`
 	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 }
 
@@ -143,6 +146,7 @@ type TrainingAllResponse struct {
 	Title     *string `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
 	Date      *string `form:"date,omitempty" json:"date,omitempty" xml:"date,omitempty"`
 	Duration  *int    `form:"duration,omitempty" json:"duration,omitempty" xml:"duration,omitempty"`
+	Note      *string `form:"note,omitempty" json:"note,omitempty" xml:"note,omitempty"`
 	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 }
 
@@ -195,6 +199,7 @@ func NewCreateRequestBody(p *trainings.CreateTrainingPayload) *CreateRequestBody
 		Title:    p.Title,
 		Date:     p.Date,
 		Duration: p.Duration,
+		Note:     p.Note,
 	}
 	if p.Exercises != nil {
 		body.Exercises = make([]*TrainingExercisePayloadRequestBody, len(p.Exercises))
@@ -219,6 +224,7 @@ func NewCreateTrainingCreated(body *CreateResponseBody) *trainings.Training {
 		Title:     *body.Title,
 		Date:      *body.Date,
 		Duration:  *body.Duration,
+		Note:      body.Note,
 		CreatedAt: body.CreatedAt,
 	}
 
@@ -277,6 +283,7 @@ func NewGetByIDTrainingAllOK(body *GetByIDResponseBody) *trainings.TrainingAll {
 		Title:     *body.Title,
 		Date:      *body.Date,
 		Duration:  *body.Duration,
+		Note:      body.Note,
 		CreatedAt: body.CreatedAt,
 	}
 	if body.Exercises != nil {

@@ -15,7 +15,7 @@ import (
 
 // Получение статистики по тренировкам
 type Service interface {
-	// Получение статисики
+	// Получение статистики
 	GetTrainingsStatistics(context.Context) (res *TrainingsStatistics, err error)
 }
 

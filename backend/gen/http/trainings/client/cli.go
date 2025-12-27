@@ -25,7 +25,7 @@ func BuildCreatePayload(trainingsCreateBody string) (*trainings.CreateTrainingPa
 	{
 		err = json.Unmarshal([]byte(trainingsCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"date\": \"2025-12-25\",\n      \"duration\": 3422303554000800197,\n      \"exercises\": [\n         {\n            \"exercise_id\": \"eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2\",\n            \"sets\": [\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2\",\n            \"sets\": [\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2\",\n            \"sets\": [\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"eac346ec-dbb1-41ce-8ea8-ac6eaf4650b2\",\n            \"sets\": [\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               },\n               {\n                  \"reps\": 5931942138589796971,\n                  \"weight\": 0.7840723453135222\n               }\n            ]\n         }\n      ],\n      \"title\": \"l95\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"date\": \"2025-12-25\",\n      \"duration\": 956423601648796362,\n      \"exercises\": [\n         {\n            \"exercise_id\": \"c276349f-d400-4af4-ab65-850445154157\",\n            \"sets\": [\n               {\n                  \"reps\": 8927779836196431132,\n                  \"weight\": 0.8463924368564205\n               },\n               {\n                  \"reps\": 8927779836196431132,\n                  \"weight\": 0.8463924368564205\n               },\n               {\n                  \"reps\": 8927779836196431132,\n                  \"weight\": 0.8463924368564205\n               },\n               {\n                  \"reps\": 8927779836196431132,\n                  \"weight\": 0.8463924368564205\n               }\n            ]\n         },\n         {\n            \"exercise_id\": \"c276349f-d400-4af4-ab65-850445154157\",\n            \"sets\": [\n               {\n                  \"reps\": 8927779836196431132,\n                  \"weight\": 0.8463924368564205\n               },\n               {\n                  \"reps\": 8927779836196431132,\n                  \"weight\": 0.8463924368564205\n               },\n               {\n                  \"reps\": 8927779836196431132,\n                  \"weight\": 0.8463924368564205\n               },\n               {\n                  \"reps\": 8927779836196431132,\n                  \"weight\": 0.8463924368564205\n               }\n            ]\n         }\n      ],\n      \"note\": \"o\",\n      \"title\": \"ypp\"\n   }'")
 		}
 		if body.Exercises == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("exercises", "body"))
@@ -36,6 +36,11 @@ func BuildCreatePayload(trainingsCreateBody string) (*trainings.CreateTrainingPa
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.date", body.Date, goa.FormatDate))
 		if body.Duration < 1 {
 			err = goa.MergeErrors(err, goa.InvalidRangeError("body.duration", body.Duration, 1, true))
+		}
+		if body.Note != nil {
+			if utf8.RuneCountInString(*body.Note) < 1 {
+				err = goa.MergeErrors(err, goa.InvalidLengthError("body.note", *body.Note, utf8.RuneCountInString(*body.Note), 1, true))
+			}
 		}
 		for _, e := range body.Exercises {
 			if e != nil {
@@ -52,6 +57,7 @@ func BuildCreatePayload(trainingsCreateBody string) (*trainings.CreateTrainingPa
 		Title:    body.Title,
 		Date:     body.Date,
 		Duration: body.Duration,
+		Note:     body.Note,
 	}
 	if body.Exercises != nil {
 		v.Exercises = make([]*trainings.TrainingExercisePayload, len(body.Exercises))

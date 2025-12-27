@@ -429,6 +429,7 @@ func unmarshalTrainingAllResponseToTrainingsTrainingAll(v *TrainingAllResponse) 
 		Title:     *v.Title,
 		Date:      *v.Date,
 		Duration:  *v.Duration,
+		Note:      v.Note,
 		CreatedAt: v.CreatedAt,
 	}
 	if v.Exercises != nil {

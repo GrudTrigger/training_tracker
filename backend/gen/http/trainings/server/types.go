@@ -20,6 +20,7 @@ type CreateRequestBody struct {
 	Title     *string                               `form:"title,omitempty" json:"title,omitempty" xml:"title,omitempty"`
 	Date      *string                               `form:"date,omitempty" json:"date,omitempty" xml:"date,omitempty"`
 	Duration  *int                                  `form:"duration,omitempty" json:"duration,omitempty" xml:"duration,omitempty"`
+	Note      *string                               `form:"note,omitempty" json:"note,omitempty" xml:"note,omitempty"`
 	Exercises []*TrainingExercisePayloadRequestBody `form:"exercises,omitempty" json:"exercises,omitempty" xml:"exercises,omitempty"`
 }
 
@@ -31,6 +32,7 @@ type CreateResponseBody struct {
 	Title     string  `form:"title" json:"title" xml:"title"`
 	Date      string  `form:"date" json:"date" xml:"date"`
 	Duration  int     `form:"duration" json:"duration" xml:"duration"`
+	Note      *string `form:"note,omitempty" json:"note,omitempty" xml:"note,omitempty"`
 	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 }
 
@@ -47,6 +49,7 @@ type GetByIDResponseBody struct {
 	Title     string  `form:"title" json:"title" xml:"title"`
 	Date      string  `form:"date" json:"date" xml:"date"`
 	Duration  int     `form:"duration" json:"duration" xml:"duration"`
+	Note      *string `form:"note,omitempty" json:"note,omitempty" xml:"note,omitempty"`
 	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 }
 
@@ -130,6 +133,7 @@ type TrainingAllResponse struct {
 	Title     string  `form:"title" json:"title" xml:"title"`
 	Date      string  `form:"date" json:"date" xml:"date"`
 	Duration  int     `form:"duration" json:"duration" xml:"duration"`
+	Note      *string `form:"note,omitempty" json:"note,omitempty" xml:"note,omitempty"`
 	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 }
 
@@ -196,6 +200,7 @@ func NewCreateResponseBody(res *trainings.Training) *CreateResponseBody {
 		Title:     res.Title,
 		Date:      res.Date,
 		Duration:  res.Duration,
+		Note:      res.Note,
 		CreatedAt: res.CreatedAt,
 	}
 	return body
@@ -223,6 +228,7 @@ func NewGetByIDResponseBody(res *trainings.TrainingAll) *GetByIDResponseBody {
 		Title:     res.Title,
 		Date:      res.Date,
 		Duration:  res.Duration,
+		Note:      res.Note,
 		CreatedAt: res.CreatedAt,
 	}
 	if res.Exercises != nil {
@@ -300,6 +306,7 @@ func NewCreateTrainingPayload(body *CreateRequestBody) *trainings.CreateTraining
 		Title:    *body.Title,
 		Date:     *body.Date,
 		Duration: *body.Duration,
+		Note:     body.Note,
 	}
 	v.Exercises = make([]*trainings.TrainingExercisePayload, len(body.Exercises))
 	for i, val := range body.Exercises {
@@ -363,6 +370,11 @@ func ValidateCreateRequestBody(body *CreateRequestBody) (err error) {
 	if body.Duration != nil {
 		if *body.Duration < 1 {
 			err = goa.MergeErrors(err, goa.InvalidRangeError("body.duration", *body.Duration, 1, true))
+		}
+	}
+	if body.Note != nil {
+		if utf8.RuneCountInString(*body.Note) < 1 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.note", *body.Note, utf8.RuneCountInString(*body.Note), 1, true))
 		}
 	}
 	for _, e := range body.Exercises {

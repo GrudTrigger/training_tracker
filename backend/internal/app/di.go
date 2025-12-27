@@ -117,7 +117,7 @@ func (d *DiContainer) Postgres(ctx context.Context) *pgx.Conn {
 			panic(fmt.Errorf("failed to connect to database in ping: %w", err))
 		}
 
-		m := migrator.NewMigrator(stdlib.OpenDB(*conn.Config().Copy()), "../migrations")
+		m := migrator.NewMigrator(stdlib.OpenDB(*conn.Config().Copy()), "./migrations")
 		err = m.Up()
 		if err != nil {
 			panic(fmt.Errorf("failed migrations: %w", err))

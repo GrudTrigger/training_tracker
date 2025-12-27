@@ -26,10 +26,11 @@ func (r *Repository) Create(ctx context.Context, data *t.CreateTrainingPayload) 
 		Title     string
 		Date      time.Time
 		Duration  int
+		Note      *string
 		CreatedAt *time.Time
 	}
-	err = tx.QueryRow(ctx, "INSERT INTO trainings(title, date, duration) VALUES($1, $2, $3) RETURNING id, title, date, duration, created_at", data.Title, data.Date, data.Duration).
-		Scan(&training.ID, &training.Title, &training.Date, &training.Duration, &training.CreatedAt)
+	err = tx.QueryRow(ctx, "INSERT INTO trainings(title, date, duration, note) VALUES($1, $2, $3, $4) RETURNING id, title, date, duration, note, created_at", data.Title, data.Date, data.Duration, data.Note).
+		Scan(&training.ID, &training.Title, &training.Date, &training.Duration, &training.Note, &training.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -50,13 +51,13 @@ func (r *Repository) Create(ctx context.Context, data *t.CreateTrainingPayload) 
 	if err = tx.Commit(ctx); err != nil {
 		return nil, fmt.Errorf("commiting transaction: %w", err)
 	}
-
 	c := training.CreatedAt.Format(time.DateTime)
 	return &t.Training{
 		ID:        training.ID,
 		Title:     training.Title,
 		Date:      training.Date.Format(time.DateOnly),
 		Duration:  training.Duration,
+		Note:      training.Note,
 		CreatedAt: &c,
 	}, nil
 }

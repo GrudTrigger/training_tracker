@@ -8,7 +8,7 @@ import (
 	"github.com/GrudTrigger/training_tracker/backend/internal/config"
 )
 
-const envPath = "../.env" // TODO: после заменить на /.env потому что при билде будет лежать в корне с .envß
+const envPath = "./.env" // TODO: после заменить на /.env потому что при билде будет лежать в корне с .envß
 
 func main() {
 	err := config.Load(envPath)

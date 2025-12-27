@@ -321,6 +321,7 @@ func marshalTrainingsTrainingAllToTrainingAllResponse(v *trainings.TrainingAll) 
 		Title:     v.Title,
 		Date:      v.Date,
 		Duration:  v.Duration,
+		Note:      v.Note,
 		CreatedAt: v.CreatedAt,
 	}
 	if v.Exercises != nil {

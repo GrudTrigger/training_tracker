@@ -15,6 +15,7 @@ func (r *Repository) All(ctx context.Context, data *t.AllPayload) ([]*t.Training
 			t.title             AS training_title,
 			t.date              AS training_date,
 			t.duration          AS training_duration,
+			t.note              AS training_note,
 			t.created_at        AS training_created_at,
 
 			e.id                AS exercise_id,
@@ -43,6 +44,7 @@ func (r *Repository) All(ctx context.Context, data *t.AllPayload) ([]*t.Training
 			trainingTitle      string
 			trainingDate       time.Time
 			trainingDuration   int
+			trainingNote       *string
 			trainingCreatedAt  *time.Time
 			exerciseID         string
 			exerciseTitle      string
@@ -58,6 +60,7 @@ func (r *Repository) All(ctx context.Context, data *t.AllPayload) ([]*t.Training
 			&trainingTitle,
 			&trainingDate,
 			&trainingDuration,
+			&trainingNote,
 			&trainingCreatedAt,
 			&exerciseID,
 			&exerciseTitle,
@@ -78,6 +81,7 @@ func (r *Repository) All(ctx context.Context, data *t.AllPayload) ([]*t.Training
 				Title:     trainingTitle,
 				Date:      trainingDate.Format(time.DateOnly),
 				Duration:  trainingDuration,
+				Note:      trainingNote,
 				CreatedAt: &c,
 				Exercises: make([]*t.ExercisesWithTraining, 0),
 			}

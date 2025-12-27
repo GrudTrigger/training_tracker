@@ -4,33 +4,6 @@ import (
 	. "goa.design/goa/v3/dsl" //nolint:staticcheck
 )
 
-// Тренировка
-var WorkoutModel = Type("WorkoutModel", func() {
-	Description("Модель тренировок")
-
-	Attribute("title", String, "Название тренировки", func() {
-		MinLength(1)
-		MaxLength(50)
-		Example("Тренировка верхней поверхности бедра")
-	})
-
-	Attribute("date", String, "Дата проведение тренировки", func() {
-		Format(FormatDate)
-		Example("2025-12-08") // YYYY-MM-DD
-	})
-
-	Attribute("duration", Int, "Продолжительность тренировки в секундах", func() {
-		Minimum(60)
-		Maximum(14400)
-		Example("5440")
-		Description("На фронте нужно будет преобразовывать из секунд в дату, так удобнее хранить в БД")
-	})
-
-	Attribute("create_at", String, "Дата создания", func() {
-		Format(FormatDateTime)
-	})
-})
-
 var Training = Type("Training", func() {
 	Attribute("id", String, FormatUUID)
 	Attribute("title", String)
@@ -38,6 +11,7 @@ var Training = Type("Training", func() {
 		Format(FormatDate)
 	})
 	Attribute("duration", Int)
+	Attribute("note", String)
 	Attribute("created_at", String, func() {
 		Format(FormatDateTime)
 	})
@@ -70,6 +44,9 @@ var CreateTrainingPayload = Type("CreateTrainingPayload", func() {
 	})
 	Attribute("duration", Int, func() {
 		Minimum(1)
+	})
+	Attribute("note", String, func() {
+		MinLength(1)
 	})
 	Attribute("exercises", ArrayOf(TrainingExercisePayload))
 	Required("title", "date", "duration", "exercises")

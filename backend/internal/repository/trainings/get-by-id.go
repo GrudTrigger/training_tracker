@@ -10,13 +10,14 @@ import (
 func (r *Repository) GetByID(ctx context.Context, id *t.GetByIDPayload) (*t.TrainingAll, error) {
 	var res t.TrainingAll
 
-	row := r.conn.QueryRow(ctx, "SELECT trainings.id, trainings.title, trainings.date, trainings.duration, trainings.created_at, exercises.id,exercises.title, exercises.muscle_group, exercise_sets.id, exercise_sets.reps, exercise_sets.weight FROM trainings JOIN training_exercises te on trainings.id = te.training_id JOIN exercises on te.exercise_id = exercises.id JOIN exercise_sets on te.id = exercise_sets.training_exercise_id WHERE trainings.id=$1", id)
+	row := r.conn.QueryRow(ctx, "SELECT trainings.id, trainings.title, trainings.date, trainings.duration, trainings.note, trainings.created_at, exercises.id,exercises.title, exercises.muscle_group, exercise_sets.id, exercise_sets.reps, exercise_sets.weight FROM trainings JOIN training_exercises te on trainings.id = te.training_id JOIN exercises on te.exercise_id = exercises.id JOIN exercise_sets on te.id = exercise_sets.training_exercise_id WHERE trainings.id=$1", id)
 
 	var (
 		trainingID         string
 		trainingTitle      string
 		trainingDate       time.Time
 		trainingDuration   int
+		trainingNote       *string
 		trainingCreatedAt  *time.Time
 		exerciseID         string
 		exerciseTitle      string
@@ -32,6 +33,7 @@ func (r *Repository) GetByID(ctx context.Context, id *t.GetByIDPayload) (*t.Trai
 		&trainingTitle,
 		&trainingDate,
 		&trainingDuration,
+		&trainingNote,
 		&trainingCreatedAt,
 		&exerciseID,
 		&exerciseTitle,
@@ -52,6 +54,7 @@ func (r *Repository) GetByID(ctx context.Context, id *t.GetByIDPayload) (*t.Trai
 			Title:     trainingTitle,
 			Date:      trainingDate.Format(time.DateOnly),
 			Duration:  trainingDuration,
+			Note:      trainingNote,
 			CreatedAt: &c,
 		}
 	}
