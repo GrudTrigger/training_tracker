@@ -4,6 +4,7 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import {useEffect} from "react";
 
 interface WorkoutsListProps {
   workouts: Workout[];
@@ -13,6 +14,11 @@ interface WorkoutsListProps {
 }
 
 export function WorkoutsList({ workouts, exercises, onWorkoutClick, onAddWorkout }: WorkoutsListProps) {
+
+  useEffect(()=>{
+      fetch("http://localhost:8080/trainings/all").then(res => console.log(res.json()))
+  })
+
   const getExerciseName = (exerciseId: string) => {
     return exercises.find(e => e.id === exerciseId)?.name || 'Неизвестное упражнение';
   };
