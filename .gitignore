@@ -1,0 +1,14 @@
+.DS_Store
+.idea
+.vscode
+
+frontend/.nuxt
+frontend/.output
+frontend/node_modules
+
+backend/bin
+backend/.cache
+
+.env
+*.log
+bin
