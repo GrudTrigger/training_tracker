@@ -80,7 +80,8 @@ const defaultDraftWorkout = (): DraftWorkout => ({
 })
 
 export const useTrainingTrackerDemo = () => {
-  const users = useState<UserProfile[]>('demo-users', () => [
+  const users = useCookie<UserProfile[]>('training_tracker_demo_users', {
+    default: () => [
     {
       id: 'user-athlete',
       name: 'George',
@@ -102,7 +103,9 @@ export const useTrainingTrackerDemo = () => {
       role: 'athlete',
       joinedAt: '2026-04-10',
     },
-  ])
+    ],
+    sameSite: 'lax',
+  })
 
   const exercises = useState<Exercise[]>('demo-exercises', () => [
     { id: 'pullup', name: 'Подтягивания', muscleGroup: 'Спина' },
@@ -113,7 +116,8 @@ export const useTrainingTrackerDemo = () => {
     { id: 'rdl', name: 'Румынская тяга', muscleGroup: 'Задняя цепь' },
   ])
 
-  const workouts = useState<Workout[]>('demo-workouts', () => [
+  const workouts = useCookie<Workout[]>('training_tracker_demo_workouts', {
+    default: () => [
     {
       id: 'w-1',
       userId: 'user-athlete',
@@ -192,19 +196,21 @@ export const useTrainingTrackerDemo = () => {
         },
       ],
     },
-  ])
+    ],
+    sameSite: 'lax',
+  })
 
-  const currentUserId = useState<string | null>('demo-current-user-id', () => null)
-  const currentView = useState<'overview' | 'create' | 'history' | 'admin'>(
-    'demo-current-view',
-    () => 'overview',
-  )
+  const currentUserId = useCookie<string | null>('training_tracker_user_id', {
+    default: () => null,
+    sameSite: 'lax',
+  })
   const selectedExerciseId = useState<string>('demo-selected-exercise-id', () => 'pullup')
   const draftWorkout = useState<DraftWorkout>('demo-draft-workout', defaultDraftWorkout)
 
   const currentUser = computed(() =>
     users.value.find((user) => user.id === currentUserId.value) ?? null,
   )
+  const isAdmin = computed(() => currentUser.value?.role === 'admin')
 
   const athleteUsers = computed(() => users.value.filter((user) => user.role === 'athlete'))
   const adminUsers = computed(() => users.value.filter((user) => user.role === 'admin'))
@@ -318,9 +324,8 @@ export const useTrainingTrackerDemo = () => {
     }
 
     currentUserId.value = found.id
-    currentView.value = found.role === 'admin' ? 'admin' : 'overview'
 
-    return { ok: true as const }
+    return { ok: true as const, user: found }
   }
 
   const loginAsDemo = (role: Role) => {
@@ -330,7 +335,8 @@ export const useTrainingTrackerDemo = () => {
     }
 
     currentUserId.value = found.id
-    currentView.value = role === 'admin' ? 'admin' : 'overview'
+
+    return found
   }
 
   const register = (name: string, email: string, password: string) => {
@@ -353,14 +359,12 @@ export const useTrainingTrackerDemo = () => {
 
     users.value = [created, ...users.value]
     currentUserId.value = created.id
-    currentView.value = 'overview'
 
-    return { ok: true as const }
+    return { ok: true as const, user: created }
   }
 
   const logout = () => {
     currentUserId.value = null
-    currentView.value = 'overview'
   }
 
   const addDraftExercise = () => {
@@ -459,9 +463,8 @@ export const useTrainingTrackerDemo = () => {
 
     workouts.value = [createdWorkout, ...workouts.value]
     draftWorkout.value = defaultDraftWorkout()
-    currentView.value = 'history'
 
-    return { ok: true as const }
+    return { ok: true as const, workout: createdWorkout }
   }
 
   return {
@@ -469,7 +472,7 @@ export const useTrainingTrackerDemo = () => {
     exercises,
     workouts,
     currentUser,
-    currentView,
+    isAdmin,
     selectedExerciseId,
     draftWorkout,
     currentUserWorkouts,
