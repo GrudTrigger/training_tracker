@@ -1,23 +1,13 @@
 package statistics_service
 
 import (
-	"context"
-
-	"github.com/george/training-tracker/backend/internal/core/domain"
+	statistics_postgres_repository "github.com/george/training-tracker/backend/internal/features/statistics/repository/postgres"
 )
 
-type Repository interface {
-	GetOverview(ctx context.Context) (domain.StatisticsOverview, error)
-}
-
 type Service struct {
-	repository Repository
+	repository statistics_postgres_repository.IRepository
 }
 
-func New(repository Repository) *Service {
+func New(repository statistics_postgres_repository.IRepository) *Service {
 	return &Service{repository: repository}
-}
-
-func (s *Service) GetOverview(ctx context.Context) (domain.StatisticsOverview, error) {
-	return s.repository.GetOverview(ctx)
 }
